@@ -4,6 +4,7 @@ import { Circle, Group, Layer, Line, Stage, Text } from "react-konva";
 import RosterPanel from "./components/RosterPanel";
 import { useEffect, useState } from "react";
 import { apiFetch } from "./lib/api";
+import FormationBar from "./components/FormationBar";
 
 const CELL_SIZE = 50;
 const WIDTH = 800;
@@ -45,6 +46,14 @@ export default function Home() {
     setPlacements(placements.filter((p) => p.choristId !== choristId));
   }
 
+  function handleLoad(
+    loaded: { choristId: string; gridX: number; gridY: number }[],
+  ) {
+    setPlacements(
+      loaded.map((p) => ({ choristId: p.choristId, x: p.gridX, y: p.gridY })),
+    );
+  }
+
   const gridLines = [];
   // Vertical lines
   for (let x = 0; x <= WIDTH; x += CELL_SIZE) {
@@ -77,51 +86,54 @@ export default function Home() {
         placedIds={placedIds}
         onPlace={handlePlace}
       />
-      <Stage width={WIDTH} height={HEIGHT}>
-        <Layer listening={false}>{gridLines}</Layer>
-        <Layer>
-          {placements.map((p) => {
-            const chorist = chorists.find((c) => c.id === p.choristId);
-            if (!chorist) return null;
-            return (
-              <Group
-                key={p.choristId}
-                x={p.x}
-                y={p.y}
-                draggable
-                onDragEnd={(e) => {
-                  const node = e.target;
-                  const newX = snapToGrid(node.x());
-                  const newY = snapToGrid(node.y());
-                  node.position({ x: newX, y: newY });
-                  setPlacements(
-                    placements.map((pl) =>
-                      pl.choristId === p.choristId
-                        ? { ...pl, x: newX, y: newY }
-                        : pl,
-                    ),
-                  );
-                }}
-                onContextMenu={(e) => {
-                  e.evt.preventDefault();
-                  handleRemove(p.choristId);
-                }}
-              >
-                <Circle radius={20} fill="grey" />
-                <Text
-                  text={chorist.name}
-                  fontSize={11}
-                  fill="#333"
-                  y={22}
-                  align="center"
-                  offsetX={25}
-                  width={50}
-                />
-              </Group>
-            );
-          })}
-        </Layer>
-      </Stage>
+      <div className="flex flex-col flex-1">
+        <FormationBar placements={placements} onLoad={handleLoad} />
+        <Stage width={WIDTH} height={HEIGHT}>
+          <Layer listening={false}>{gridLines}</Layer>
+          <Layer>
+            {placements.map((p) => {
+              const chorist = chorists.find((c) => c.id === p.choristId);
+              if (!chorist) return null;
+              return (
+                <Group
+                  key={p.choristId}
+                  x={p.x}
+                  y={p.y}
+                  draggable
+                  onDragEnd={(e) => {
+                    const node = e.target;
+                    const newX = snapToGrid(node.x());
+                    const newY = snapToGrid(node.y());
+                    node.position({ x: newX, y: newY });
+                    setPlacements(
+                      placements.map((pl) =>
+                        pl.choristId === p.choristId
+                          ? { ...pl, x: newX, y: newY }
+                          : pl,
+                      ),
+                    );
+                  }}
+                  onContextMenu={(e) => {
+                    e.evt.preventDefault();
+                    handleRemove(p.choristId);
+                  }}
+                >
+                  <Circle radius={20} fill="grey" />
+                  <Text
+                    text={chorist.name}
+                    fontSize={11}
+                    fill="#333"
+                    y={22}
+                    align="center"
+                    offsetX={25}
+                    width={50}
+                  />
+                </Group>
+              );
+            })}
+          </Layer>
+        </Stage>
+      </div>
     </div>
   );
 }

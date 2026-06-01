@@ -9,3 +9,37 @@ export async function apiFetch(path: string, options?: RequestInit) {
     },
   });
 }
+
+export async function listFormations() {
+  const res = await apiFetch("/formations");
+  return res.json();
+}
+
+export async function createFormation(name: string) {
+  const res = await apiFetch("/formations", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok ? res.json() : null;
+}
+
+export async function loadFormation(id: string) {
+  const res = await apiFetch(`/formations/${id}`);
+  return res.ok ? res.json() : null;
+}
+
+export async function deleteFormation(id: string) {
+  const res = await apiFetch(`/formations/${id}`, { method: "DELETE" });
+  return res.ok;
+}
+
+export async function savePlacements(
+  formationId: string,
+  placements: { choristId: string; gridX: number; gridY: number }[],
+) {
+  const res = await apiFetch(`/formations/${formationId}/placements`, {
+    method: "PUT",
+    body: JSON.stringify(placements),
+  });
+  return res.ok;
+}
