@@ -1,8 +1,8 @@
 "use client";
 
-import { Circle, Group, Layer, Line, Stage, Text } from "react-konva";
+import { Circle, Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 import RosterPanel from "./components/RosterPanel";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { apiFetch } from "./lib/api";
 import FormationBar from "./components/FormationBar";
 
@@ -20,6 +20,17 @@ function snapToGrid(value: number) {
 export default function Home() {
   const [chorists, setChorists] = useState<Chorist[]>([]);
   const [placements, setPlacements] = useState<Placement[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [marquee, setMarquee] = useState<{
+    startX: number;
+    startY: number;
+    x: number;
+    y: number;
+  } | null>(null);
+  const didMarquee = useRef(false);
 
   useEffect(() => {
     apiFetch("/chorists")
@@ -88,7 +99,53 @@ export default function Home() {
       />
       <div className="flex flex-col flex-1">
         <FormationBar placements={placements} onLoad={handleLoad} />
-        <Stage width={WIDTH} height={HEIGHT}>
+        <Stage
+          width={WIDTH}
+          height={HEIGHT}
+          onMouseDown={(e) => {
+            // Only start marquee on empty space
+            if (e.target !== e.target.getStage()) return;
+            const pos = e.target.getStage()!.getPointerPosition()!;
+            setMarquee({ startX: pos.x, startY: pos.y, x: pos.x, y: pos.y });
+          }}
+          onMouseMove={(e) => {
+            if (!marquee) return;
+            const pos = e.target.getStage()!.getPointerPosition()!;
+            setMarquee({ ...marquee, x: pos.x, y: pos.y });
+          }}
+          onMouseUp={() => {
+            if (!marquee) return;
+            const dx = Math.abs(marquee.x - marquee.startX);
+            const dy = Math.abs(marquee.y - marquee.startY);
+
+            // Only select if the rectangle has some real size (not just a click)
+            if (dx > 5 || dy > 5) {
+              didMarquee.current = true;
+              const left = Math.min(marquee.startX, marquee.x);
+              const right = Math.max(marquee.startX, marquee.x);
+              const top = Math.min(marquee.startY, marquee.y);
+              const bottom = Math.max(marquee.startY, marquee.y);
+
+              const selected = new Set<string>();
+              placements.forEach((p) => {
+                if (p.x >= left && p.x <= right && p.y >= top && p.y <= bottom) {
+                  selected.add(p.choristId);
+                }
+              });
+              setSelectedIds(selected);
+            }
+            setMarquee(null);
+          }}
+          onClick={(e) => {
+            if (didMarquee.current) {
+              didMarquee.current = false;
+              return;
+            }
+            if (e.target === e.target.getStage()) {
+              setSelectedIds(new Set());
+            }
+          }}
+        >
           <Layer listening={false}>{gridLines}</Layer>
           <Layer>
             {placements.map((p) => {
@@ -100,25 +157,77 @@ export default function Home() {
                   x={p.x}
                   y={p.y}
                   draggable
+                  onDragStart={(e) => {
+                    const node = e.target;
+                    setDragStart({ x: node.x(), y: node.y() });
+                    // Auto-select if dragging an unselected shape
+                    if (!selectedIds.has(p.choristId)) {
+                      setSelectedIds(new Set([p.choristId]));
+                    }
+                  }}
                   onDragEnd={(e) => {
                     const node = e.target;
                     const newX = snapToGrid(node.x());
                     const newY = snapToGrid(node.y());
                     node.position({ x: newX, y: newY });
-                    setPlacements(
-                      placements.map((pl) =>
-                        pl.choristId === p.choristId
-                          ? { ...pl, x: newX, y: newY }
-                          : pl,
-                      ),
-                    );
+
+                    if (
+                      dragStart &&
+                      selectedIds.has(p.choristId) &&
+                      selectedIds.size > 1
+                    ) {
+                      // Calculate how far this shape moved
+                      const dx = newX - dragStart.x;
+                      const dy = newY - dragStart.y;
+                      // Move all selected shapes by the same delta
+                      setPlacements(
+                        placements.map((pl) =>
+                          selectedIds.has(pl.choristId)
+                            ? {
+                                ...pl,
+                                x: snapToGrid(pl.x + dx),
+                                y: snapToGrid(pl.y + dy),
+                              }
+                            : pl,
+                        ),
+                      );
+                    } else {
+                      // Single shape drag
+                      setPlacements(
+                        placements.map((pl) =>
+                          pl.choristId === p.choristId
+                            ? { ...pl, x: newX, y: newY }
+                            : pl,
+                        ),
+                      );
+                    }
+                    setDragStart(null);
                   }}
                   onContextMenu={(e) => {
                     e.evt.preventDefault();
                     handleRemove(p.choristId);
                   }}
+                  onClick={(e) => {
+                    if (e.evt.shiftKey) {
+                      // Shift + click toggles selection
+                      const next = new Set(selectedIds);
+                      if (next.has(p.choristId)) {
+                        next.delete(p.choristId);
+                      } else {
+                        next.add(p.choristId);
+                      }
+                      setSelectedIds(next);
+                    } else {
+                      setSelectedIds(new Set([p.choristId]));
+                    }
+                  }}
                 >
-                  <Circle radius={20} fill="grey" />
+                  <Circle
+                    radius={20}
+                    fill="grey"
+                    stroke={selectedIds.has(p.choristId) ? "blue" : undefined}
+                    strokeWidth={selectedIds.has(p.choristId) ? 2 : 0}
+                  />
                   <Text
                     text={chorist.name}
                     fontSize={11}
@@ -131,6 +240,19 @@ export default function Home() {
                 </Group>
               );
             })}
+          </Layer>
+          <Layer listening={false}>
+            {marquee && (
+              <Rect
+                x={Math.min(marquee.startX, marquee.x)}
+                y={Math.min(marquee.startY, marquee.y)}
+                width={Math.abs(marquee.x - marquee.startX)}
+                height={Math.abs(marquee.y - marquee.startY)}
+                fill="rgba(0, 100, 255, 0.1)"
+                stroke="rgba(0, 100, 255, 0.5)"
+                strokeWidth={1}
+              />
+            )}
           </Layer>
         </Stage>
       </div>
