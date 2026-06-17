@@ -13,6 +13,7 @@ import {
   loadFormation,
   savePlacements,
   saveHiddenChorists,
+  copyFormationToConcert,
 } from "../lib/api";
 
 type Concert = { id: string; name: string };
@@ -143,6 +144,25 @@ export default function FormationBar({ placements, hiddenIds, onLoad, onFormatio
     }
   }
 
+  async function handleCopyToConcert() {
+    if (!activeFormationId) return;
+    const otherConcerts = concerts.filter((c) => c.id !== activeConcertId);
+    if (otherConcerts.length === 0) {
+      window.alert("No other concerts to copy to.");
+      return;
+    }
+    const choice = window.prompt(
+      "Copy to which concert?\n" +
+        otherConcerts.map((c, i) => `${i + 1}. ${c.name}`).join("\n") +
+        "\n\nEnter number:",
+    );
+    if (!choice) return;
+    const idx = parseInt(choice, 10) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= otherConcerts.length) return;
+    await copyFormationToConcert(activeFormationId, otherConcerts[idx].id);
+    window.alert(`Copied to "${otherConcerts[idx].name}".`);
+  }
+
   return (
     <div className="flex flex-col gap-1 p-2 border-b border-gray-200">
       <div className="flex items-center gap-2">
@@ -235,6 +255,12 @@ export default function FormationBar({ placements, hiddenIds, onLoad, onFormatio
                 className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
               >
                 Duplicate
+              </button>
+              <button
+                onClick={handleCopyToConcert}
+                className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+              >
+                Copy to...
               </button>
               <button
                 onClick={handleDeleteFormation}
