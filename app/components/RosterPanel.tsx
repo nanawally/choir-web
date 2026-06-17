@@ -1,14 +1,20 @@
 "use client";
-import { useState, useEffect } from "react";
-import { apiFetch } from "../lib/api";
+import { useState } from "react";
+import { apiFetch, assignChorist, unassignChorist } from "../lib/api";
 
 type Chorist = { id: string; name: string };
+type VoicePart = { id: string; name: string; color: string; shape: string };
+type VoiceGroup = { id: string; name: string; parts: VoicePart[] };
+type Assignment = { choristId: string; voicePartId: string };
 
 type Props = {
   chorists: Chorist[];
   setChorists: (chorists: Chorist[]) => void;
   placedIds: Set<string>;
   onPlace: (id: string) => void;
+  activeGroup: VoiceGroup | null;
+  assignments: Assignment[];
+  onAssignmentsChange: (assignments: Assignment[]) => void;
 };
 
 export default function RosterPanel({
@@ -16,6 +22,9 @@ export default function RosterPanel({
   setChorists,
   placedIds,
   onPlace,
+  activeGroup,
+  assignments,
+  onAssignmentsChange,
 }: Props) {
   const [newName, setNewName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -57,8 +66,30 @@ export default function RosterPanel({
     }
   }
 
+  async function handleAssign(choristId: string, voicePartId: string) {
+    if (!activeGroup) return;
+    if (voicePartId === "") {
+      await unassignChorist(activeGroup.id, choristId);
+      onAssignmentsChange(assignments.filter((a) => a.choristId !== choristId));
+    } else {
+      await assignChorist(choristId, voicePartId);
+      const updated = assignments.filter((a) => a.choristId !== choristId);
+      updated.push({ choristId, voicePartId });
+      onAssignmentsChange(updated);
+    }
+  }
+
+  function getPartForChorist(choristId: string): VoicePart | null {
+    if (!activeGroup) return null;
+    const assignment = assignments.find((a) => a.choristId === choristId);
+    if (!assignment) return null;
+    return activeGroup.parts.find((p) => p.id === assignment.voicePartId) ?? null;
+  }
+
+  const unplaced = chorists.filter((c) => !placedIds.has(c.id));
+
   return (
-    <div className="w-64 border-r border-gray-200 p-4">
+    <div className="w-64 border-r border-gray-200 p-4 overflow-y-auto">
       <h2 className="font-bold mb-3">Roster</h2>
 
       <div className="flex gap-1 mb-4">
@@ -77,44 +108,118 @@ export default function RosterPanel({
         </button>
       </div>
 
-      <ul className="space-y-1">
-        {chorists
-          .filter((c) => !placedIds.has(c.id))
-          .map((c) => (
-            <li
-              key={c.id}
-              className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-gray-100"
-            >
-              {editingId === c.id ? (
-                <input
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleRename(c.id)}
-                  onBlur={() => handleRename(c.id)}
-                  autoFocus
-                  className="flex-1 border border-gray-300 rounded px-1"
-                />
-              ) : (
-                <span
-                  onDoubleClick={() => {
-                    setEditingId(c.id);
-                    setEditingName(c.name);
-                  }}
-                  onClick={() => onPlace(c.id)}
-                  className="cursor-pointer"
-                >
-                  {c.name}
-                </span>
-              )}
-              <button
-                onClick={() => handleDelete(c.id)}
-                className="text-red-400 hover:text-red-600 text-xs ml-2"
-              >
-                X
-              </button>
-            </li>
-          ))}
-      </ul>
+      {unplaced.length > 0 && (
+        <>
+          <h3 className="text-xs text-gray-500 font-medium mb-1">Unplaced</h3>
+          <ul className="space-y-1 mb-4">
+            {unplaced.map((c) => (
+              <ChoristRow
+                key={c.id}
+                chorist={c}
+                part={getPartForChorist(c.id)}
+                editingId={editingId}
+                editingName={editingName}
+                onEditStart={(id, name) => { setEditingId(id); setEditingName(name); }}
+                onEditChange={setEditingName}
+                onEditSubmit={handleRename}
+                onPlace={onPlace}
+                onDelete={handleDelete}
+              />
+            ))}
+          </ul>
+        </>
+      )}
+
+      {activeGroup && (
+        <>
+          <h3 className="text-xs text-gray-500 font-medium mb-1">Voice Parts</h3>
+          <ul className="space-y-1">
+            {chorists.map((c) => {
+              const part = getPartForChorist(c.id);
+              return (
+                <li key={c.id} className="flex items-center gap-1 text-sm py-0.5">
+                  {part && (
+                    <span
+                      className="w-3 h-3 rounded-full inline-block flex-shrink-0"
+                      style={{ backgroundColor: part.color }}
+                    />
+                  )}
+                  <span className="flex-1 truncate">{c.name}</span>
+                  <select
+                    value={assignments.find((a) => a.choristId === c.id)?.voicePartId ?? ""}
+                    onChange={(e) => handleAssign(c.id, e.target.value)}
+                    className="border border-gray-300 rounded px-1 py-0.5 text-xs w-20"
+                  >
+                    <option value="">—</option>
+                    {activeGroup.parts.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
     </div>
+  );
+}
+
+function ChoristRow({
+  chorist,
+  part,
+  editingId,
+  editingName,
+  onEditStart,
+  onEditChange,
+  onEditSubmit,
+  onPlace,
+  onDelete,
+}: {
+  chorist: Chorist;
+  part: VoicePart | null;
+  editingId: string | null;
+  editingName: string;
+  onEditStart: (id: string, name: string) => void;
+  onEditChange: (name: string) => void;
+  onEditSubmit: (id: string) => void;
+  onPlace: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <li className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-gray-100">
+      {part && (
+        <span
+          className="w-3 h-3 rounded-full inline-block flex-shrink-0 mr-1"
+          style={{ backgroundColor: part.color }}
+        />
+      )}
+      {editingId === chorist.id ? (
+        <input
+          value={editingName}
+          onChange={(e) => onEditChange(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && onEditSubmit(chorist.id)}
+          onBlur={() => onEditSubmit(chorist.id)}
+          autoFocus
+          className="flex-1 border border-gray-300 rounded px-1"
+        />
+      ) : (
+        <span
+          onDoubleClick={() => onEditStart(chorist.id, chorist.name)}
+          onClick={() => onPlace(chorist.id)}
+          className="cursor-pointer flex-1 truncate"
+        >
+          {chorist.name}
+        </span>
+      )}
+      <button
+        onClick={() => onDelete(chorist.id)}
+        className="text-red-400 hover:text-red-600 text-xs ml-2"
+      >
+        X
+      </button>
+    </li>
   );
 }

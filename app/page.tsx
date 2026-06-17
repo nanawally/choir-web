@@ -1,10 +1,11 @@
 "use client";
 
-import { Circle, Group, Layer, Line, Rect, Stage, Text } from "react-konva";
+import { Circle, Group, Layer, Line, Rect, RegularPolygon, Stage, Text } from "react-konva";
 import RosterPanel from "./components/RosterPanel";
 import { useEffect, useRef, useState } from "react";
-import { apiFetch } from "./lib/api";
+import { apiFetch, getAssignments, listVoiceGroups } from "./lib/api";
 import FormationBar from "./components/FormationBar";
+import VoiceGroupPanel from "./components/VoiceGroupPanel";
 
 const CELL_SIZE = 50;
 const WIDTH = 800;
@@ -21,9 +22,25 @@ export default function Home() {
   const [chorists, setChorists] = useState<Chorist[]>([]);
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
     null,
   );
+  const [assignments, setAssignments] = useState<
+    { choristId: string; voicePartId: string }[]
+  >([]);
+  const [voiceGroups, setVoiceGroups] = useState<
+    {
+      id: string;
+      name: string;
+      parts: {
+        id: string;
+        name: string;
+        color: string;
+        shape: string;
+      }[];
+    }[]
+  >([]);
   const [marquee, setMarquee] = useState<{
     startX: number;
     startY: number;
@@ -38,6 +55,21 @@ export default function Home() {
       .then(setChorists);
   }, []);
 
+  useEffect(() => {
+    listVoiceGroups().then(setVoiceGroups);
+  }, []);
+
+  useEffect(() => {
+    if (activeGroupId) {
+      getAssignments(activeGroupId).then(setAssignments);
+    }
+  }, [activeGroupId]);
+
+  function handleSelectGroup(id: string | null) {
+    setActiveGroupId(id);
+    if (!id) setAssignments([]);
+  }
+  
   const placedIds = new Set(placements.map((p) => p.choristId));
 
   function handlePlace(choristId: string) {
@@ -63,6 +95,19 @@ export default function Home() {
     setPlacements(
       loaded.map((p) => ({ choristId: p.choristId, x: p.gridX, y: p.gridY })),
     );
+  }
+
+  function getChoristVisuals(choristId: string): {
+    color: string;
+    shape: string;
+  } {
+    if (!activeGroupId) return { color: "grey", shape: "circle" };
+    const assignment = assignments.find((a) => a.choristId === choristId);
+    if (!assignment) return { color: "#ccc", shape: "circle" }; // unassigned = light grey;
+    const group = voiceGroups.find((g) => g.id === activeGroupId);
+    const part = group?.parts.find((p) => p.id === assignment.voicePartId);
+    if (!part) return { color: "grey", shape: "circle" };
+    return { color: part.color, shape: part.shape };
   }
 
   const gridLines = [];
@@ -96,9 +141,18 @@ export default function Home() {
         setChorists={setChorists}
         placedIds={placedIds}
         onPlace={handlePlace}
+        activeGroup={voiceGroups.find((g) => g.id === activeGroupId) ?? null}
+        assignments={assignments}
+        onAssignmentsChange={setAssignments}
       />
       <div className="flex flex-col flex-1">
         <FormationBar placements={placements} onLoad={handleLoad} />
+        <VoiceGroupPanel
+          activeGroupId={activeGroupId}
+          onSelectGroup={handleSelectGroup}
+          voiceGroups={voiceGroups}
+          setVoiceGroups={setVoiceGroups}
+        />
         <Stage
           width={WIDTH}
           height={HEIGHT}
@@ -128,7 +182,12 @@ export default function Home() {
 
               const selected = new Set<string>();
               placements.forEach((p) => {
-                if (p.x >= left && p.x <= right && p.y >= top && p.y <= bottom) {
+                if (
+                  p.x >= left &&
+                  p.x <= right &&
+                  p.y >= top &&
+                  p.y <= bottom
+                ) {
                   selected.add(p.choristId);
                 }
               });
@@ -222,12 +281,44 @@ export default function Home() {
                     }
                   }}
                 >
-                  <Circle
-                    radius={20}
-                    fill="grey"
-                    stroke={selectedIds.has(p.choristId) ? "blue" : undefined}
-                    strokeWidth={selectedIds.has(p.choristId) ? 2 : 0}
-                  />
+                  {(() => {
+                    const { color, shape } = getChoristVisuals(p.choristId);
+                    const selected = selectedIds.has(p.choristId);
+                    const stroke = selected ? "blue" : undefined;
+                    const strokeWidth = selected ? 2 : 0;
+                    if (shape === "square") {
+                      return (
+                        <Rect
+                          width={36}
+                          height={36}
+                          offsetX={18}
+                          offsetY={18}
+                          fill={color}
+                          stroke={stroke}
+                          strokeWidth={strokeWidth}
+                        />
+                      );
+                    }
+                    if (shape === "triangle") {
+                      return (
+                        <RegularPolygon
+                          sides={3}
+                          radius={22}
+                          fill={color}
+                          stroke={stroke}
+                          strokeWidth={strokeWidth}
+                        />
+                      );
+                    }
+                    return (
+                      <Circle
+                        radius={20}
+                        fill={color}
+                        stroke={stroke}
+                        strokeWidth={strokeWidth}
+                      />
+                    );
+                  })()}
                   <Text
                     text={chorist.name}
                     fontSize={11}
