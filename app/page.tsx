@@ -23,6 +23,8 @@ export default function Home() {
     { choristId: string; voicePartId: string }[]
   >([]);
   const [highlightPartId, setHighlightPartId] = useState<string | null>(null);
+  const [formationName, setFormationName] = useState<string | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [voiceGroups, setVoiceGroups] = useState<
     {
       id: string;
@@ -73,10 +75,12 @@ export default function Home() {
 
   function handleLoad(
     loaded: { choristId: string; gridX: number; gridY: number }[],
+    hidden: string[],
   ) {
     setPlacements(
       loaded.map((p) => ({ choristId: p.choristId, x: p.gridX, y: p.gridY })),
     );
+    setHiddenIds(new Set(hidden));
   }
 
   return (
@@ -89,9 +93,11 @@ export default function Home() {
         activeGroup={voiceGroups.find((g) => g.id === activeGroupId) ?? null}
         assignments={assignments}
         onAssignmentsChange={setAssignments}
+        hiddenIds={hiddenIds}
+        onToggleHidden={setHiddenIds}
       />
       <div className="flex flex-col flex-1">
-        <FormationBar placements={placements} onLoad={handleLoad} />
+        <FormationBar placements={placements} hiddenIds={hiddenIds} onLoad={handleLoad} onFormationNameChange={setFormationName} />
         <GridCanvas
           chorists={chorists}
           placements={placements}
@@ -103,6 +109,8 @@ export default function Home() {
           assignments={assignments}
           highlightPartId={highlightPartId}
           onRemove={handleRemove}
+          formationName={formationName}
+          hiddenIds={hiddenIds}
         />
       </div>
       <VoiceGroupPanel

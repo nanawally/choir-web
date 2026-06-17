@@ -27,6 +27,8 @@ type Props = {
   assignments: Assignment[];
   highlightPartId: string | null;
   onRemove: (choristId: string) => void;
+  formationName: string | null;
+  hiddenIds: Set<string>;
 };
 
 function snapToGrid(value: number): number {
@@ -44,6 +46,8 @@ export default function GridCanvas({
   assignments,
   highlightPartId,
   onRemove,
+  formationName,
+  hiddenIds,
 }: Props) {
   const stageRef = useRef<Konva.Stage>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
@@ -60,7 +64,7 @@ export default function GridCanvas({
     if (!stage) return;
     const dataURL = stage.toDataURL({ pixelRatio: 2 });
     const link = document.createElement("a");
-    link.download = "formation.png";
+    link.download = (formationName || "formation") + ".png";
     link.href = dataURL;
     link.click();
   }
@@ -145,7 +149,7 @@ export default function GridCanvas({
     >
       <Layer listening={false}>{gridLines}</Layer>
       <Layer>
-        {placements.map((p) => {
+        {placements.filter((p) => !hiddenIds.has(p.choristId)).map((p) => {
           const chorist = chorists.find((c) => c.id === p.choristId);
           if (!chorist) return null;
           const { color, shape } = getChoristVisuals(p.choristId);

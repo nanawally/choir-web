@@ -10,13 +10,51 @@ export async function apiFetch(path: string, options?: RequestInit) {
   });
 }
 
-export async function listFormations() {
-  const res = await apiFetch("/formations");
+// Concerts
+
+export async function listConcerts() {
+  const res = await apiFetch("/concerts");
   return res.json();
 }
 
-export async function createFormation(name: string) {
-  const res = await apiFetch("/formations", {
+export async function createConcert(name: string) {
+  const res = await apiFetch("/concerts", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok ? res.json() : null;
+}
+
+export async function renameConcert(id: string, name: string) {
+  const res = await apiFetch(`/concerts/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok;
+}
+
+export async function deleteConcert(id: string) {
+  const res = await apiFetch(`/concerts/${id}`, { method: "DELETE" });
+  return res.ok;
+}
+
+export async function duplicateConcert(id: string, name: string) {
+  const res = await apiFetch(`/concerts/${id}/duplicate`, {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok ? res.json() : null;
+}
+
+// Formations
+
+export async function listFormations(concertId: string) {
+  const res = await apiFetch(`/concerts/${concertId}/formations`);
+  return res.json();
+}
+
+export async function createFormation(concertId: string, name: string) {
+  const res = await apiFetch(`/concerts/${concertId}/formations`, {
     method: "POST",
     body: JSON.stringify({ name }),
   });
@@ -43,6 +81,29 @@ export async function savePlacements(
   });
   return res.ok;
 }
+
+export async function duplicateFormation(id: string) {
+  const res = await apiFetch(`/formations/${id}/duplicate`, { method: "POST" });
+  return res.ok ? res.json() : null;
+}
+
+export async function saveHiddenChorists(formationId: string, choristIds: string[]) {
+  const res = await apiFetch(`/formations/${formationId}/hidden`, {
+    method: "PUT",
+    body: JSON.stringify({ choristIds }),
+  });
+  return res.ok;
+}
+
+export async function copyFormationToConcert(formationId: string, targetConcertId: string) {
+  const res = await apiFetch(`/formations/${formationId}/copy`, {
+    method: "POST",
+    body: JSON.stringify({ targetConcertId }),
+  });
+  return res.ok ? res.json() : null;
+}
+
+// Voice groups
 
 export async function listVoiceGroups() {
   const res = await apiFetch("/voice-groups");
