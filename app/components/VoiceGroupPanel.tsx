@@ -15,6 +15,8 @@ type Props = {
   onSelectGroup: (id: string | null) => void;
   voiceGroups: VoiceGroup[];
   setVoiceGroups: (groups: VoiceGroup[]) => void;
+  highlightPartId: string | null;
+  onHighlightPart: (id: string | null) => void;
 };
 
 const COLORS = [
@@ -34,6 +36,8 @@ export default function VoiceGroupPanel({
   onSelectGroup,
   voiceGroups,
   setVoiceGroups,
+  highlightPartId,
+  onHighlightPart,
 }: Props) {
   const [newGroupName, setNewGroupName] = useState("");
   const [showParts, setShowParts] = useState(false);
@@ -143,7 +147,8 @@ export default function VoiceGroupPanel({
             {activeGroup.parts.map((p) => (
               <li
                 key={p.id}
-                className="flex items-center justify-between text-sm py-0.5"
+                className={`flex items-center justify-between text-sm py-0.5 cursor-pointer rounded px-1 ${highlightPartId === p.id ? "bg-gray-200" : "hover:bg-gray-100"}`}
+                onClick={() => onHighlightPart(highlightPartId === p.id ? null : p.id)}
               >
                 <span className="flex items-center gap-1">
                   <span

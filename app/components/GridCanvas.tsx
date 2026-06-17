@@ -24,6 +24,7 @@ type Props = {
   activeGroupId: string | null;
   voiceGroups: VoiceGroup[];
   assignments: Assignment[];
+  highlightPartId: string | null;
   onRemove: (choristId: string) => void;
 };
 
@@ -40,6 +41,7 @@ export default function GridCanvas({
   activeGroupId,
   voiceGroups,
   assignments,
+  highlightPartId,
   onRemove,
 }: Props) {
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
@@ -125,6 +127,10 @@ export default function GridCanvas({
           const chorist = chorists.find((c) => c.id === p.choristId);
           if (!chorist) return null;
           const { color, shape } = getChoristVisuals(p.choristId);
+          const dimmed =
+            highlightPartId != null &&
+            assignments.find((a) => a.choristId === p.choristId)?.voicePartId !== highlightPartId;
+          const opacity = dimmed ? 0.2 : 1;
           return (
             <Group
               key={p.choristId}
@@ -181,11 +187,12 @@ export default function GridCanvas({
                 }
               }}
             >
-              <ChoristShape color={color} shape={shape} selected={selectedIds.has(p.choristId)} />
+              <ChoristShape color={color} shape={shape} selected={selectedIds.has(p.choristId)} opacity={opacity} />
               <Text
                 text={chorist.name}
                 fontSize={11}
                 fill="#333"
+                opacity={opacity}
                 y={22}
                 align="center"
                 offsetX={25}

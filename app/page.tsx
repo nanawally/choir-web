@@ -22,6 +22,7 @@ export default function Home() {
   const [assignments, setAssignments] = useState<
     { choristId: string; voicePartId: string }[]
   >([]);
+  const [highlightPartId, setHighlightPartId] = useState<string | null>(null);
   const [voiceGroups, setVoiceGroups] = useState<
     {
       id: string;
@@ -48,6 +49,7 @@ export default function Home() {
 
   function handleSelectGroup(id: string | null) {
     setActiveGroupId(id);
+    setHighlightPartId(null);
     if (!id) setAssignments([]);
   }
 
@@ -99,6 +101,7 @@ export default function Home() {
           activeGroupId={activeGroupId}
           voiceGroups={voiceGroups}
           assignments={assignments}
+          highlightPartId={highlightPartId}
           onRemove={handleRemove}
         />
       </div>
@@ -107,6 +110,8 @@ export default function Home() {
         onSelectGroup={handleSelectGroup}
         voiceGroups={voiceGroups}
         setVoiceGroups={setVoiceGroups}
+        highlightPartId={highlightPartId}
+        onHighlightPart={setHighlightPartId}
       />
     </div>
   );

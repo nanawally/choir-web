@@ -4,9 +4,10 @@ type Props = {
   color: string;
   shape: string;
   selected: boolean;
+  opacity?: number;
 };
 
-export default function ChoristShape({ color, shape, selected }: Props) {
+export default function ChoristShape({ color, shape, selected, opacity = 1 }: Props) {
   const stroke = selected ? "blue" : undefined;
   const strokeWidth = selected ? 2 : 0;
 
@@ -20,6 +21,7 @@ export default function ChoristShape({ color, shape, selected }: Props) {
         fill={color}
         stroke={stroke}
         strokeWidth={strokeWidth}
+        opacity={opacity}
       />
     );
   }
@@ -32,6 +34,7 @@ export default function ChoristShape({ color, shape, selected }: Props) {
         fill={color}
         stroke={stroke}
         strokeWidth={strokeWidth}
+        opacity={opacity}
       />
     );
   }
@@ -42,6 +45,7 @@ export default function ChoristShape({ color, shape, selected }: Props) {
       fill={color}
       stroke={stroke}
       strokeWidth={strokeWidth}
+      opacity={opacity}
     />
   );
 }
