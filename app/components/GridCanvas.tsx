@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
+import Konva from "konva";
 import ChoristShape from "./ChoristShape";
 
 const CELL_SIZE = 50;
@@ -44,6 +45,7 @@ export default function GridCanvas({
   highlightPartId,
   onRemove,
 }: Props) {
+  const stageRef = useRef<Konva.Stage>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [marquee, setMarquee] = useState<{
     startX: number;
@@ -52,6 +54,16 @@ export default function GridCanvas({
     y: number;
   } | null>(null);
   const didMarquee = useRef(false);
+
+  function handleDownload() {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const dataURL = stage.toDataURL({ pixelRatio: 2 });
+    const link = document.createElement("a");
+    link.download = "formation.png";
+    link.href = dataURL;
+    link.click();
+  }
 
   function getChoristVisuals(choristId: string): { color: string; shape: string } {
     if (!activeGroupId) return { color: "grey", shape: "circle" };
@@ -76,7 +88,17 @@ export default function GridCanvas({
   }
 
   return (
+    <div>
+      <div className="flex justify-end mb-1">
+        <button
+          onClick={handleDownload}
+          className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+        >
+          Download PNG
+        </button>
+      </div>
     <Stage
+      ref={stageRef}
       width={WIDTH}
       height={HEIGHT}
       onMouseDown={(e) => {
@@ -216,5 +238,6 @@ export default function GridCanvas({
         )}
       </Layer>
     </Stage>
+    </div>
   );
 }
