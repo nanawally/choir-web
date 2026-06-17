@@ -95,111 +95,114 @@ export default function VoiceGroupPanel({
   }
 
   return (
-    <div className="flex items-start gap-2 p-2 border-b border-gray-200">
-      <div className="flex items-center gap-2">
-        <select
-          value={activeGroupId || ""}
-          onChange={(e) => onSelectGroup(e.target.value || null)}
-          className="border border-gray-300 rounded px-2 py-1 text-sm"
-        >
-          <option value="">No voice group</option>
-          {voiceGroups.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}
-            </option>
-          ))}
-        </select>
+    <div className="w-64 border-l border-gray-200 p-4 overflow-y-auto">
+      <h2 className="font-bold mb-3">Voice Groups</h2>
 
+      <select
+        value={activeGroupId || ""}
+        onChange={(e) => onSelectGroup(e.target.value || null)}
+        className="w-full border border-gray-300 rounded px-2 py-1 text-sm mb-2"
+      >
+        <option value="">No voice group</option>
+        {voiceGroups.map((g) => (
+          <option key={g.id} value={g.id}>
+            {g.name}
+          </option>
+        ))}
+      </select>
+
+      <div className="flex gap-1 mb-4">
         <input
           value={newGroupName}
           onChange={(e) => setNewGroupName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreateGroup()}
           placeholder="New group..."
-          className="border border-gray-300 rounded px-2 py-1 text-sm w-32"
+          className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
         />
         <button
           onClick={handleCreateGroup}
           className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
         >
-          Create
+          Add
         </button>
-
-        {activeGroupId && (
-          <>
-            <button
-              onClick={() => setShowParts(!showParts)}
-              className="px-2 py-1 border border-gray-300 rounded text-sm"
-            >
-              {showParts ? "Hide parts" : "Edit parts"}
-            </button>
-            <button
-              onClick={handleDeleteGroup}
-              className="px-2 py-1 bg-red-500 text-white rounded text-sm"
-            >
-              Delete
-            </button>
-          </>
-        )}
       </div>
 
-      {showParts && activeGroup && (
-        <div className="ml-4 border-l border-gray-200 pl-4">
-          <div className="flex flex-wrap gap-1 mb-2">
+      {activeGroup && (
+        <>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs text-gray-500 font-medium">Parts</h3>
+            <button
+              onClick={handleDeleteGroup}
+              className="text-red-400 hover:text-red-600 text-xs"
+            >
+              Delete group
+            </button>
+          </div>
+
+          <ul className="space-y-1 mb-3">
             {activeGroup.parts.map((p) => (
-              <span
+              <li
                 key={p.id}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs text-white"
-                style={{ backgroundColor: p.color }}
+                className="flex items-center justify-between text-sm py-0.5"
               >
-                {p.name} ({p.shape})
+                <span className="flex items-center gap-1">
+                  <span
+                    className="w-3 h-3 rounded-full inline-block"
+                    style={{ backgroundColor: p.color }}
+                  />
+                  {p.name}
+                </span>
                 <button
                   onClick={() => handleDeletePart(p.id)}
-                  className="ml-1 font-bold"
+                  className="text-red-400 hover:text-red-600 text-xs"
                 >
-                  ×
+                  X
                 </button>
-              </span>
+              </li>
             ))}
-          </div>
-          <div className="flex items-center gap-1">
+          </ul>
+
+          <div className="flex flex-col gap-1">
             <input
               value={newPartName}
               onChange={(e) => setNewPartName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAddPart()}
               placeholder="Part name..."
-              className="border border-gray-300 rounded px-2 py-1 text-sm w-24"
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
             />
-            <select
-              value={newPartColor}
-              onChange={(e) => setNewPartColor(e.target.value)}
-              className="border border-gray-300 rounded px-1 py-1 text-sm"
-              style={{ backgroundColor: newPartColor, color: "white" }}
-            >
-              {COLORS.map((c) => (
-                <option key={c} value={c} style={{ backgroundColor: c }}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <select
-              value={newPartShape}
-              onChange={(e) => setNewPartShape(e.target.value)}
-              className="border border-gray-300 rounded px-1 py-1 text-sm"
-            >
-              {SHAPES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={handleAddPart}
-              className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
-            >
-              Add
-            </button>
+            <div className="flex gap-1">
+              <select
+                value={newPartColor}
+                onChange={(e) => setNewPartColor(e.target.value)}
+                className="flex-1 border border-gray-300 rounded px-1 py-1 text-sm"
+                style={{ backgroundColor: newPartColor, color: "white" }}
+              >
+                {COLORS.map((c) => (
+                  <option key={c} value={c} style={{ backgroundColor: c }}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={newPartShape}
+                onChange={(e) => setNewPartShape(e.target.value)}
+                className="flex-1 border border-gray-300 rounded px-1 py-1 text-sm"
+              >
+                {SHAPES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAddPart}
+                className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
+              >
+                Add
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
