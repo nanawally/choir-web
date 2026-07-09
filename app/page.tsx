@@ -1,126 +1,102 @@
 "use client";
 
-import RosterPanel from "./components/RosterPanel";
 import { useEffect, useState } from "react";
-import { apiFetch, getAssignments, listVoiceGroups } from "./lib/api";
-import FormationBar from "./components/FormationBar";
-import VoiceGroupPanel from "./components/VoiceGroupPanel";
-import GridCanvas from "./components/GridCanvas";
+import {
+  listConcerts,
+  createConcert,
+  deleteConcert,
+  duplicateConcert,
+} from "./lib/api";
+import Link from "next/link";
 
-const CELL_SIZE = 50;
-const WIDTH = 800;
-const HEIGHT = 600;
-
-type Chorist = { id: string; name: string };
-type Placement = { choristId: string; x: number; y: number };
+type Concert = { id: string; name: string };
 
 export default function Home() {
-  const [chorists, setChorists] = useState<Chorist[]>([]);
-  const [placements, setPlacements] = useState<Placement[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
-  const [assignments, setAssignments] = useState<
-    { choristId: string; voicePartId: string }[]
-  >([]);
-  const [highlightPartId, setHighlightPartId] = useState<string | null>(null);
-  const [formationName, setFormationName] = useState<string | null>(null);
-  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
-  const [voiceGroups, setVoiceGroups] = useState<
-    {
-      id: string;
-      name: string;
-      parts: { id: string; name: string; color: string; shape: string }[];
-    }[]
-  >([]);
+  const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [newConcertName, setNewConcertName] = useState("");
 
   useEffect(() => {
-    apiFetch("/chorists")
-      .then((res) => res.json())
-      .then(setChorists);
+    listConcerts().then(setConcerts);
   }, []);
 
-  useEffect(() => {
-    listVoiceGroups().then(setVoiceGroups);
-  }, []);
-
-  useEffect(() => {
-    if (activeGroupId) {
-      getAssignments(activeGroupId).then(setAssignments);
-    }
-  }, [activeGroupId]);
-
-  function handleSelectGroup(id: string | null) {
-    setActiveGroupId(id);
-    setHighlightPartId(null);
-    if (!id) setAssignments([]);
-  }
-
-  const placedIds = new Set(placements.map((p) => p.choristId));
-
-  function handlePlace(choristId: string) {
-    const occupied = new Set(placements.map((p) => `${p.x},${p.y}`));
-    for (let y = CELL_SIZE; y < HEIGHT; y += CELL_SIZE) {
-      for (let x = CELL_SIZE; x < WIDTH; x += CELL_SIZE) {
-        if (!occupied.has(`${x},${y}`)) {
-          setPlacements([...placements, { choristId, x, y }]);
-          return;
-        }
-      }
+  async function handleCreateConcert() {
+    if (!newConcertName.trim()) return;
+    const concert = await createConcert(newConcertName.trim());
+    if (concert) {
+      setConcerts([...concerts, concert]);
+      setNewConcertName("");
     }
   }
 
-  function handleRemove(choristId: string) {
-    setPlacements(placements.filter((p) => p.choristId !== choristId));
+  async function handleDeleteConcert(id: string) {
+    if (!window.confirm("Delete this concert and all its formations?")) return;
+    if (await deleteConcert(id)) {
+      setConcerts(concerts.filter((c) => c.id !== id));
+    }
   }
 
-  function handleLoad(
-    loaded: { choristId: string; gridX: number; gridY: number }[],
-    hidden: string[],
-  ) {
-    setPlacements(
-      loaded.map((p) => ({ choristId: p.choristId, x: p.gridX, y: p.gridY })),
+  async function handleDuplicateConcert(id: string) {
+    const original = concerts.find((c) => c.id === id);
+    const name = window.prompt(
+      "Name for the copy:",
+      (original?.name ?? "") + " (copy)",
     );
-    setHiddenIds(new Set(hidden));
+    if (!name) return;
+    const concert = await duplicateConcert(id, name);
+    if (concert) {
+      setConcerts([...concerts, concert]);
+    }
   }
 
   return (
-    <div className="flex h-screen">
-      <RosterPanel
-        chorists={chorists}
-        setChorists={setChorists}
-        placedIds={placedIds}
-        onPlace={handlePlace}
-        activeGroup={voiceGroups.find((g) => g.id === activeGroupId) ?? null}
-        assignments={assignments}
-        onAssignmentsChange={setAssignments}
-        hiddenIds={hiddenIds}
-        onToggleHidden={setHiddenIds}
-      />
-      <div className="flex flex-col flex-1">
-        <FormationBar placements={placements} hiddenIds={hiddenIds} onLoad={handleLoad} onFormationNameChange={setFormationName} />
-        <GridCanvas
-          chorists={chorists}
-          placements={placements}
-          setPlacements={setPlacements}
-          selectedIds={selectedIds}
-          setSelectedIds={setSelectedIds}
-          activeGroupId={activeGroupId}
-          voiceGroups={voiceGroups}
-          assignments={assignments}
-          highlightPartId={highlightPartId}
-          onRemove={handleRemove}
-          formationName={formationName}
-          hiddenIds={hiddenIds}
+    <div className="flex flex-col items-center min-h-screen py-8">
+      <h1 className="text-4xl font-bold mb-6">Concerts</h1>
+
+      <div className="flex gap-2 mb-6">
+        <input
+          value={newConcertName}
+          onChange={(e) => setNewConcertName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleCreateConcert()}
+          placeholder="New concert"
+          className="border border-gray-300 rounded px-2 py-1 text-sm w-48"
         />
+        <button
+          onClick={handleCreateConcert}
+          className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+        >
+          Create
+        </button>
       </div>
-      <VoiceGroupPanel
-        activeGroupId={activeGroupId}
-        onSelectGroup={handleSelectGroup}
-        voiceGroups={voiceGroups}
-        setVoiceGroups={setVoiceGroups}
-        highlightPartId={highlightPartId}
-        onHighlightPart={setHighlightPartId}
-      />
+
+      <ul className="space-y-2 w-80">
+        {concerts.map((c) => (
+          <li
+            key={c.id}
+            className="flex items-center justify-between border border-gray-200 rounded p-3"
+          >
+            <Link
+              href={`/concerts/${c.id}`}
+              className="font-medium hover:underline"
+            >
+              {c.name}
+            </Link>
+            <div className="flex gap-1">
+              <button
+                onClick={() => handleDuplicateConcert(c.id)}
+                className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-xs"
+              >
+                Duplicate
+              </button>
+              <button
+                onClick={() => handleDeleteConcert(c.id)}
+                className="px-1 py-1 bg-red-500 text-white rounded text-xs"
+              >
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
