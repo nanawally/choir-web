@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Allegro",
+  title: "melisma",
   description: "Choir formation editor",
 };
 
