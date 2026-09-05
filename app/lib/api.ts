@@ -10,6 +10,34 @@ export async function apiFetch(path: string, options?: RequestInit) {
   });
 }
 
+// Songs
+
+export async function listSongs() {
+  const res = await apiFetch("/songs");
+  return res.json();
+}
+
+export async function createSong(name: string) {
+  const res = await apiFetch("/songs", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok ? res.json() : null;
+}
+
+export async function renameSong(id: string, name: string) {
+  const res = await apiFetch(`/songs/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok;
+}
+
+export async function deleteSong(id: string) {
+  const res = await apiFetch(`/songs/${id}`, { method: "DELETE" });
+  return res.ok;
+}
+
 // Concerts
 
 export async function listConcerts() {
@@ -44,6 +72,62 @@ export async function duplicateConcert(id: string, name: string) {
     body: JSON.stringify({ name }),
   });
   return res.ok ? res.json() : null;
+}
+
+// ConcertSongs
+
+export async function listConcertSongs(concertId: string) {
+  const res = await apiFetch(`/concerts/${concertId}/songs`);
+  return res.json();
+}
+
+export async function addSongToConcert(concertId: string, songId: string) {
+  const res = await apiFetch(`/concerts/${concertId}/songs`, {
+    method: "POST",
+    body: JSON.stringify({ songId }),
+  });
+  return res.ok ? res.json() : null;
+}
+
+export async function removeSongFromConcert(concertId: string, concertSongId: string) {
+  const res = await apiFetch(`/concerts/${concertId}/songs/${concertSongId}`, { 
+    method: "DELETE" 
+  });
+  return res.ok;
+}
+
+export async function reorderConcertSongs(concertId: string, concertSongIds: string[]) {
+  const res = await apiFetch(`/concerts/${concertId}/songs/reorder`, {
+    method: "PUT",
+    body: JSON.stringify({ concertSongIds }),
+  });
+  return res.ok;
+}
+
+export async function saveHiddenChorists(
+  concertSongId: string,
+  choristIds: string[],
+) {
+  const res = await apiFetch(`/concert-songs/${concertSongId}/hidden`, {
+    method: "PUT",
+    body: JSON.stringify({ choristIds }),
+  });
+  return res.ok;
+}
+
+// ConcertChorists
+
+export async function listConcertChorists(concertId: string) {
+  const res = await apiFetch(`/concerts/${concertId}/chorists`);
+  return res.json();
+}
+
+export async function setConcertChorists(concertId: string, choristIds: string[]) {
+  const res = await apiFetch(`/concerts/${concertId}/chorists`, {
+    method: "PUT",
+    body: JSON.stringify({ choristIds }),
+  });
+  return res.ok;
 }
 
 // Formations
@@ -87,20 +171,27 @@ export async function duplicateFormation(id: string) {
   return res.ok ? res.json() : null;
 }
 
-export async function saveHiddenChorists(formationId: string, choristIds: string[]) {
-  const res = await apiFetch(`/formations/${formationId}/hidden`, {
-    method: "PUT",
-    body: JSON.stringify({ choristIds }),
-  });
-  return res.ok;
-}
-
 export async function copyFormationToConcert(formationId: string, targetConcertId: string) {
   const res = await apiFetch(`/formations/${formationId}/copy`, {
     method: "POST",
     body: JSON.stringify({ targetConcertId }),
   });
   return res.ok ? res.json() : null;
+}
+
+// SongFormations
+
+export async function listSongFormations(concertSongId: string) {
+  const res = await apiFetch(`/concert-songs/${concertSongId}/formations`)
+  return res.json();
+}
+
+export async function setSongFormations(concertSongId: string, formationIds: string[]) {
+  const res = await apiFetch(`/concert-songs/${concertSongId}/formations`, {
+    method: "PUT",
+    body: JSON.stringify({ formationIds }),
+  });
+  return res.ok;
 }
 
 // Voice groups
