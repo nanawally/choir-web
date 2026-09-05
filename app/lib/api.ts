@@ -38,6 +38,34 @@ export async function deleteSong(id: string) {
   return res.ok;
 }
 
+// Chorists
+
+export async function listChorists() {
+  const res = await apiFetch("/chorists");
+  return res.json();
+}
+
+export async function createChorist(name: string) {
+  const res = await apiFetch("/chorists", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok ? res.json() : null;
+}
+
+export async function renameChorist(id: string, name: string) {
+  const res = await apiFetch(`/chorists/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok;
+}
+
+export async function deleteChorist(id: string) {
+  const res = await apiFetch(`/chorists/${id}`, { method: "DELETE" });
+  return res.ok;
+}
+
 // Concerts
 
 export async function listConcerts() {
