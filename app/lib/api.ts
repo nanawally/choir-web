@@ -132,6 +132,11 @@ export async function reorderConcertSongs(concertId: string, concertSongIds: str
   return res.ok;
 }
 
+export async function getHiddenChorists(concertSongId: string): Promise<string[]> {
+  const res = await apiFetch(`/concert-songs/${concertSongId}/hidden`);
+  return res.json();
+}
+
 export async function saveHiddenChorists(
   concertSongId: string,
   choristIds: string[],
