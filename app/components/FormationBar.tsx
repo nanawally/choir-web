@@ -9,10 +9,10 @@ import {
   duplicateFormation,
   loadFormation,
   savePlacements,
-  saveHiddenChorists,
   copyFormationToConcert,
   setSongFormations,
 } from "../lib/api";
+import AddFormationModal from "./AddFormationModal";
 
 type Concert = { id: string; name: string };
 type Formation = { id: string; name: string; sortOrder: number };
@@ -21,7 +21,6 @@ type Placement = { choristId: string; x: number; y: number };
 type Props = {
   concertId: string;
   placements: Placement[];
-  hiddenIds: Set<string>;
   onLoad: (
     placements: { choristId: string; gridX: number; gridY: number }[],
     hiddenChoristIds: string[],
@@ -35,7 +34,6 @@ type Props = {
 export default function FormationBar({
   concertId,
   placements,
-  hiddenIds,
   onLoad,
   onFormationNameChange,
   songFormationIds,
@@ -46,8 +44,8 @@ export default function FormationBar({
   const [activeFormationId, setActiveFormationId] = useState<string | null>(
     null,
   );
-  const [newFormationName, setNewFormationName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const visibleFormations =
     songFormationIds.size > 0
@@ -58,14 +56,12 @@ export default function FormationBar({
     listFormations(concertId).then(setFormations);
   }, [concertId]);
 
-  async function handleCreateFormation() {
-    if (!newFormationName.trim()) return;
-    const formation = await createFormation(concertId, newFormationName.trim());
+  async function handleCreateFormation(name: string) {
+    const formation = await createFormation(concertId, name.trim());
     if (formation) {
       setFormations([...formations, formation]);
       setActiveFormationId(formation.id);
       onFormationNameChange(formation.name);
-      setNewFormationName("");
       onLoad([], []);
       if (activeConcertSongId) {
         const updatedIds = [...songFormationIds, formation.id];
@@ -109,6 +105,14 @@ export default function FormationBar({
       onFormationNameChange(null);
       onLoad([], []);
     }
+  }
+
+  async function handleReuseFormation(formationId: string) {
+    if (!activeConcertSongId) return;
+    const updatedIds = [...songFormationIds, formationId];
+    await setSongFormations(activeConcertSongId, updatedIds);
+    onSongFormationsChange(new Set(updatedIds));
+    handleSelectFormation(formationId);
   }
 
   async function handleDuplicateFormation() {
@@ -163,18 +167,11 @@ export default function FormationBar({
           ))}
         </select>
 
-        <input
-          value={newFormationName}
-          onChange={(e) => setNewFormationName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleCreateFormation()}
-          placeholder="New formation"
-          className="border border-gray-300 rounded px-2 py-1 text-sm w-36"
-        />
         <button
-          onClick={handleCreateFormation}
+          onClick={() => setShowAddModal(true)}
           className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
         >
-          Create
+          Add
         </button>
 
         <button
@@ -208,6 +205,20 @@ export default function FormationBar({
           </>
         )}
       </div>
+      <AddFormationModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        formations={formations}
+        songFormationIds={songFormationIds}
+        onCreateNew={(name) => {
+          handleCreateFormation(name);
+          setShowAddModal(false);
+        }}
+        onReuse={(formationId) => {
+          handleReuseFormation(formationId);
+          setShowAddModal(false);
+        }}
+      />
     </div>
   );
 }
