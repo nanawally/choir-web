@@ -2,7 +2,7 @@
 
 import RosterPanel from "../../../components/RosterPanel";
 import { use, useEffect, useState } from "react";
-import { addSongToConcert, apiFetch, getAssignments, getHiddenChorists, listConcertChorists, listConcertSongs, listSongs, listVoiceGroups, removeSongFromConcert, saveHiddenChorists, setConcertChorists } from "../../../lib/api";
+import { addSongToConcert, apiFetch, getAssignments, getHiddenChorists, listConcertChorists, listConcertSongs, listSongFormations, listSongs, listVoiceGroups, removeSongFromConcert, saveHiddenChorists, setConcertChorists } from "../../../lib/api";
 import FormationBar from "../../../components/FormationBar";
 import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import GridCanvas from "../../../components/GridCanvas";
@@ -46,6 +46,7 @@ export default function ConcertEditor({
   const [catalogSongs, setCatalogSongs] = useState<{ id: string; name: string }[]>([]);
   const [rosterIds, setRosterIds] = useState<Set<string>>(new Set());
   const [showRosterModal, setShowRosterModal] = useState(false);
+  const [songFormationIds, setSongFormationIds] = useState<Set<string>>(new Set());
   
   useEffect(() => {
     apiFetch("/chorists")
@@ -88,6 +89,8 @@ export default function ConcertEditor({
     setActiveConcertSongId(concertSongId);
     const hidden = await getHiddenChorists(concertSongId);
     setHiddenIds(new Set(hidden));
+    const formationIds = await listSongFormations(concertSongId);
+    setSongFormationIds(new Set(formationIds));
   }
 
   async function handleToggleHidden(newHiddenIds: Set<string>) {
@@ -240,6 +243,9 @@ export default function ConcertEditor({
             hiddenIds={hiddenIds}
             onLoad={handleLoad}
             onFormationNameChange={setFormationName}
+            songFormationIds={songFormationIds}
+            activeConcertSongId={activeConcertSongId}
+            onSongFormationsChange={setSongFormationIds}
           />
           <VoiceGroupPanel
             activeGroupId={activeGroupId}

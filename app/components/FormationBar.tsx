@@ -11,6 +11,7 @@ import {
   savePlacements,
   saveHiddenChorists,
   copyFormationToConcert,
+  setSongFormations,
 } from "../lib/api";
 
 type Concert = { id: string; name: string };
@@ -26,6 +27,9 @@ type Props = {
     hiddenChoristIds: string[],
   ) => void;
   onFormationNameChange: (name: string | null) => void;
+  songFormationIds: Set<string>;
+  activeConcertSongId: string | null;
+  onSongFormationsChange: (ids: Set<string>) => void;
 };
 
 export default function FormationBar({
@@ -34,6 +38,9 @@ export default function FormationBar({
   hiddenIds,
   onLoad,
   onFormationNameChange,
+  songFormationIds,
+  activeConcertSongId,
+  onSongFormationsChange,
 }: Props) {
   const [formations, setFormations] = useState<Formation[]>([]);
   const [activeFormationId, setActiveFormationId] = useState<string | null>(
@@ -42,10 +49,15 @@ export default function FormationBar({
   const [newFormationName, setNewFormationName] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const visibleFormations =
+    songFormationIds.size > 0
+      ? formations.filter((f) => songFormationIds.has(f.id))
+      : formations;
+
   useEffect(() => {
     listFormations(concertId).then(setFormations);
   }, [concertId]);
-  
+
   async function handleCreateFormation() {
     if (!newFormationName.trim()) return;
     const formation = await createFormation(concertId, newFormationName.trim());
@@ -55,6 +67,11 @@ export default function FormationBar({
       onFormationNameChange(formation.name);
       setNewFormationName("");
       onLoad([], []);
+      if (activeConcertSongId) {
+        const updatedIds = [...songFormationIds, formation.id];
+        await setSongFormations(activeConcertSongId, updatedIds);
+        onSongFormationsChange(new Set(updatedIds));
+      }
     }
   }
 
@@ -79,7 +96,6 @@ export default function FormationBar({
           gridY: p.y,
         })),
       ),
-      saveHiddenChorists(activeFormationId, [...hiddenIds]),
     ]);
     setSaving(false);
   }
@@ -108,14 +124,18 @@ export default function FormationBar({
   async function handleCopyToConcert() {
     if (!activeFormationId) return;
     const allConcerts = await listConcerts();
-    const otherConcerts = allConcerts.filter((c: Concert) => c.id !== concertId);
+    const otherConcerts = allConcerts.filter(
+      (c: Concert) => c.id !== concertId,
+    );
     if (otherConcerts.length === 0) {
       window.alert("No other concerts to copy to.");
       return;
     }
     const choice = window.prompt(
       "Copy to which concert?\n" +
-        otherConcerts.map((c: Concert, i: number) => `${i + 1}. ${c.name}`).join("\n") +
+        otherConcerts
+          .map((c: Concert, i: number) => `${i + 1}. ${c.name}`)
+          .join("\n") +
         "\n\nEnter number:",
     );
     if (!choice) return;
@@ -136,7 +156,7 @@ export default function FormationBar({
           className="border border-gray-300 rounded px-2 py-1 text-sm"
         >
           <option value="">Select formation</option>
-          {formations.map((f) => (
+          {visibleFormations.map((f) => (
             <option key={f.id} value={f.id}>
               {f.name}
             </option>
