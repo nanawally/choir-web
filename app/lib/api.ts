@@ -287,3 +287,13 @@ export async function unassignChorist(groupId: string, choristId: string) {
   );
   return res.ok;
 }
+
+// Grid
+
+export async function updateRowSizes(formationId: string, rowSizes: number[]) {
+  const res = await apiFetch(`/formations/${formationId}/row-sizes`, {
+    method: "PUT",
+    body: JSON.stringify({ rowSizes: JSON.stringify(rowSizes) }),
+  });
+  return res.ok;
+}
