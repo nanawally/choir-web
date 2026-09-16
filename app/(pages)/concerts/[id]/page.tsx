@@ -13,7 +13,7 @@ const WIDTH = 800;
 const HEIGHT = 600;
 
 type Chorist = { id: string; name: string };
-type Placement = { choristId: string; x: number; y: number };
+type Placement = { choristId: string; gridX: number; gridY: number };
 
 export default function ConcertEditor({
   params,
@@ -47,6 +47,7 @@ export default function ConcertEditor({
   const [rosterIds, setRosterIds] = useState<Set<string>>(new Set());
   const [showRosterModal, setShowRosterModal] = useState(false);
   const [songFormationIds, setSongFormationIds] = useState<Set<string>>(new Set());
+  const [rowSizes, setRowSizes] = useState<number[]>([]);
   
   useEffect(() => {
     apiFetch("/chorists")
@@ -106,11 +107,11 @@ export default function ConcertEditor({
   }
 
   function handlePlace(choristId: string) {
-    const occupied = new Set(placements.map((p) => `${p.x},${p.y}`));
-    for (let y = CELL_SIZE; y < HEIGHT; y += CELL_SIZE) {
-      for (let x = CELL_SIZE; x < WIDTH; x += CELL_SIZE) {
-        if (!occupied.has(`${x},${y}`)) {
-          setPlacements([...placements, { choristId, x, y }]);
+    const occupied = new Set(placements.map((p) => `${p.gridX},${p.gridY}`));
+    for (let gridY = 1; gridY < HEIGHT / CELL_SIZE; gridY++) {
+      for (let gridX = 1; gridX < WIDTH / CELL_SIZE; gridX++) {
+        if (!occupied.has(`${gridX},${gridY}`)) {
+          setPlacements([...placements, { choristId, gridX, gridY }]);
           return;
         }
       }
@@ -124,11 +125,38 @@ export default function ConcertEditor({
   function handleLoad(
     loaded: { choristId: string; gridX: number; gridY: number }[],
     hidden: string[],
+    loadedRowSizes: number[],
   ) {
     setPlacements(
-      loaded.map((p) => ({ choristId: p.choristId, x: p.gridX, y: p.gridY })),
+      loaded.map((p) => ({ choristId: p.choristId, gridX: p.gridX, gridY: p.gridY })),
     );
     setHiddenIds(new Set(hidden));
+    setRowSizes(loadedRowSizes)
+  }
+
+  function handleClampPlacements(rowIndex: number, newSize: number) {
+    const onRow = placements.filter((p) => p.gridY === rowIndex);
+    const notOnRow = placements.filter((p) => p.gridY !== rowIndex);
+
+    // Separate into "still fits" and "out of bounds"
+    const valid = onRow.filter((p) => p.gridX < newSize);
+    const overflow = onRow.filter((p) => p.gridX >= newSize);
+
+    // Track which gridX slots are taken
+    const taken = new Set(valid.map((p) => p.gridX));
+
+    // For each overflow chorist, find the highest free gridX (leftward from end)
+    const clamped = overflow.map((p) => {
+      for (let x = newSize - 1; x >= 0; x--) {
+        if (!taken.has(x)) {
+          taken.add(x);
+          return { ...p, gridX: x };
+        }
+      }
+      return p;
+    });
+
+    setPlacements([...notOnRow, ...valid, ...clamped]);
   }
 
   return (
@@ -146,12 +174,13 @@ export default function ConcertEditor({
         onRemove={handleRemove}
         formationName={formationName}
         hiddenIds={hiddenIds}
+        rowSizes={rowSizes}
       />
 
       {/* Left toggle buttons */}
       <div className="absolute top-4 left-4 flex flex-col gap-2 z-20 bg-white rounded-lg shadow p-2 hover:bg-gray-100">
-        <button onClick={() => setShowSetlist(!showSetlist)}>☰</button>
-        <button onClick={() => setShowChorists(!showChorists)}>👥</button>
+        <button onClick={() => { setShowSetlist(!showSetlist); setShowChorists(false); }}>☰</button>
+        <button onClick={() => { setShowChorists(!showChorists); setShowSetlist(false); }}>👥</button>
       </div>
 
       {/* Right toggle button */}
@@ -161,7 +190,7 @@ export default function ConcertEditor({
 
       {/* Left drawers */}
       {showSetlist && (
-        <div className="absolute top-0 left-0 h-full w-72 bg-white shadow-lg z-10 p-4">
+        <div className="absolute top-0 left-0 h-full w-72 bg-white shadow-lg z-10 p-4 pl-16">
           <h2 className="font-bold">Setlist</h2>
           <ul className="space-y-1 mb-4">
             {concertSongs.map((s) => (
@@ -215,7 +244,7 @@ export default function ConcertEditor({
         </div>
       )}
       {showChorists && (
-        <div className="absolute top-0 left-0 h-full w-72 bg-white shadow-lg z-10">
+        <div className="absolute top-0 left-0 h-full w-72 bg-white shadow-lg z-10 p-4 pl-16">
           <h2 className="font-bold">Chorists</h2>
           <button
             onClick={() => setShowRosterModal(true)}
@@ -240,12 +269,14 @@ export default function ConcertEditor({
           <FormationBar
             concertId={id}
             placements={placements}
-            hiddenIds={hiddenIds}
             onLoad={handleLoad}
             onFormationNameChange={setFormationName}
             songFormationIds={songFormationIds}
             activeConcertSongId={activeConcertSongId}
             onSongFormationsChange={setSongFormationIds}
+            rowSizes={rowSizes}
+            onRowSizesChange={setRowSizes}
+            onClampPlacements={handleClampPlacements}
           />
           <VoiceGroupPanel
             activeGroupId={activeGroupId}
