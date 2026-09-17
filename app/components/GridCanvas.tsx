@@ -1,11 +1,10 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 import Konva from "konva";
 import ChoristShape from "./ChoristShape";
 
 const CELL_SIZE = 50;
-const WIDTH = 800;
-const HEIGHT = 600;
+const ROW_SPACING = 120;
 
 type Chorist = { id: string; name: string };
 type Placement = { choristId: string; gridX: number; gridY: number };
@@ -36,24 +35,22 @@ function snapToGrid(value: number): number {
   return Math.round(value / CELL_SIZE) * CELL_SIZE;
 }
 
-const ROW_SPACING = 120;
-const CENTER_X = WIDTH / 2;
-const CENTER_Y = HEIGHT - 20;
-
 function arcPosition(
   gridX: number,
   gridY: number,
   rowSize: number,
+  centerX: number,
+  centerY: number,
 ): { x: number; y: number } {
   const radius = (gridY + 1) * ROW_SPACING;
   if (rowSize === 1) {
-    return { x: CENTER_X, y: CENTER_Y - radius };
+    return { x: centerX, y: centerY - radius };
   }
   const PAD = 0.15; // radians inward from each edge so end positions aren't clipped
-  const angle = (Math.PI - PAD) - (gridX / (rowSize - 1)) * (Math.PI - 2 * PAD);
+  const angle = Math.PI - PAD - (gridX / (rowSize - 1)) * (Math.PI - 2 * PAD);
   return {
-    x: CENTER_X + radius * Math.cos(angle),
-    y: CENTER_Y - radius * Math.sin(angle),
+    x: centerX + radius * Math.cos(angle),
+    y: centerY - radius * Math.sin(angle),
   };
 }
 
@@ -83,6 +80,21 @@ export default function GridCanvas({
     y: number;
   } | null>(null);
   const didMarquee = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 800, height: 600 });
+  const centerX = size.width / 2;
+  const centerY = size.height - 20;
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      setSize({ width, height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect(); // cleanup on unmount
+  }, []);
 
   function snapToArc(
     pixelX: number,
@@ -94,7 +106,7 @@ export default function GridCanvas({
 
     rowSizes.forEach((rowSize, gridY) => {
       for (let gridX = 0; gridX < rowSize; gridX++) {
-        const pos = arcPosition(gridX, gridY, rowSize);
+        const pos = arcPosition(gridX, gridY, rowSize, centerX, centerY);
         const dist = Math.hypot(pixelX - pos.x, pixelY - pos.y);
         if (dist < minDist) {
           minDist = dist;
@@ -132,7 +144,7 @@ export default function GridCanvas({
   function toPixel(gridX: number, gridY: number): { x: number; y: number } {
     if (rowSizes.length > 0) {
       const rowSize = rowSizes[gridY] ?? 1;
-      return arcPosition(gridX, gridY, rowSize);
+      return arcPosition(gridX, gridY, rowSize, centerX, centerY);
     }
     return { x: gridX * CELL_SIZE, y: gridY * CELL_SIZE };
   }
@@ -146,8 +158,8 @@ export default function GridCanvas({
       const PAD = 0.15;
       const points: number[] = [];
       for (let a = Math.PI - PAD; a >= PAD; a -= 0.05) {
-        points.push(CENTER_X + radius * Math.cos(a));
-        points.push(CENTER_Y - radius * Math.sin(a));
+        points.push(centerX + radius * Math.cos(a));
+        points.push(centerY - radius * Math.sin(a));
       }
       gridLines.push(
         <Line
@@ -159,7 +171,7 @@ export default function GridCanvas({
       );
       // Draw dots at each valid position
       for (let gridX = 0; gridX < rowSize; gridX++) {
-        const pos = arcPosition(gridX, gridY, rowSize);
+        const pos = arcPosition(gridX, gridY, rowSize, centerX, centerY);
         gridLines.push(
           <Rect
             key={`dot-${gridY}-${gridX}`}
@@ -175,21 +187,21 @@ export default function GridCanvas({
     });
   } else {
     // Rectangular grid mode
-    for (let x = 0; x <= WIDTH; x += CELL_SIZE) {
+    for (let x = 0; x <= size.width; x += CELL_SIZE) {
       gridLines.push(
         <Line
           key={`v-${x}`}
-          points={[x, 0, x, HEIGHT]}
+          points={[x, 0, x, size.height]}
           stroke="#ddd"
           strokeWidth={1}
         />,
       );
     }
-    for (let y = 0; y <= HEIGHT; y += CELL_SIZE) {
+    for (let y = 0; y <= size.height; y += CELL_SIZE) {
       gridLines.push(
         <Line
           key={`h-${y}`}
-          points={[0, y, WIDTH, y]}
+          points={[0, y, size.width, y]}
           stroke="#ddd"
           strokeWidth={1}
         />,
@@ -198,7 +210,7 @@ export default function GridCanvas({
   }
 
   return (
-    <div>
+    <div ref={containerRef} className="flex-1 h-full">
       <div className="flex justify-end mb-1">
         <button
           onClick={handleDownload}
@@ -209,8 +221,8 @@ export default function GridCanvas({
       </div>
       <Stage
         ref={stageRef}
-        width={WIDTH}
-        height={HEIGHT}
+        width={size.width}
+        height={size.height}
         onMouseDown={(e) => {
           if (e.target !== e.target.getStage()) return;
           const pos = e.target.getStage()!.getPointerPosition()!;
