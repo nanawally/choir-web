@@ -83,22 +83,26 @@ export default function FormationBar({
     setActiveFormationId(id);
     const data = await loadFormation(id);
     if (data) {
-      onLoad(data.placements, data.hiddenChoristIds || [], JSON.parse(data.rowSizes || "[]"));
+      onLoad(
+        data.placements,
+        data.hiddenChoristIds || [],
+        JSON.parse(data.rowSizes || "[]"),
+      );
       onFormationNameChange(data.name);
     }
   }
-  
+
   async function handleSave() {
     if (!activeFormationId) return;
     setSaving(true);
-    await savePlacements (
+    await savePlacements(
       activeFormationId,
       placements.map((p) => ({
         choristId: p.choristId,
         gridX: p.gridX,
         gridY: p.gridY,
       })),
-    )
+    );
     setSaving(false);
   }
 
@@ -157,6 +161,7 @@ export default function FormationBar({
 
   return (
     <div className="flex flex-col gap-1 p-2 border-b border-gray-200">
+      <h2 className="font-bold mb-3">Formations</h2>
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={activeFormationId || ""}
