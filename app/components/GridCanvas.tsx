@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 import Konva from "konva";
 import ChoristShape from "./ChoristShape";
@@ -29,6 +29,11 @@ type Props = {
   formationName: string | null;
   hiddenIds: Set<string>;
   rowSizes: number[];
+  canvasWidth: number;
+  canvasHeight: number;
+  scale: number;
+  virtualWidth: number;
+  virtualHeight: number;
 };
 
 function snapToGrid(value: number): number {
@@ -68,6 +73,11 @@ export default function GridCanvas({
   formationName,
   hiddenIds,
   rowSizes,
+  canvasWidth,
+  canvasHeight,
+  scale,
+  virtualWidth,
+  virtualHeight,
 }: Props) {
   const stageRef = useRef<Konva.Stage>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
@@ -80,21 +90,15 @@ export default function GridCanvas({
     y: number;
   } | null>(null);
   const didMarquee = useRef(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ width: 800, height: 600 });
-  const centerX = size.width / 2;
-  const centerY = size.height - 20;
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      setSize({ width, height });
-    });
-    observer.observe(el);
-    return () => observer.disconnect(); // cleanup on unmount
-  }, []);
+  // Center of the virtual coordinate space (for arc rendering)
+  const centerX = virtualWidth / 2;
+  const centerY = virtualHeight - 20;
+
+  // Convert physical pointer position to virtual coordinates
+  function toVirtual(pos: { x: number; y: number }) {
+    return { x: pos.x / scale, y: pos.y / scale };
+  }
 
   function snapToArc(
     pixelX: number,
@@ -149,6 +153,7 @@ export default function GridCanvas({
     return { x: gridX * CELL_SIZE, y: gridY * CELL_SIZE };
   }
 
+  // Grid lines drawn in virtual coordinate space
   const gridLines = [];
   if (rowSizes.length > 0) {
     // Arc mode: draw semicircles and position dots
@@ -186,22 +191,22 @@ export default function GridCanvas({
       }
     });
   } else {
-    // Rectangular grid mode
-    for (let x = 0; x <= size.width; x += CELL_SIZE) {
+    // Rectangular grid — drawn to virtual dimensions
+    for (let x = 0; x <= virtualWidth; x += CELL_SIZE) {
       gridLines.push(
         <Line
           key={`v-${x}`}
-          points={[x, 0, x, size.height]}
+          points={[x, 0, x, virtualHeight]}
           stroke="#ddd"
           strokeWidth={1}
         />,
       );
     }
-    for (let y = 0; y <= size.height; y += CELL_SIZE) {
+    for (let y = 0; y <= virtualHeight; y += CELL_SIZE) {
       gridLines.push(
         <Line
           key={`h-${y}`}
-          points={[0, y, size.width, y]}
+          points={[0, y, virtualWidth, y]}
           stroke="#ddd"
           strokeWidth={1}
         />,
@@ -210,27 +215,27 @@ export default function GridCanvas({
   }
 
   return (
-    <div ref={containerRef} className="flex-1 h-full">
-      <div className="flex justify-end mb-1">
-        <button
-          onClick={handleDownload}
-          className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
-        >
-          Download PNG
-        </button>
-      </div>
+    <div className="w-full h-full relative">
+      <button
+        onClick={handleDownload}
+        className="absolute top-1 right-14 z-10 px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+      >
+        Download PNG
+      </button>
       <Stage
         ref={stageRef}
-        width={size.width}
-        height={size.height}
+        width={canvasWidth}
+        height={canvasHeight}
         onMouseDown={(e) => {
           if (e.target !== e.target.getStage()) return;
-          const pos = e.target.getStage()!.getPointerPosition()!;
+          const raw = e.target.getStage()!.getPointerPosition()!;
+          const pos = toVirtual(raw);
           setMarquee({ startX: pos.x, startY: pos.y, x: pos.x, y: pos.y });
         }}
         onMouseMove={(e) => {
           if (!marquee) return;
-          const pos = e.target.getStage()!.getPointerPosition()!;
+          const raw = e.target.getStage()!.getPointerPosition()!;
+          const pos = toVirtual(raw);
           setMarquee({ ...marquee, x: pos.x, y: pos.y });
         }}
         onMouseUp={() => {
@@ -271,8 +276,8 @@ export default function GridCanvas({
           }
         }}
       >
-        <Layer listening={false}>{gridLines}</Layer>
-        <Layer>
+        <Layer listening={false} scaleX={scale} scaleY={scale}>{gridLines}</Layer>
+        <Layer scaleX={scale} scaleY={scale}>
           {placements
             .filter((p) => !hiddenIds.has(p.choristId))
             .map((p) => {
@@ -396,7 +401,7 @@ export default function GridCanvas({
               );
             })}
         </Layer>
-        <Layer listening={false}>
+        <Layer listening={false} scaleX={scale} scaleY={scale}>
           {marquee && (
             <Rect
               x={Math.min(marquee.startX, marquee.x)}

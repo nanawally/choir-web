@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import { useConcertEditor } from "../../../hooks/useConcertEditor";
 import GridCanvas from "../../../components/GridCanvas";
 import RosterPanel from "../../../components/RosterPanel";
@@ -9,6 +9,8 @@ import FormationBar from "../../../components/FormationBar";
 import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import SetlistDrawer from "@/app/components/SetlistDrawer";
 
+const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
+
 export default function ConcertEditor({
   params,
 }: {
@@ -16,12 +18,50 @@ export default function ConcertEditor({
 }) {
   const { id } = use(params);
   const editor = useConcertEditor(id);
+  const leftOpen = editor.showSetlist || editor.showChorists;
+  const rightOpen = editor.showFormations;
+
+  // Track full window size (the "virtual" coordinate space)
+  const [windowSize, setWindowSize] = useState({ width: 1600, height: 734 });
+
+  useEffect(() => {
+    function onResize() {
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    }
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Measure the canvas container so button strips can take their natural width
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const [canvasWidth, setCanvasWidth] = useState(windowSize.width);
+
+  const updateCanvasWidth = useCallback(() => {
+    if (canvasContainerRef.current) {
+      setCanvasWidth(canvasContainerRef.current.clientWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    const el = canvasContainerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => updateCanvasWidth());
+    ro.observe(el);
+    updateCanvasWidth(); // measure immediately
+    return () => ro.disconnect();
+  }, [updateCanvasWidth]);
+
+  const canvasHeight = windowSize.height;
+
+  // Scale factor: how much to shrink the virtual space to fit
+  const scale = canvasWidth / windowSize.width;
 
   return (
-    <div className="flex h-screen">
+    <div className="relative h-screen overflow-hidden">
       {/* Left drawers */}
       {(editor.showSetlist || editor.showChorists) && (
-        <div className="w-72 shrink-0 bg-white shadow-lg p-4 overflow-y-auto">
+        <div className="absolute top-0 left-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-10">
           {editor.showSetlist && (
             <SetlistDrawer
               concertId={id}
@@ -45,26 +85,20 @@ export default function ConcertEditor({
         </div>
       )}
 
-      <div className="flex-1 relative">
-        <GridCanvas
-          chorists={editor.rosterChorists}
-          placements={editor.placements}
-          setPlacements={editor.setPlacements}
-          selectedIds={editor.selectedIds}
-          setSelectedIds={editor.setSelectedIds}
-          activeGroupId={editor.activeGroupId}
-          voiceGroups={editor.voiceGroups}
-          assignments={editor.assignments}
-          highlightPartId={editor.highlightPartId}
-          onRemove={editor.handleRemove}
-          formationName={editor.formationName}
-          hiddenIds={editor.hiddenIds}
-          rowSizes={editor.rowSizes}
-        />
-
-        {/* Left toggle buttons */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2 z-20 bg-white rounded-lg shadow p-2 hover:bg-gray-100">
+      {/* Grid area — offset by open drawers, uses flex so button strips take natural width */}
+      <div
+        className="absolute overflow-hidden flex"
+        style={{
+          top: 0,
+          bottom: 0,
+          left: leftOpen ? DRAWER_WIDTH : 0,
+          right: rightOpen ? DRAWER_WIDTH : 0,
+        }}
+      >
+        {/* Left toggle buttons — sits beside the canvas, not on top */}
+        <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
           <button
+            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
             onClick={() => {
               editor.setShowSetlist(!editor.showSetlist);
               editor.setShowChorists(false);
@@ -73,6 +107,7 @@ export default function ConcertEditor({
             ☰
           </button>
           <button
+            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
             onClick={() => {
               editor.setShowChorists(!editor.showChorists);
               editor.setShowSetlist(false);
@@ -82,9 +117,34 @@ export default function ConcertEditor({
           </button>
         </div>
 
-        {/* Right toggle button */}
-        <div className="absolute top-4 right-4 z-20 bg-white rounded-lg shadow p-2 hover:bg-gray-100">
+        {/* Canvas container — fills remaining space */}
+        <div ref={canvasContainerRef} className="flex-1 min-w-0 overflow-hidden relative">
+          <GridCanvas
+            chorists={editor.rosterChorists}
+            placements={editor.placements}
+            setPlacements={editor.setPlacements}
+            selectedIds={editor.selectedIds}
+            setSelectedIds={editor.setSelectedIds}
+            activeGroupId={editor.activeGroupId}
+            voiceGroups={editor.voiceGroups}
+            assignments={editor.assignments}
+            highlightPartId={editor.highlightPartId}
+            onRemove={editor.handleRemove}
+            formationName={editor.formationName}
+            hiddenIds={editor.hiddenIds}
+            rowSizes={editor.rowSizes}
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            scale={scale}
+            virtualWidth={windowSize.width}
+            virtualHeight={windowSize.height}
+          />
+        </div>
+
+        {/* Right toggle button — sits beside the canvas, not on top */}
+        <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
           <button
+            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
             onClick={() => editor.setShowFormations(!editor.showFormations)}
           >
             🎵
@@ -94,7 +154,7 @@ export default function ConcertEditor({
 
       {/* Right drawer */}
       {editor.showFormations && (
-        <div className="w-72 shrink-0 bg-white shadow-lg p-4 overflow-y-auto">
+        <div className="absolute top-0 right-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-10">
           <FormationBar
             concertId={id}
             placements={editor.placements}
