@@ -4,7 +4,7 @@ import Konva from "konva";
 import ChoristShape from "./ChoristShape";
 
 const CELL_SIZE = 50;
-const ROW_SPACING = 120;
+const ARC_PADDING = 40; // pixels of padding around the outermost arc
 
 type Chorist = { id: string; name: string };
 type Placement = { choristId: string; gridX: number; gridY: number };
@@ -46,8 +46,9 @@ function arcPosition(
   rowSize: number,
   centerX: number,
   centerY: number,
+  rowSpacing: number,
 ): { x: number; y: number } {
-  const radius = (gridY + 1) * ROW_SPACING;
+  const radius = (gridY + 1) * rowSpacing;
   if (rowSize === 1) {
     return { x: centerX, y: centerY - radius };
   }
@@ -95,6 +96,12 @@ export default function GridCanvas({
   const centerX = virtualWidth / 2;
   const centerY = virtualHeight - 20;
 
+  // Compute row spacing so the outermost arc fills the available space
+  const numRows = rowSizes.length || 1;
+  const maxRadiusH = centerX - ARC_PADDING; // horizontal limit (half width minus padding)
+  const maxRadiusV = centerY - ARC_PADDING; // vertical limit (full height minus padding)
+  const rowSpacing = Math.min(maxRadiusH, maxRadiusV) / numRows;
+
   // Convert physical pointer position to virtual coordinates
   function toVirtual(pos: { x: number; y: number }) {
     return { x: pos.x / scale, y: pos.y / scale };
@@ -110,7 +117,7 @@ export default function GridCanvas({
 
     rowSizes.forEach((rowSize, gridY) => {
       for (let gridX = 0; gridX < rowSize; gridX++) {
-        const pos = arcPosition(gridX, gridY, rowSize, centerX, centerY);
+        const pos = arcPosition(gridX, gridY, rowSize, centerX, centerY, rowSpacing);
         const dist = Math.hypot(pixelX - pos.x, pixelY - pos.y);
         if (dist < minDist) {
           minDist = dist;
@@ -148,7 +155,7 @@ export default function GridCanvas({
   function toPixel(gridX: number, gridY: number): { x: number; y: number } {
     if (rowSizes.length > 0) {
       const rowSize = rowSizes[gridY] ?? 1;
-      return arcPosition(gridX, gridY, rowSize, centerX, centerY);
+      return arcPosition(gridX, gridY, rowSize, centerX, centerY, rowSpacing);
     }
     return { x: gridX * CELL_SIZE, y: gridY * CELL_SIZE };
   }
@@ -158,7 +165,7 @@ export default function GridCanvas({
   if (rowSizes.length > 0) {
     // Arc mode: draw semicircles and position dots
     rowSizes.forEach((rowSize, gridY) => {
-      const radius = (gridY + 1) * ROW_SPACING;
+      const radius = (gridY + 1) * rowSpacing;
       // Draw the arc as a series of short line segments (padded to match positions)
       const PAD = 0.15;
       const points: number[] = [];
@@ -176,7 +183,7 @@ export default function GridCanvas({
       );
       // Draw dots at each valid position
       for (let gridX = 0; gridX < rowSize; gridX++) {
-        const pos = arcPosition(gridX, gridY, rowSize, centerX, centerY);
+        const pos = arcPosition(gridX, gridY, rowSize, centerX, centerY, rowSpacing);
         gridLines.push(
           <Rect
             key={`dot-${gridY}-${gridX}`}
@@ -276,7 +283,11 @@ export default function GridCanvas({
           }
         }}
       >
-        <Layer listening={false} scaleX={scale} scaleY={scale}>{gridLines}</Layer>
+        <Layer listening={false} scaleX={scale} scaleY={scale}>
+          {/* White background so exported PNGs aren't transparent (invisible in dark mode) */}
+          <Rect x={0} y={0} width={virtualWidth} height={virtualHeight} fill="white" />
+          {gridLines}
+        </Layer>
         <Layer scaleX={scale} scaleY={scale}>
           {placements
             .filter((p) => !hiddenIds.has(p.choristId))

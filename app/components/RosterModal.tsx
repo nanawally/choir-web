@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Chorist = { id: string; name: string };
 
@@ -19,7 +19,17 @@ export default function RosterModal({
   rosterIds,
   onSave,
 }: Props) {
-  const [localIds, setLocalIds] = useState<Set<string>>(new Set(rosterIds)); // initial value (new Set(rosterIds)) creates a copy of the rosterIds set
+  const [localIds, setLocalIds] = useState<Set<string>>(new Set());
+
+  // Re-sync localIds every time the modal opens
+  // If roster is empty (new concert), pre-select all chorists — easier to uncheck a few than to check 35
+  useEffect(() => {
+    if (open) {
+      setLocalIds(
+        rosterIds.size > 0 ? new Set(rosterIds) : new Set(chorists.map((c) => c.id)),
+      );
+    }
+  }, [open, rosterIds, chorists]);
 
   if (!open) return null;
 

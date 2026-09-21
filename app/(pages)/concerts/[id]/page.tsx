@@ -8,6 +8,7 @@ import RosterModal from "@/app/components/RosterModal";
 import FormationBar from "../../../components/FormationBar";
 import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import SetlistDrawer from "@/app/components/SetlistDrawer";
+import Link from "next/link";
 
 const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
 
@@ -70,6 +71,10 @@ export default function ConcertEditor({
               catalogSongs={editor.catalogSongs}
               onSelectSong={editor.handleSelectConcertSong}
               onSongsChange={editor.setConcertSongs}
+              getFormationsForSong={editor.getFormationsForSong}
+              activeFormationId={editor.activeFormationId}
+              onSelectFormation={editor.handleSelectFormation}
+              onReorderFormations={editor.handleReorderFormations}
             />
           )}
           {editor.showChorists && (
@@ -97,6 +102,13 @@ export default function ConcertEditor({
       >
         {/* Left toggle buttons — sits beside the canvas, not on top */}
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
+          <Link
+            href="/concerts"
+            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100 text-center text-sm"
+            title="Back to concerts"
+          >
+            &larr;
+          </Link>
           <button
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
             onClick={() => {
@@ -119,6 +131,12 @@ export default function ConcertEditor({
 
         {/* Canvas container — fills remaining space */}
         <div ref={canvasContainerRef} className="flex-1 min-w-0 overflow-hidden relative">
+          {/* Concert name — centered above the grid */}
+          {editor.concertName && (
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10 text-sm font-medium text-gray-500">
+              {editor.concertName}
+            </div>
+          )}
           <GridCanvas
             chorists={editor.rosterChorists}
             placements={editor.placements}
@@ -162,10 +180,15 @@ export default function ConcertEditor({
             onFormationNameChange={editor.setFormationName}
             songFormationIds={editor.songFormationIds}
             activeConcertSongId={editor.activeConcertSongId}
-            onSongFormationsChange={editor.setSongFormationIds}
+            onSongFormationsChange={editor.updateSongFormationIds}
             rowSizes={editor.rowSizes}
             onRowSizesChange={editor.setRowSizes}
             onClampPlacements={editor.handleClampPlacements}
+            activeFormationId={editor.activeFormationId}
+            onActiveFormationIdChange={editor.setActiveFormationId}
+            formationName={editor.formationName}
+            formations={editor.formations}
+            onFormationsChange={editor.setFormations}
           />
           <VoiceGroupPanel
             activeGroupId={editor.activeGroupId}

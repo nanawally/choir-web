@@ -50,6 +50,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen py-8">
+      <Link href="/" className="self-start ml-8 text-sm text-blue-500 hover:underline mb-4">
+        &larr; Home
+      </Link>
       <h1 className="text-4xl font-bold mb-6">Concerts</h1>
 
       <div className="flex gap-2 mb-6">

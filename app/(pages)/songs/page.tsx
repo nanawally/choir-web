@@ -16,14 +16,16 @@ export default function Home() {
   const [newSongName, setNewSongName] = useState("");
 
   useEffect(() => {
-    listSongs().then(setSongs);
+    listSongs().then((songs: Song[]) =>
+      setSongs(songs.sort((a, b) => a.name.localeCompare(b.name))),
+    );
   }, []);
 
   async function handleCreateSong() {
     if (!newSongName.trim()) return;
     const song = await createSong(newSongName.trim());
     if (song) {
-      setSongs([...songs, song]);
+      setSongs([...songs, song].sort((a, b) => a.name.localeCompare(b.name)));
       setNewSongName("");
     }
   }
@@ -32,7 +34,11 @@ export default function Home() {
     const newName = window.prompt("Rename song:", currentName);
     if (!newName || newName === currentName) return;
     if (await renameSong(id, newName)) {
-      setSongs(songs.map((s) => (s.id === id ? { ...s, name: newName } : s)));
+      setSongs(
+        songs
+          .map((s) => (s.id === id ? { ...s, name: newName } : s))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      );
     }
   }
 
@@ -45,6 +51,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen py-8">
+      <Link href="/" className="self-start ml-8 text-sm text-blue-500 hover:underline mb-4">
+        &larr; Home
+      </Link>
       <h1 className="text-4xl font-bold mb-6">Songs</h1>
 
       <div className="flex gap-2 mb-6">

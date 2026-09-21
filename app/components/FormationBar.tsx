@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import {
   listConcerts,
-  listFormations,
   createFormation,
   deleteFormation,
   duplicateFormation,
-  loadFormation,
+  renameFormation,
   savePlacements,
   copyFormationToConcert,
   setSongFormations,
@@ -34,6 +33,11 @@ type Props = {
   rowSizes: number[];
   onRowSizesChange: (sizes: number[]) => void;
   onClampPlacements: (rowIndex: number, newSize: number) => void;
+  activeFormationId: string | null;
+  onActiveFormationIdChange: (id: string | null) => void;
+  formationName: string | null;
+  formations: Formation[];
+  onFormationsChange: (formations: Formation[]) => void;
 };
 
 export default function FormationBar({
@@ -47,28 +51,44 @@ export default function FormationBar({
   rowSizes,
   onRowSizesChange,
   onClampPlacements,
+  activeFormationId,
+  onActiveFormationIdChange,
+  formationName,
+  formations,
+  onFormationsChange,
 }: Props) {
-  const [formations, setFormations] = useState<Formation[]>([]);
-  const [activeFormationId, setActiveFormationId] = useState<string | null>(
-    null,
-  );
   const [saving, setSaving] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
-  const visibleFormations =
-    songFormationIds.size > 0
-      ? formations.filter((f) => songFormationIds.has(f.id))
-      : formations;
+  // Arc mode is active when there are arc rows defined
+  const isArcMode = rowSizes.length > 0;
 
-  useEffect(() => {
-    listFormations(concertId).then(setFormations);
-  }, [concertId]);
+  async function handleRename() {
+    if (!activeFormationId || !nameInput.trim()) return;
+    const trimmed = nameInput.trim();
+    if (trimmed === formationName) {
+      setEditingName(false);
+      return;
+    }
+    await renameFormation(activeFormationId, trimmed);
+    onFormationNameChange(trimmed);
+    // Update the name in the formations list so setlist tags reflect it
+    onFormationsChange(
+      formations.map((f) =>
+        f.id === activeFormationId ? { ...f, name: trimmed } : f,
+      ),
+    );
+    setEditingName(false);
+  }
 
   async function handleCreateFormation(name: string) {
     const formation = await createFormation(concertId, name.trim());
     if (formation) {
-      setFormations([...formations, formation]);
-      setActiveFormationId(formation.id);
+      onFormationsChange([...formations, formation]);
+      onActiveFormationIdChange(formation.id);
       onFormationNameChange(formation.name);
       onLoad([], [], []);
       if (activeConcertSongId) {
@@ -76,19 +96,6 @@ export default function FormationBar({
         await setSongFormations(activeConcertSongId, updatedIds);
         onSongFormationsChange(new Set(updatedIds));
       }
-    }
-  }
-
-  async function handleSelectFormation(id: string) {
-    setActiveFormationId(id);
-    const data = await loadFormation(id);
-    if (data) {
-      onLoad(
-        data.placements,
-        data.hiddenChoristIds || [],
-        JSON.parse(data.rowSizes || "[]"),
-      );
-      onFormationNameChange(data.name);
     }
   }
 
@@ -103,6 +110,12 @@ export default function FormationBar({
         gridY: p.gridY,
       })),
     );
+    // If a song is selected, ensure this formation is linked to it
+    if (activeConcertSongId && !songFormationIds.has(activeFormationId)) {
+      const updatedIds = [...songFormationIds, activeFormationId];
+      await setSongFormations(activeConcertSongId, updatedIds);
+      onSongFormationsChange(new Set(updatedIds));
+    }
     setSaving(false);
   }
 
@@ -110,8 +123,8 @@ export default function FormationBar({
     if (!activeFormationId) return;
     if (!window.confirm("Delete this formation?")) return;
     if (await deleteFormation(activeFormationId)) {
-      setFormations(formations.filter((f) => f.id !== activeFormationId));
-      setActiveFormationId(null);
+      onFormationsChange(formations.filter((f) => f.id !== activeFormationId));
+      onActiveFormationIdChange(null);
       onFormationNameChange(null);
       onLoad([], [], []);
     }
@@ -122,15 +135,14 @@ export default function FormationBar({
     const updatedIds = [...songFormationIds, formationId];
     await setSongFormations(activeConcertSongId, updatedIds);
     onSongFormationsChange(new Set(updatedIds));
-    handleSelectFormation(formationId);
   }
 
   async function handleDuplicateFormation() {
     if (!activeFormationId) return;
     const copy = await duplicateFormation(activeFormationId);
     if (copy) {
-      setFormations([...formations, copy]);
-      setActiveFormationId(copy.id);
+      onFormationsChange([...formations, copy]);
+      onActiveFormationIdChange(copy.id);
       onFormationNameChange(copy.name);
     }
   }
@@ -159,42 +171,135 @@ export default function FormationBar({
     window.alert(`Copied to "${otherConcerts[idx].name}".`);
   }
 
+  function handleSetArcMode(arc: boolean) {
+    if (!activeFormationId) return;
+    if (arc && rowSizes.length === 0) {
+      // Switching to arc — add a default row
+      const next = [10];
+      onRowSizesChange(next);
+      updateRowSizes(activeFormationId, next);
+    } else if (!arc) {
+      // Switching to rectangle — clear all rows
+      onRowSizesChange([]);
+      updateRowSizes(activeFormationId, []);
+    }
+  }
+
   return (
-    <div className="flex flex-col gap-1 p-2 border-b border-gray-200">
-      <h2 className="font-bold mb-3">Formations</h2>
-      <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={activeFormationId || ""}
-          onChange={(e) =>
-            e.target.value && handleSelectFormation(e.target.value)
-          }
-          className="border border-gray-300 rounded px-2 py-1 text-sm"
-        >
-          <option value="">Select formation</option>
-          {visibleFormations.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.name}
-            </option>
-          ))}
-        </select>
+    <div className="flex flex-col gap-2 p-2 border-b border-gray-200">
+      <h2 className="font-bold mb-1">Formations</h2>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
-        >
-          Add
-        </button>
+      {/* Add new formation button — always visible */}
+      <button
+        onClick={() => setShowAddModal(true)}
+        className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm w-fit"
+      >
+        Add new formation
+      </button>
 
-        <button
-          onClick={handleSave}
-          disabled={!activeFormationId || saving}
-          className="px-2 py-1 bg-green-500 text-white rounded text-sm disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save"}
-        </button>
+      {/* Everything below only shows when a formation is selected */}
+      {activeFormationId && formationName && (
+        <>
+          {/* Formation name — click to edit */}
+          {editingName ? (
+            <input
+              ref={nameInputRef}
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              onBlur={handleRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleRename();
+                if (e.key === "Escape") setEditingName(false);
+              }}
+              className="text-sm font-medium text-gray-700 mt-1 border-b border-gray-400 outline-none w-full"
+              autoFocus
+            />
+          ) : (
+            <p
+              className="text-sm font-medium text-gray-700 mt-1 cursor-pointer hover:underline"
+              onClick={() => {
+                setNameInput(formationName || "");
+                setEditingName(true);
+              }}
+              title="Click to rename"
+            >
+              {formationName}
+            </p>
+          )}
 
-        {activeFormationId && (
-          <>
+          {/* Layout mode dropdown */}
+          <select
+            value={isArcMode ? "arc" : "grid"}
+            onChange={(e) => handleSetArcMode(e.target.value === "arc")}
+            className="mt-1 border border-gray-300 rounded px-2 py-1.5 text-sm w-fit"
+          >
+            <option value="arc">Arc</option>
+            <option value="grid">Grid</option>
+          </select>
+
+          {/* Arc row configuration — only visible in arc mode */}
+          {isArcMode && (
+            <div className="mt-1">
+              <h4 className="text-xs font-medium mb-1 text-gray-500">
+                Arc rows (empty = rectangular grid)
+              </h4>
+              {rowSizes.map((size, i) => (
+                <div key={i} className="flex items-center gap-1 mb-1">
+                  <span className="text-xs w-12">Row {i + 1}:</span>
+                  <input
+                    type="number"
+                    value={size}
+                    min={placements.filter((p) => p.gridY === i).length || 1}
+                    onChange={(e) => {
+                      const next = [...rowSizes];
+                      next[i] = parseInt(e.target.value) || 1;
+                      onRowSizesChange(next);
+                      onClampPlacements(i, next[i]);
+                      updateRowSizes(activeFormationId, next);
+                    }}
+                    className="border border-gray-300 rounded px-1 py-0.5 text-sm w-16"
+                  />
+                  <button
+                    onClick={() => {
+                      const next = rowSizes.filter((_, j) => j !== i);
+                      onRowSizesChange(next);
+                      updateRowSizes(activeFormationId, next);
+                    }}
+                    className="text-red-400 hover:text-red-600 text-xs"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  const next = [...rowSizes, 10];
+                  onRowSizesChange(next);
+                  updateRowSizes(activeFormationId, next);
+                }}
+                className="text-xs text-blue-500 hover:underline"
+              >
+                + Add row
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Spacer before voice groups (rendered by parent) */}
+      <div className="border-t border-gray-200 mt-2" />
+
+      {/* Save / action buttons — only when a formation is selected */}
+      {activeFormationId && (
+        <div className="flex flex-col gap-2 mt-2">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-3 py-1.5 bg-green-500 text-white rounded text-sm w-fit font-medium disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save formation"}
+          </button>
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={handleDuplicateFormation}
               className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
@@ -209,58 +314,14 @@ export default function FormationBar({
             </button>
             <button
               onClick={handleDeleteFormation}
-              className="px-1 py-1 bg-red-500 text-white rounded text-sm"
+              className="px-2 py-1 bg-red-500 text-white rounded text-sm"
             >
               Delete
             </button>
-          </>
-        )}
-      </div>
-      {activeFormationId && (
-        <div className="mt-2">
-          <h4 className="text-xs font-medium mb-1">
-            Arc rows (empty = rectangular grid)
-          </h4>
-          {rowSizes.map((size, i) => (
-            <div key={i} className="flex items-center gap-1 mb-1">
-              <span className="text-xs w-12">Row {i + 1}:</span>
-              <input
-                type="number"
-                value={size}
-                min={placements.filter((p) => p.gridY === i).length || 1}
-                onChange={(e) => {
-                  const next = [...rowSizes];
-                  next[i] = parseInt(e.target.value) || 1;
-                  onRowSizesChange(next);
-                  onClampPlacements(i, next[i]);
-                  updateRowSizes(activeFormationId, next);
-                }}
-                className="border border-gray-300 rounded px-1 py-0.5 text-sm w-16"
-              />
-              <button
-                onClick={() => {
-                  const next = rowSizes.filter((_, j) => j !== i);
-                  onRowSizesChange(next);
-                  updateRowSizes(activeFormationId, next);
-                }}
-                className="text-red-400 hover:text-red-600 text-xs"
-              >
-                X
-              </button>
-            </div>
-          ))}
-          <button
-            onClick={() => {
-              const next = [...rowSizes, 10];
-              onRowSizesChange(next);
-              updateRowSizes(activeFormationId, next);
-            }}
-            className="text-xs text-blue-500 hover:underline"
-          >
-            + Add row
-          </button>
+          </div>
         </div>
       )}
+
       <AddFormationModal
         open={showAddModal}
         onClose={() => setShowAddModal(false)}

@@ -183,6 +183,14 @@ export async function loadFormation(id: string) {
   return res.ok ? res.json() : null;
 }
 
+export async function renameFormation(id: string, name: string) {
+  const res = await apiFetch(`/formations/${id}/name`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok;
+}
+
 export async function deleteFormation(id: string) {
   const res = await apiFetch(`/formations/${id}`, { method: "DELETE" });
   return res.ok;
@@ -258,6 +266,22 @@ export async function addVoicePart(
     body: JSON.stringify({ name, color, shape }),
   });
   return res.ok ? res.json() : null;
+}
+
+export async function updateVoicePart(partId: string, name: string, color: string, shape: string) {
+  const res = await apiFetch(`/voice-groups/parts/${partId}`, {
+    method: "PUT",
+    body: JSON.stringify({ name, color, shape }),
+  });
+  return res.ok;
+}
+
+export async function reorderVoiceParts(groupId: string, partIds: string[]) {
+  const res = await apiFetch(`/voice-groups/${groupId}/parts/reorder`, {
+    method: "PUT",
+    body: JSON.stringify({ partIds }),
+  });
+  return res.ok;
 }
 
 export async function deleteVoicePart(partId: string) {

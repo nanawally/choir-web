@@ -2,14 +2,18 @@ import { useEffect, useState } from "react";
 import {
   apiFetch,
   getAssignments,
+  listConcerts,
   getHiddenChorists,
   listConcertChorists,
   listConcertSongs,
+  listFormations,
   listSongFormations,
   listSongs,
   listVoiceGroups,
+  loadFormation,
   saveHiddenChorists,
   setConcertChorists,
+  setSongFormations,
 } from "../lib/api";
 
 const CELL_SIZE = 50;
@@ -18,8 +22,10 @@ const HEIGHT = 600;
 
 type Chorist = { id: string; name: string };
 type Placement = { choristId: string; gridX: number; gridY: number };
+type Formation = { id: string; name: string; sortOrder: number };
 
 export function useConcertEditor(concertId: string) {
+  const [concertName, setConcertName] = useState<string>("");
   const [chorists, setChorists] = useState<Chorist[]>([]);
   const [placements, setPlacements] = useState<Placement[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -54,13 +60,26 @@ export function useConcertEditor(concertId: string) {
   const [songFormationIds, setSongFormationIds] = useState<Set<string>>(
     new Set(),
   );
+  // Map of concertSongId → formation IDs for all songs (for setlist tags)
+  const [allSongFormationIds, setAllSongFormationIds] = useState<
+    Map<string, string[]>
+  >(new Map());
   const [rowSizes, setRowSizes] = useState<number[]>([]);
+  const [activeFormationId, setActiveFormationId] = useState<string | null>(null);
+  const [formations, setFormations] = useState<Formation[]>([]);
 
   useEffect(() => {
     apiFetch("/chorists")
       .then((res) => res.json())
       .then(setChorists);
   }, []);
+
+  useEffect(() => {
+    listConcerts().then((concerts: { id: string; name: string }[]) => {
+      const concert = concerts.find((c) => c.id === concertId);
+      if (concert) setConcertName(concert.name);
+    });
+  }, [concertId]);
 
   useEffect(() => {
     listVoiceGroups().then(setVoiceGroups);
@@ -86,6 +105,22 @@ export function useConcertEditor(concertId: string) {
     );
   }, [concertId]);
 
+  // Fetch all formations for this concert
+  useEffect(() => {
+    listFormations(concertId).then(setFormations);
+  }, [concertId]);
+
+  // Fetch formation links for all songs so tags are always visible
+  useEffect(() => {
+    if (concertSongs.length === 0) return;
+    Promise.all(
+      concertSongs.map(async (s) => {
+        const ids = await listSongFormations(s.id);
+        return [s.id, ids] as [string, string[]];
+      }),
+    ).then((entries) => setAllSongFormationIds(new Map(entries)));
+  }, [concertSongs]);
+
   function handleSelectGroup(id: string | null) {
     setActiveGroupId(id);
     setHighlightPartId(null);
@@ -95,12 +130,78 @@ export function useConcertEditor(concertId: string) {
   const placedIds = new Set(placements.map((p) => p.choristId));
   const rosterChorists = chorists.filter((c) => rosterIds.has(c.id));
 
+  // Build a lookup: for each song, its formation objects (with names, in order)
+  function getFormationsForSong(songId: string) {
+    const ids = allSongFormationIds.get(songId) || [];
+    // Map IDs to formation objects, preserving the stored order
+    return ids
+      .map((id) => formations.find((f) => f.id === id))
+      .filter((f): f is Formation => f != null);
+  }
+
+  // Keep allSongFormationIds in sync when the active song's links change
+  function updateSongFormationIds(newIds: Set<string>) {
+    setSongFormationIds(newIds);
+    if (activeConcertSongId) {
+      setAllSongFormationIds((prev) => {
+        const next = new Map(prev);
+        next.set(activeConcertSongId, Array.from(newIds));
+        return next;
+      });
+    }
+  }
+
+  // Reorder formations under a song (called after drag-and-drop)
+  async function handleReorderFormations(songId: string, newOrder: string[]) {
+    // Update the local map immediately for responsive UI
+    setAllSongFormationIds((prev) => {
+      const next = new Map(prev);
+      next.set(songId, newOrder);
+      return next;
+    });
+    // Also update songFormationIds if this is the active song
+    if (songId === activeConcertSongId) {
+      setSongFormationIds(new Set(newOrder));
+    }
+    // Persist to backend
+    await setSongFormations(songId, newOrder);
+  }
+
   async function handleSelectConcertSong(concertSongId: string) {
     setActiveConcertSongId(concertSongId);
     const hidden = await getHiddenChorists(concertSongId);
     setHiddenIds(new Set(hidden));
     const formationIds = await listSongFormations(concertSongId);
     setSongFormationIds(new Set(formationIds));
+
+    // Auto-load the first linked formation onto the grid
+    if (formationIds.length > 0) {
+      await handleSelectFormation(formationIds[0]);
+    } else {
+      // Song has no linked formations — clear the grid
+      setActiveFormationId(null);
+      setPlacements([]);
+      setRowSizes([]);
+      setFormationName(null);
+    }
+  }
+
+  // Load a specific formation onto the grid (used by setlist tags and auto-load)
+  async function handleSelectFormation(formationId: string) {
+    const data = await loadFormation(formationId);
+    if (data) {
+      setActiveFormationId(formationId);
+      setPlacements(
+        data.placements.map((p: any) => ({
+          choristId: p.choristId,
+          gridX: p.gridX,
+          gridY: p.gridY,
+        })),
+      );
+      setHiddenIds(new Set(data.hiddenChoristIds || []));
+      setRowSizes(JSON.parse(data.rowSizes || "[]"));
+      setFormationName(data.name);
+    }
   }
 
   async function handleToggleHidden(newHiddenIds: Set<string>) {
@@ -174,6 +275,7 @@ export function useConcertEditor(concertId: string) {
 
   return {
     // State values
+    concertName,
     chorists,
     placements,
     selectedIds,
@@ -193,6 +295,9 @@ export function useConcertEditor(concertId: string) {
     showRosterModal,
     songFormationIds,
     rowSizes,
+    activeFormationId,
+    formations,
+    getFormationsForSong,
     placedIds,
     rosterChorists,
 
@@ -204,19 +309,23 @@ export function useConcertEditor(concertId: string) {
     setShowFormations,
     setShowRosterModal,
     setConcertSongs,
-    setSongFormationIds,
+    updateSongFormationIds,
     setRowSizes,
+    setActiveFormationId,
     setVoiceGroups,
+    setFormations,
 
     // Handlers
     handleSelectGroup,
     handleSelectConcertSong,
+    handleSelectFormation,
     handleToggleHidden,
     handleSaveRoster,
     handlePlace,
     handleRemove,
     handleLoad,
     handleClampPlacements,
+    handleReorderFormations,
     setFormationName,
     setHighlightPartId,
   };
