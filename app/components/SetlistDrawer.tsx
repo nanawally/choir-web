@@ -209,6 +209,7 @@ export default function SetlistDrawer({
           Add
         </button>
       </div>
+      <div className="mt-3" />
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

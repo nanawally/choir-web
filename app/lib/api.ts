@@ -87,24 +87,34 @@ export async function deleteSong(id: string) {
 
 // Chorists
 
-export async function listChorists() {
-  const res = await apiFetch("/chorists");
+export async function listChorists(includeArchived = false) {
+  const res = await apiFetch(`/chorists${includeArchived ? "?includeArchived=true" : ""}`);
   return res.json();
 }
 
-export async function createChorist(name: string) {
+export async function createChorist(name: string, isSectionLeader = false) {
   const res = await apiFetch("/chorists", {
     method: "POST",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, isSectionLeader }),
   });
   return res.ok ? res.json() : null;
 }
 
-export async function renameChorist(id: string, name: string) {
+export async function updateChorist(id: string, name: string, isSectionLeader = false) {
   const res = await apiFetch(`/chorists/${id}`, {
     method: "PUT",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, isSectionLeader }),
   });
+  return res.ok;
+}
+
+export async function archiveChorist(id: string) {
+  const res = await apiFetch(`/chorists/${id}/archive`, { method: "PUT" });
+  return res.ok;
+}
+
+export async function unarchiveChorist(id: string) {
+  const res = await apiFetch(`/chorists/${id}/unarchive`, { method: "PUT" });
   return res.ok;
 }
 
@@ -289,12 +299,28 @@ export async function listVoiceGroups() {
   return res.json();
 }
 
-export async function createVoiceGroup(name: string) {
+export async function createVoiceGroup(name: string, isStandard = false) {
   const res = await apiFetch("/voice-groups", {
     method: "POST",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, isStandard }),
   });
   return res.ok ? res.json() : null;
+}
+
+export async function renameVoiceGroup(id: string, name: string) {
+  const res = await apiFetch(`/voice-groups/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok;
+}
+
+export async function setVoiceGroupStandard(id: string, isStandard: boolean) {
+  const res = await apiFetch(`/voice-groups/${id}/standard`, {
+    method: "PUT",
+    body: JSON.stringify({ isStandard }),
+  });
+  return res.ok;
 }
 
 export async function deleteVoiceGroup(id: string) {

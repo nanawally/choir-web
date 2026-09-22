@@ -50,6 +50,15 @@ export default function Home() {
             Manage your roster and member information
           </p>
         </Link>
+        <Link
+          href="/voice-groups"
+          className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
+        >
+          <h2 className="text-lg font-semibold">Voice Groups</h2>
+          <p className="text-sm text-gray-500">
+            Manage voice groups and parts
+          </p>
+        </Link>
       </div>
       <button
         onClick={handleLogout}

@@ -25,7 +25,7 @@ import {
 } from "../lib/api";
 
 type VoicePart = { id: string; name: string; color: string; shape: string };
-type VoiceGroup = { id: string; name: string; parts: VoicePart[] };
+type VoiceGroup = { id: string; name: string; isStandard: boolean; parts: VoicePart[] };
 
 type Props = {
   activeGroupId: string | null;
