@@ -1,6 +1,24 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getToken, clearToken } from "./lib/api";
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!getToken()) {
+      router.push("/login");
+    }
+  }, [router]);
+
+  function handleLogout() {
+    clearToken();
+    router.push("/login");
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <h1 className="text-4xl font-bold">melisma</h1>
@@ -33,6 +51,12 @@ export default function Home() {
           </p>
         </Link>
       </div>
+      <button
+        onClick={handleLogout}
+        className="mt-8 text-sm text-gray-400 hover:text-gray-600"
+      >
+        Log out
+      </button>
     </main>
   );
 }
