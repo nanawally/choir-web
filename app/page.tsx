@@ -59,6 +59,15 @@ export default function Home() {
             Manage voice groups and parts
           </p>
         </Link>
+        <Link
+          href="/base-formations"
+          className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
+        >
+          <h2 className="text-lg font-semibold">Base Formations</h2>
+          <p className="text-sm text-gray-500">
+            Template formations for new concerts
+          </p>
+        </Link>
       </div>
       <button
         onClick={handleLogout}

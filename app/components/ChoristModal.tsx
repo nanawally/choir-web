@@ -8,6 +8,7 @@ import {
   unassignChorist,
   archiveChorist,
 } from "../lib/api";
+import { sortVoiceGroups } from "../lib/voiceGroupSort";
 
 type Chorist = {
   id: string;
@@ -114,12 +115,7 @@ export default function ChoristModal({
         </label>
 
         <div className="space-y-3 mb-6">
-          {[...voiceGroups].sort((a, b) => {
-            const aIs4 = a.name.includes("4-part") || a.name.includes("4-stäm");
-            const bIs4 = b.name.includes("4-part") || b.name.includes("4-stäm");
-            if (aIs4 !== bIs4) return aIs4 ? -1 : 1;
-            return a.name.localeCompare(b.name, undefined, { numeric: true });
-          }).map((group) => (
+          {sortVoiceGroups(voiceGroups).map((group) => (
             <div key={group.id}>
               <label className="block text-sm font-medium mb-1">
                 {group.name}

@@ -248,6 +248,59 @@ export function useConcertEditor(concertId: string) {
     setRowSizes(loadedRowSizes);
   }
 
+  // Build a flat list of navigation stops: each formation is a stop,
+  // and songs without formations are also stops.
+  function getNavStops(): { songId: string; formationId: string | null }[] {
+    const list: { songId: string; formationId: string | null }[] = [];
+    for (const song of concertSongs) {
+      const songFormations = getFormationsForSong(song.id);
+      if (songFormations.length === 0) {
+        list.push({ songId: song.id, formationId: null });
+      } else {
+        for (const f of songFormations) {
+          list.push({ songId: song.id, formationId: f.id });
+        }
+      }
+    }
+    return list;
+  }
+
+  const navStops = getNavStops();
+  const activeNavIdx = navStops.findIndex((stop) =>
+    stop.songId === activeConcertSongId &&
+    stop.formationId === activeFormationId,
+  );
+  const hasPrevFormation = activeNavIdx > 0;
+  const hasNextFormation = activeNavIdx >= 0 && activeNavIdx < navStops.length - 1;
+
+  // Navigate to a nav stop without the auto-load behavior of handleSelectConcertSong
+  async function navigateToStop(stop: { songId: string; formationId: string | null }) {
+    if (stop.songId !== activeConcertSongId) {
+      setActiveConcertSongId(stop.songId);
+      const formationIds = await listSongFormations(stop.songId);
+      setSongFormationIds(new Set(formationIds));
+    }
+    if (stop.formationId) {
+      await handleSelectFormation(stop.formationId);
+    } else {
+      // Song with no formations — clear the grid
+      setActiveFormationId(null);
+      setPlacements([]);
+      setRowSizes([]);
+      setFormationName(null);
+    }
+  }
+
+  async function handlePrevFormation() {
+    if (!hasPrevFormation) return;
+    await navigateToStop(navStops[activeNavIdx - 1]);
+  }
+
+  async function handleNextFormation() {
+    if (!hasNextFormation) return;
+    await navigateToStop(navStops[activeNavIdx + 1]);
+  }
+
   function handleClampPlacements(rowIndex: number, newSize: number) {
     const onRow = placements.filter((p) => p.gridY === rowIndex);
     const notOnRow = placements.filter((p) => p.gridY !== rowIndex);
@@ -328,5 +381,9 @@ export function useConcertEditor(concertId: string) {
     handleReorderFormations,
     setFormationName,
     setHighlightPartId,
+    hasPrevFormation,
+    hasNextFormation,
+    handlePrevFormation,
+    handleNextFormation,
   };
 }

@@ -6,9 +6,11 @@ import {
   listChorists,
   listVoiceGroups,
   getAssignments,
+  unarchiveChorist,
 } from "../../lib/api";
 import ChoristModal from "../../components/ChoristModal";
 import { Table, Thead, TheadRow, Th, Tbody, Tr, Td } from "../../components/StyledTable";
+import { sortVoiceGroups } from "../../lib/voiceGroupSort";
 
 type Chorist = {
   id: string;
@@ -26,7 +28,6 @@ type ModalState =
   | { mode: "add" }
   | { mode: "edit"; chorist: Chorist };
 
-// A filter is a selected voice part within a voice group
 type ActiveFilter = { groupId: string; groupName: string; partId: string; partName: string };
 
 export default function RosterPage() {
@@ -37,17 +38,17 @@ export default function RosterPage() {
   );
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
-  const [showArchived, setShowArchived] = useState(false);
   const [filters, setFilters] = useState<ActiveFilter[]>([]);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filterExpandedGroup, setFilterExpandedGroup] = useState<string | null>(null);
   const filterRef = useRef<HTMLDivElement>(null);
+  const [archivedOpen, setArchivedOpen] = useState(false);
+  const [archivedChorists, setArchivedChorists] = useState<Chorist[]>([]);
 
   useEffect(() => {
     loadData();
-  }, [showArchived]);
+  }, []);
 
-  // Close filter menu on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
@@ -61,7 +62,7 @@ export default function RosterPage() {
 
   async function loadData() {
     const [choristData, groupData] = await Promise.all([
-      listChorists(showArchived),
+      listChorists(),
       listVoiceGroups(),
     ]);
     setChorists(choristData);
@@ -74,6 +75,19 @@ export default function RosterPage() {
       }),
     );
     setAssignments(assignmentMap);
+  }
+
+  async function openArchivedModal() {
+    const all = await listChorists(true);
+    setArchivedChorists(all.filter((c: Chorist) => c.isArchived));
+    setArchivedOpen(true);
+  }
+
+  async function handleUnarchive(id: string) {
+    if (await unarchiveChorist(id)) {
+      setArchivedChorists(archivedChorists.filter((c) => c.id !== id));
+      await loadData();
+    }
   }
 
   function getPartForChorist(
@@ -124,8 +138,6 @@ export default function RosterPage() {
 
   function matchesFilters(choristId: string): boolean {
     if (filters.length === 0) return true;
-    // Group filters by voice group — within a group, any match counts (OR).
-    // Across groups, all must match (AND).
     const byGroup = new Map<string, string[]>();
     for (const f of filters) {
       const parts = byGroup.get(f.groupId) || [];
@@ -141,9 +153,7 @@ export default function RosterPage() {
     return true;
   }
 
-  const standardGroups = voiceGroups
-    .filter((g) => g.isStandard)
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  const standardGroups = sortVoiceGroups(voiceGroups.filter((g) => g.isStandard));
 
   const fourPartGroup = standardGroups.find(
     (g) =>
@@ -165,12 +175,7 @@ export default function RosterPage() {
       return a.name.localeCompare(b.name);
     });
 
-  const sortedFilterGroups = [...voiceGroups].sort((a, b) => {
-    const aIs4 = a.name.includes("4-part") || a.name.includes("4-stäm");
-    const bIs4 = b.name.includes("4-part") || b.name.includes("4-stäm");
-    if (aIs4 !== bIs4) return aIs4 ? -1 : 1;
-    return a.name.localeCompare(b.name, undefined, { numeric: true });
-  });
+  const sortedFilterGroups = sortVoiceGroups(voiceGroups);
 
   return (
     <div className="flex flex-col min-h-screen py-8 px-8">
@@ -241,21 +246,21 @@ export default function RosterPage() {
                 </div>
               )}
             </div>
-            <label className="flex items-center gap-1 text-sm text-gray-500 ml-2">
-              <input
-                type="checkbox"
-                checked={showArchived}
-                onChange={(e) => setShowArchived(e.target.checked)}
-              />
-              Show archived
-            </label>
           </div>
-          <button
-            onClick={() => setModal({ mode: "add" })}
-            className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
-          >
-            + Add chorist
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={openArchivedModal}
+              className="px-3 py-2 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50"
+            >
+              Archived Chorists
+            </button>
+            <button
+              onClick={() => setModal({ mode: "add" })}
+              className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
+            >
+              + Add chorist
+            </button>
+          </div>
         </div>
 
         {filters.length > 0 && (
@@ -301,10 +306,7 @@ export default function RosterPage() {
                 : null;
 
               return (
-                <Tr
-                  key={chorist.id}
-                  className={chorist.isArchived ? "opacity-50" : ""}
-                >
+                <Tr key={chorist.id}>
                   {fourPartGroup && (
                     <Td compact>
                       <div className="flex items-center gap-1">
@@ -362,6 +364,77 @@ export default function RosterPage() {
             loadData();
           }}
         />
+      )}
+
+      {archivedOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Archived Chorists</h2>
+              <button
+                onClick={() => setArchivedOpen(false)}
+                className="text-gray-400 hover:text-gray-600 text-lg"
+              >
+                ×
+              </button>
+            </div>
+
+            {archivedChorists.length === 0 ? (
+              <p className="text-gray-400 text-sm text-center py-4">
+                No archived chorists.
+              </p>
+            ) : (
+              <Table>
+                <Thead>
+                  <TheadRow>
+                    {fourPartGroup && <Th compact />}
+                    <Th>Name</Th>
+                    {otherStandardGroups.map((g) => (
+                      <Th key={g.id}>{g.name}</Th>
+                    ))}
+                    <Th compact />
+                  </TheadRow>
+                </Thead>
+                <Tbody>
+                  {archivedChorists.map((chorist) => {
+                    const fourPartPart = fourPartGroup
+                      ? getPartForChorist(chorist.id, fourPartGroup)
+                      : null;
+
+                    return (
+                      <Tr key={chorist.id}>
+                        {fourPartGroup && (
+                          <Td compact>
+                            <span className="text-gray-600">
+                              {fourPartPart?.name ?? "—"}
+                            </span>
+                          </Td>
+                        )}
+                        <Td className="font-medium">{chorist.name}</Td>
+                        {otherStandardGroups.map((group) => {
+                          const part = getPartForChorist(chorist.id, group);
+                          return (
+                            <Td key={group.id} className="text-gray-600">
+                              {part?.name ?? "—"}
+                            </Td>
+                          );
+                        })}
+                        <Td compact className="text-center">
+                          <button
+                            onClick={() => handleUnarchive(chorist.id)}
+                            className="text-blue-500 hover:text-blue-700 text-xs font-medium"
+                          >
+                            Unarchive
+                          </button>
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

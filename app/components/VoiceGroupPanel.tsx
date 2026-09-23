@@ -15,6 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
+import { sortVoiceGroups } from "../lib/voiceGroupSort";
 import {
   createVoiceGroup,
   deleteVoiceGroup,
@@ -311,7 +312,7 @@ export default function VoiceGroupPanel({
         className="w-full border border-gray-300 rounded px-2 py-1 text-sm mb-2"
       >
         <option value="">No voice group</option>
-        {voiceGroups.map((g) => (
+        {sortVoiceGroups(voiceGroups).map((g) => (
           <option key={g.id} value={g.id}>
             {g.name}
           </option>

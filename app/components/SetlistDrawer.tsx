@@ -270,3 +270,34 @@ export default function SetlistDrawer({
     </>
   );
 }
+
+export function SetlistNavButtons({
+  onPrev,
+  onNext,
+  hasPrev,
+  hasNext,
+}: {
+  onPrev: () => void;
+  onNext: () => void;
+  hasPrev: boolean;
+  hasNext: boolean;
+}) {
+  return (
+    <div className="flex justify-center gap-2 py-2 border-t border-gray-200">
+      <button
+        onClick={onPrev}
+        disabled={!hasPrev}
+        className="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        &larr;
+      </button>
+      <button
+        onClick={onNext}
+        disabled={!hasNext}
+        className="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        &rarr;
+      </button>
+    </div>
+  );
+}

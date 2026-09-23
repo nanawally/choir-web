@@ -13,6 +13,7 @@ import {
   deleteVoicePart,
   reorderVoiceParts,
 } from "../../lib/api";
+import { sortVoiceGroups } from "../../lib/voiceGroupSort";
 import {
   DndContext,
   closestCenter,
@@ -194,8 +195,8 @@ export default function VoiceGroupsPage() {
     listVoiceGroups().then(setGroups);
   }, []);
 
-  const standardGroups = groups.filter((g) => g.isStandard);
-  const otherGroups = groups.filter((g) => !g.isStandard);
+  const standardGroups = sortVoiceGroups(groups.filter((g) => g.isStandard));
+  const otherGroups = sortVoiceGroups(groups.filter((g) => !g.isStandard));
 
   async function handleCreateGroup() {
     if (!newGroupName.trim()) return;

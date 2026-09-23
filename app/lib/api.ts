@@ -277,6 +277,29 @@ export async function copyFormationToConcert(formationId: string, targetConcertI
   return res.ok ? res.json() : null;
 }
 
+// Base formations
+
+export async function listBaseFormations() {
+  const res = await apiFetch("/base-formations");
+  return res.json();
+}
+
+export async function createBaseFormation(name: string) {
+  const res = await apiFetch("/base-formations", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+  return res.ok ? res.json() : null;
+}
+
+export async function copyBaseIntoConcert(formationId: string, concertId: string) {
+  const res = await apiFetch(`/formations/${formationId}/copy-into-concert`, {
+    method: "POST",
+    body: JSON.stringify({ concertId }),
+  });
+  return res.ok ? res.json() : null;
+}
+
 // SongFormations
 
 export async function listSongFormations(concertSongId: string) {

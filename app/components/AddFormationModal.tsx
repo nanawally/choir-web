@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { listBaseFormations } from "../lib/api";
 
 type Formation = { id: string; name: string; sortOrder: number };
+type BaseFormation = { id: string; name: string };
 
 type Props = {
   open: boolean;
@@ -11,6 +13,7 @@ type Props = {
   songFormationIds: Set<string>;
   onCreateNew: (name: string) => void;
   onReuse: (formationId: string) => void;
+  onCopyBase: (baseFormationId: string) => void;
 };
 
 export default function AddFormationModal({
@@ -20,8 +23,16 @@ export default function AddFormationModal({
   songFormationIds,
   onCreateNew,
   onReuse,
+  onCopyBase,
 }: Props) {
   const [newName, setNewName] = useState("");
+  const [baseFormations, setBaseFormations] = useState<BaseFormation[]>([]);
+
+  useEffect(() => {
+    if (open) {
+      listBaseFormations().then(setBaseFormations);
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -52,6 +63,25 @@ export default function AddFormationModal({
             Create
           </button>
         </div>
+
+        {baseFormations.length > 0 && (
+          <>
+            <h3 className="text-sm font-medium mb-2">
+              Start from base formation
+            </h3>
+            <ul className="space-y-1 mb-4 max-h-40 overflow-y-auto">
+              {baseFormations.map((f) => (
+                <li
+                  key={f.id}
+                  onClick={() => onCopyBase(f.id)}
+                  className="text-sm py-1 px-2 rounded hover:bg-gray-100 cursor-pointer"
+                >
+                  {f.name}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
 
         {reusable.length > 0 && (
           <>

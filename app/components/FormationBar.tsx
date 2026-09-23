@@ -9,6 +9,8 @@ import {
   renameFormation,
   savePlacements,
   copyFormationToConcert,
+  copyBaseIntoConcert,
+  loadFormation,
   setSongFormations,
   updateRowSizes,
 } from "../lib/api";
@@ -144,6 +146,33 @@ export default function FormationBar({
       onFormationsChange([...formations, copy]);
       onActiveFormationIdChange(copy.id);
       onFormationNameChange(copy.name);
+    }
+  }
+
+  async function handleCopyBase(baseFormationId: string) {
+    const result = await copyBaseIntoConcert(baseFormationId, concertId);
+    if (result) {
+      onFormationsChange([...formations, result]);
+      onActiveFormationIdChange(result.id);
+      onFormationNameChange(result.name);
+      // Load the copied formation's placements onto the grid
+      const detail = await loadFormation(result.id);
+      if (detail) {
+        onLoad(
+          detail.placements.map((p: any) => ({
+            choristId: p.choristId,
+            gridX: p.gridX,
+            gridY: p.gridY,
+          })),
+          detail.hiddenChoristIds || [],
+          JSON.parse(detail.rowSizes || "[]"),
+        );
+      }
+      if (activeConcertSongId) {
+        const updatedIds = [...songFormationIds, result.id];
+        await setSongFormations(activeConcertSongId, updatedIds);
+        onSongFormationsChange(new Set(updatedIds));
+      }
     }
   }
 
@@ -333,6 +362,10 @@ export default function FormationBar({
         }}
         onReuse={(formationId) => {
           handleReuseFormation(formationId);
+          setShowAddModal(false);
+        }}
+        onCopyBase={(baseFormationId) => {
+          handleCopyBase(baseFormationId);
           setShowAddModal(false);
         }}
       />

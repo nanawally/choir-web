@@ -7,7 +7,7 @@ import RosterPanel from "../../../components/RosterPanel";
 import RosterModal from "@/app/components/RosterModal";
 import FormationBar from "../../../components/FormationBar";
 import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
-import SetlistDrawer from "@/app/components/SetlistDrawer";
+import SetlistDrawer, { SetlistNavButtons } from "@/app/components/SetlistDrawer";
 import Link from "next/link";
 
 const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
@@ -54,7 +54,7 @@ export default function ConcertEditor({
   }, [updateCanvasWidth]);
 
   const canvasHeight = windowSize.height;
-
+  
   // Scale factor: how much to shrink the virtual space to fit
   const scale = canvasWidth / windowSize.width;
 
@@ -62,29 +62,39 @@ export default function ConcertEditor({
     <div className="relative h-screen overflow-hidden">
       {/* Left drawers */}
       {(editor.showSetlist || editor.showChorists) && (
-        <div className="absolute top-0 left-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-10">
+        <div className="absolute top-0 left-0 w-72 h-full bg-white shadow-lg flex flex-col z-10">
+          <div className="flex-1 overflow-y-auto p-4">
+            {editor.showSetlist && (
+              <SetlistDrawer
+                concertId={id}
+                concertSongs={editor.concertSongs}
+                activeConcertSongId={editor.activeConcertSongId}
+                catalogSongs={editor.catalogSongs}
+                onSelectSong={editor.handleSelectConcertSong}
+                onSongsChange={editor.setConcertSongs}
+                getFormationsForSong={editor.getFormationsForSong}
+                activeFormationId={editor.activeFormationId}
+                onSelectFormation={editor.handleSelectFormation}
+                onReorderFormations={editor.handleReorderFormations}
+              />
+            )}
+            {editor.showChorists && (
+              <RosterPanel
+                chorists={editor.rosterChorists}
+                placedIds={editor.placedIds}
+                onPlace={editor.handlePlace}
+                hiddenIds={editor.hiddenIds}
+                onToggleHidden={editor.handleToggleHidden}
+                onEditRoster={() => editor.setShowRosterModal(true)}
+              />
+            )}
+          </div>
           {editor.showSetlist && (
-            <SetlistDrawer
-              concertId={id}
-              concertSongs={editor.concertSongs}
-              activeConcertSongId={editor.activeConcertSongId}
-              catalogSongs={editor.catalogSongs}
-              onSelectSong={editor.handleSelectConcertSong}
-              onSongsChange={editor.setConcertSongs}
-              getFormationsForSong={editor.getFormationsForSong}
-              activeFormationId={editor.activeFormationId}
-              onSelectFormation={editor.handleSelectFormation}
-              onReorderFormations={editor.handleReorderFormations}
-            />
-          )}
-          {editor.showChorists && (
-            <RosterPanel
-              chorists={editor.rosterChorists}
-              placedIds={editor.placedIds}
-              onPlace={editor.handlePlace}
-              hiddenIds={editor.hiddenIds}
-              onToggleHidden={editor.handleToggleHidden}
-              onEditRoster={() => editor.setShowRosterModal(true)}
+            <SetlistNavButtons
+              onPrev={editor.handlePrevFormation}
+              onNext={editor.handleNextFormation}
+              hasPrev={editor.hasPrevFormation}
+              hasNext={editor.hasNextFormation}
             />
           )}
         </div>
