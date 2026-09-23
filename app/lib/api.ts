@@ -130,18 +130,18 @@ export async function listConcerts() {
   return res.json();
 }
 
-export async function createConcert(name: string) {
+export async function createConcert(name: string, date?: string | null) {
   const res = await apiFetch("/concerts", {
     method: "POST",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, date: date || null }),
   });
   return res.ok ? res.json() : null;
 }
 
-export async function renameConcert(id: string, name: string) {
+export async function updateConcert(id: string, name: string, date?: string | null) {
   const res = await apiFetch(`/concerts/${id}`, {
     method: "PUT",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, date: date || null }),
   });
   return res.ok;
 }
