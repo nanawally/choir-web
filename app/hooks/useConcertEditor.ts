@@ -40,6 +40,7 @@ export function useConcertEditor(concertId: string) {
     {
       id: string;
       name: string;
+      isStandard: boolean;
       parts: { id: string; name: string; color: string; shape: string }[];
     }[]
   >([]);
@@ -96,7 +97,9 @@ export function useConcertEditor(concertId: string) {
   }, [concertId]);
 
   useEffect(() => {
-    listSongs().then(setCatalogSongs);
+    listSongs().then((songs) =>
+      setCatalogSongs([...songs].sort((a, b) => a.name.localeCompare(b.name))),
+    );
   }, []);
 
   useEffect(() => {

@@ -1,191 +1,48 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import Link from "next/link";
-import {
-  listChorists,
-  listVoiceGroups,
-  getAssignments,
-  unarchiveChorist,
-} from "../../lib/api";
 import ChoristModal from "../../components/ChoristModal";
 import { Table, Thead, TheadRow, Th, Tbody, Tr, Td } from "../../components/StyledTable";
-import { sortVoiceGroups } from "../../lib/voiceGroupSort";
-
-type Chorist = {
-  id: string;
-  name: string;
-  isSectionLeader: boolean;
-  isArchived: boolean;
-};
-
-type VoicePart = { id: string; name: string; color: string; shape: string };
-type VoiceGroup = { id: string; name: string; isStandard: boolean; parts: VoicePart[] };
-type Assignment = { choristId: string; voicePartId: string };
-
-type ModalState =
-  | { mode: "closed" }
-  | { mode: "add" }
-  | { mode: "edit"; chorist: Chorist };
-
-type ActiveFilter = { groupId: string; groupName: string; partId: string; partName: string };
+import NavSidebar from "../../components/NavSidebar";
+import { useChorists } from "../../hooks/useChorists";
 
 export default function RosterPage() {
-  const [chorists, setChorists] = useState<Chorist[]>([]);
-  const [voiceGroups, setVoiceGroups] = useState<VoiceGroup[]>([]);
-  const [assignments, setAssignments] = useState<Record<string, Assignment[]>>(
-    {},
-  );
-  const [search, setSearch] = useState("");
-  const [modal, setModal] = useState<ModalState>({ mode: "closed" });
-  const [filters, setFilters] = useState<ActiveFilter[]>([]);
-  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [filterExpandedGroup, setFilterExpandedGroup] = useState<string | null>(null);
-  const filterRef = useRef<HTMLDivElement>(null);
-  const [archivedOpen, setArchivedOpen] = useState(false);
-  const [archivedChorists, setArchivedChorists] = useState<Chorist[]>([]);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-        setFilterMenuOpen(false);
-        setFilterExpandedGroup(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  async function loadData() {
-    const [choristData, groupData] = await Promise.all([
-      listChorists(),
-      listVoiceGroups(),
-    ]);
-    setChorists(choristData);
-    setVoiceGroups(groupData);
-
-    const assignmentMap: Record<string, Assignment[]> = {};
-    await Promise.all(
-      groupData.map(async (g: VoiceGroup) => {
-        assignmentMap[g.id] = await getAssignments(g.id);
-      }),
-    );
-    setAssignments(assignmentMap);
-  }
-
-  async function openArchivedModal() {
-    const all = await listChorists(true);
-    setArchivedChorists(all.filter((c: Chorist) => c.isArchived));
-    setArchivedOpen(true);
-  }
-
-  async function handleUnarchive(id: string) {
-    if (await unarchiveChorist(id)) {
-      setArchivedChorists(archivedChorists.filter((c) => c.id !== id));
-      await loadData();
-    }
-  }
-
-  function getPartForChorist(
-    choristId: string,
-    group: VoiceGroup,
-  ): VoicePart | null {
-    const groupAssignments = assignments[group.id] || [];
-    const assignment = groupAssignments.find((a) => a.choristId === choristId);
-    if (!assignment) return null;
-    return group.parts.find((p) => p.id === assignment.voicePartId) || null;
-  }
-
-  function getPartSortIndex(choristId: string, group: VoiceGroup): number {
-    const part = getPartForChorist(choristId, group);
-    if (!part) return Infinity;
-    return group.parts.findIndex((p) => p.id === part.id);
-  }
-
-  function getCurrentParts(choristId: string): Record<string, string> {
-    const parts: Record<string, string> = {};
-    for (const group of voiceGroups) {
-      const part = getPartForChorist(choristId, group);
-      parts[group.id] = part?.id ?? "";
-    }
-    return parts;
-  }
-
-  function isFilterActive(groupId: string, partId: string): boolean {
-    return filters.some((f) => f.groupId === groupId && f.partId === partId);
-  }
-
-  function toggleFilter(group: VoiceGroup, part: VoicePart) {
-    if (isFilterActive(group.id, part.id)) {
-      setFilters(filters.filter((f) => !(f.groupId === group.id && f.partId === part.id)));
-    } else {
-      setFilters([...filters, {
-        groupId: group.id,
-        groupName: group.name,
-        partId: part.id,
-        partName: part.name,
-      }]);
-    }
-  }
-
-  function removeFilter(groupId: string, partId: string) {
-    setFilters(filters.filter((f) => !(f.groupId === groupId && f.partId === partId)));
-  }
-
-  function matchesFilters(choristId: string): boolean {
-    if (filters.length === 0) return true;
-    const byGroup = new Map<string, string[]>();
-    for (const f of filters) {
-      const parts = byGroup.get(f.groupId) || [];
-      parts.push(f.partId);
-      byGroup.set(f.groupId, parts);
-    }
-    for (const [groupId, partIds] of byGroup) {
-      const group = voiceGroups.find((g) => g.id === groupId);
-      if (!group) return false;
-      const choristPart = getPartForChorist(choristId, group);
-      if (!choristPart || !partIds.includes(choristPart.id)) return false;
-    }
-    return true;
-  }
-
-  const standardGroups = sortVoiceGroups(voiceGroups.filter((g) => g.isStandard));
-
-  const fourPartGroup = standardGroups.find(
-    (g) =>
-      g.name.includes("4-part") ||
-      g.name.includes("4-stäm") ||
-      g.name === "4-part",
-  );
-  const otherStandardGroups = standardGroups.filter((g) => g.id !== fourPartGroup?.id);
-
-  const filteredChorists = chorists
-    .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
-    .filter((c) => matchesFilters(c.id))
-    .sort((a, b) => {
-      for (const group of standardGroups) {
-        const aIdx = getPartSortIndex(a.id, group);
-        const bIdx = getPartSortIndex(b.id, group);
-        if (aIdx !== bIdx) return aIdx - bIdx;
-      }
-      return a.name.localeCompare(b.name);
-    });
-
-  const sortedFilterGroups = sortVoiceGroups(voiceGroups);
+  const {
+    loading,
+    search,
+    setSearch,
+    modal,
+    setModal,
+    filters,
+    filterMenuOpen,
+    setFilterMenuOpen,
+    filterExpandedGroup,
+    setFilterExpandedGroup,
+    filterRef,
+    archivedOpen,
+    setArchivedOpen,
+    archivedChorists,
+    voiceGroups,
+    fourPartGroup,
+    otherStandardGroups,
+    filteredChorists,
+    sortedFilterGroups,
+    getPartForChorist,
+    getCurrentParts,
+    isFilterActive,
+    toggleFilter,
+    removeFilter,
+    clearFilters,
+    openArchivedModal,
+    handleUnarchive,
+    handleDownloadCsv,
+    loadData,
+  } = useChorists();
 
   return (
-    <div className="flex flex-col min-h-screen py-8 px-8">
-      <Link
-        href="/"
-        className="self-start text-sm text-blue-500 hover:underline mb-4"
-      >
-        &larr; Home
-      </Link>
-      <h1 className="text-4xl font-bold mb-6">Roster</h1>
+    <div className="flex min-h-screen">
+      <NavSidebar />
+      <div className="flex-1 flex flex-col py-8 px-8">
+      <h1 className="text-4xl font-bold mb-6">Chorists</h1>
 
       <div className="mx-auto w-full max-w-3xl">
         <div className="flex items-center justify-between mb-2">
@@ -205,7 +62,7 @@ export default function RosterPage() {
                 className="px-2 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
                 title="Filter"
               >
-                ≡
+                ⋮
               </button>
               {filterMenuOpen && (
                 <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-56">
@@ -249,6 +106,13 @@ export default function RosterPage() {
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={handleDownloadCsv}
+              className="px-2 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
+              title="Download CSV"
+            >
+              ⬇
+            </button>
+            <button
               onClick={openArchivedModal}
               className="px-3 py-2 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50"
             >
@@ -280,7 +144,7 @@ export default function RosterPage() {
               </span>
             ))}
             <button
-              onClick={() => setFilters([])}
+              onClick={clearFilters}
               className="text-xs text-gray-500 hover:text-gray-700"
             >
               Clear all
@@ -343,7 +207,7 @@ export default function RosterPage() {
           </Tbody>
         </Table>
 
-        {filteredChorists.length === 0 && (
+        {!loading && filteredChorists.length === 0 && (
           <p className="text-gray-400 text-sm mt-4 text-center">
             {search ? "No chorists match your search." : "No chorists yet."}
           </p>
@@ -436,6 +300,7 @@ export default function RosterPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

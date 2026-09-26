@@ -1,19 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
+import NavSidebar from "../../components/NavSidebar";
 import {
-  listVoiceGroups,
-  createVoiceGroup,
-  renameVoiceGroup,
-  deleteVoiceGroup,
-  setVoiceGroupStandard,
-  addVoicePart,
-  updateVoicePart,
-  deleteVoicePart,
-  reorderVoiceParts,
-} from "../../lib/api";
-import { sortVoiceGroups } from "../../lib/voiceGroupSort";
+  useVoiceGroups,
+  SHAPES,
+  type VoicePart,
+  type VoiceGroup,
+} from "../../hooks/useVoiceGroups";
 import {
   DndContext,
   closestCenter,
@@ -33,25 +27,7 @@ import {
 } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 
-type VoicePart = { id: string; name: string; color: string; shape: string };
-type VoiceGroup = {
-  id: string;
-  name: string;
-  isStandard: boolean;
-  parts: VoicePart[];
-};
-
-const DEFAULT_COLORS = [
-  "#ff6b6b",
-  "#4ecdc4",
-  "#45b7d1",
-  "#f9ca24",
-  "#a55eea",
-  "#26de81",
-  "#fd9644",
-  "#778ca3",
-];
-const SHAPES = ["circle", "square", "triangle", "diamond", "cross", "star"];
+const VISIBLE_ROWS = 4;
 
 function SortablePartRow({
   part,
@@ -85,7 +61,7 @@ function SortablePartRow({
     <li
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 py-1.5 px-2 border-b border-gray-100"
+      className="flex items-center gap-2 h-8 px-2 border-b border-gray-100"
     >
       <span
         {...attributes}
@@ -104,19 +80,19 @@ function SortablePartRow({
               if (e.key === "Enter") save();
               if (e.key === "Escape") setEditing(false);
             }}
-            className="border border-gray-300 rounded px-2 py-0.5 text-sm w-24"
+            className="border border-gray-300 rounded px-2 py-0.5 text-sm w-20"
             autoFocus
           />
           <input
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="w-7 h-7 border border-gray-300 rounded cursor-pointer p-0"
+            className="w-6 h-6 border border-gray-300 rounded cursor-pointer p-0"
           />
           <select
             value={shape}
             onChange={(e) => setShape(e.target.value)}
-            className="border border-gray-300 rounded px-1 py-0.5 text-sm"
+            className="border border-gray-300 rounded px-1 py-0.5 text-xs"
           >
             {SHAPES.map((s) => (
               <option key={s} value={s}>
@@ -144,7 +120,7 @@ function SortablePartRow({
             style={{ backgroundColor: part.color }}
           />
           <span
-            className="text-sm cursor-pointer hover:text-blue-600"
+            className="text-sm font-medium cursor-pointer hover:text-blue-600"
             onDoubleClick={() => {
               setName(part.name);
               setColor(part.color);
@@ -170,327 +146,304 @@ function SortablePartRow({
   );
 }
 
-export default function VoiceGroupsPage() {
-  const [groups, setGroups] = useState<VoiceGroup[]>([]);
-  const [showAddGroup, setShowAddGroup] = useState(false);
-  const [newGroupName, setNewGroupName] = useState("");
-  const [newGroupStandard, setNewGroupStandard] = useState(true);
-  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
-  // Add part state per group
-  const [addingPartGroupId, setAddingPartGroupId] = useState<string | null>(
-    null,
+function VoiceGroupCard({
+  group,
+  sensors,
+  addingPartGroupId,
+  newPartName,
+  newPartColor,
+  newPartShape,
+  renamingGroupId,
+  renameValue,
+  onSetAddingPartGroupId,
+  onSetNewPartName,
+  onSetNewPartColor,
+  onSetNewPartShape,
+  onSetRenamingGroupId,
+  onSetRenameValue,
+  onAddPart,
+  onUpdatePart,
+  onDeletePart,
+  onPartDragEnd,
+  onRenameGroup,
+  onToggleStandard,
+  onDeleteGroup,
+}: {
+  group: VoiceGroup;
+  sensors: ReturnType<typeof useSensors>;
+  addingPartGroupId: string | null;
+  newPartName: string;
+  newPartColor: string;
+  newPartShape: string;
+  renamingGroupId: string | null;
+  renameValue: string;
+  onSetAddingPartGroupId: (id: string | null) => void;
+  onSetNewPartName: (v: string) => void;
+  onSetNewPartColor: (v: string) => void;
+  onSetNewPartShape: (v: string) => void;
+  onSetRenamingGroupId: (id: string | null) => void;
+  onSetRenameValue: (v: string) => void;
+  onAddPart: (groupId: string) => void;
+  onUpdatePart: (partId: string, name: string, color: string, shape: string) => void;
+  onDeletePart: (partId: string) => void;
+  onPartDragEnd: (groupId: string, event: DragEndEvent) => void;
+  onRenameGroup: (id: string) => void;
+  onToggleStandard: (id: string, current: boolean) => void;
+  onDeleteGroup: (id: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isRenaming = renamingGroupId === group.id;
+  const hasMore = group.parts.length > VISIBLE_ROWS;
+  const visibleParts = expanded || !hasMore
+    ? group.parts
+    : group.parts.slice(0, VISIBLE_ROWS - 1);
+
+  return (
+    <div className="border border-gray-200 rounded-lg overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
+        <div className="flex items-center gap-2">
+          {isRenaming ? (
+            <input
+              value={renameValue}
+              onChange={(e) => onSetRenameValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onRenameGroup(group.id);
+                if (e.key === "Escape") onSetRenamingGroupId(null);
+              }}
+              className="border border-gray-300 rounded px-2 py-0.5 text-sm w-24"
+              autoFocus
+            />
+          ) : (
+            <span className="font-medium text-sm">{group.name}</span>
+          )}
+          <span className="text-xs text-gray-400">
+            {group.parts.length} part{group.parts.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="text-gray-400 hover:text-gray-600 text-sm px-1"
+          title="Options"
+        >
+          ⋮
+        </button>
+      </div>
+
+      {/* Collapsible menu */}
+      {menuOpen && (
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border-t border-gray-100">
+          <label className="flex items-center gap-1 text-xs text-gray-500">
+            <input
+              type="checkbox"
+              checked={group.isStandard}
+              onChange={() => onToggleStandard(group.id, group.isStandard)}
+            />
+            Standard
+          </label>
+          <button
+            onClick={() => {
+              onSetRenamingGroupId(group.id);
+              onSetRenameValue(group.name);
+            }}
+            className="text-gray-400 hover:text-gray-600 text-xs"
+          >
+            Rename
+          </button>
+          <button
+            onClick={() => onDeleteGroup(group.id)}
+            className="text-red-400 hover:text-red-600 text-xs"
+          >
+            Delete
+          </button>
+        </div>
+      )}
+
+      {/* Parts list */}
+      <div className="px-2 py-1 flex-1">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={(e) => onPartDragEnd(group.id, e)}
+          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+        >
+          <SortableContext
+            items={visibleParts.map((p) => p.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <ul className="m-0 p-0 list-none">
+              {visibleParts.map((p) => (
+                <SortablePartRow
+                  key={p.id}
+                  part={p}
+                  onUpdate={(name, color, shape) =>
+                    onUpdatePart(p.id, name, color, shape)
+                  }
+                  onDelete={() => onDeletePart(p.id)}
+                />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
+
+        {/* Show more / Show less */}
+        {hasMore && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 h-8 px-2 border-b border-gray-100 w-full"
+          >
+            <span>{expanded ? "▲" : "▶"}</span>
+            {expanded ? "Show less" : "Show more"}
+          </button>
+        )}
+
+        {/* Empty filler rows so all collapsed cards are the same height */}
+        {!expanded &&
+          (() => {
+            const usedRows = hasMore ? VISIBLE_ROWS : group.parts.length;
+            const emptyRows = VISIBLE_ROWS - usedRows;
+            return Array.from({ length: emptyRows }, (_, i) => (
+              <div key={`empty-${i}`} className="h-8 px-2 border-b border-transparent">&nbsp;</div>
+            ));
+          })()}
+
+        {/* Add part */}
+        {addingPartGroupId === group.id ? (
+          <div className="flex items-center gap-2 py-2 px-2">
+            <input
+              value={newPartName}
+              onChange={(e) => onSetNewPartName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") onAddPart(group.id);
+                if (e.key === "Escape") onSetAddingPartGroupId(null);
+              }}
+              placeholder="Part name..."
+              className="border border-gray-300 rounded px-2 py-0.5 text-sm w-20"
+              autoFocus
+            />
+            <input
+              type="color"
+              value={newPartColor}
+              onChange={(e) => onSetNewPartColor(e.target.value)}
+              className="w-6 h-6 border border-gray-300 rounded cursor-pointer p-0"
+            />
+            <select
+              value={newPartShape}
+              onChange={(e) => onSetNewPartShape(e.target.value)}
+              className="border border-gray-300 rounded px-1 py-0.5 text-xs"
+            >
+              {SHAPES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => onAddPart(group.id)}
+              className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
+            >
+              Add
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => {
+              onSetAddingPartGroupId(group.id);
+              onSetNewPartName("");
+            }}
+            className="text-sm text-blue-500 hover:underline py-1.5 px-2"
+          >
+            + Add part
+          </button>
+        )}
+      </div>
+    </div>
   );
-  const [newPartName, setNewPartName] = useState("");
-  const [newPartColor, setNewPartColor] = useState(DEFAULT_COLORS[0]);
-  const [newPartShape, setNewPartShape] = useState(SHAPES[0]);
-  // Rename group
-  const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
+}
+
+export default function VoiceGroupsPage() {
+  const {
+    loading,
+    standardGroups,
+    otherGroups,
+    showAddGroup,
+    setShowAddGroup,
+    newGroupName,
+    setNewGroupName,
+    newGroupStandard,
+    setNewGroupStandard,
+    addingPartGroupId,
+    setAddingPartGroupId,
+    newPartName,
+    setNewPartName,
+    newPartColor,
+    setNewPartColor,
+    newPartShape,
+    setNewPartShape,
+    renamingGroupId,
+    setRenamingGroupId,
+    renameValue,
+    setRenameValue,
+    handleCreateGroup,
+    handleRenameGroup,
+    handleToggleStandard,
+    handleDeleteGroup,
+    handleAddPart,
+    handleUpdatePart,
+    handleDeletePart,
+    handlePartDragEnd,
+  } = useVoiceGroups();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
-  useEffect(() => {
-    listVoiceGroups().then(setGroups);
-  }, []);
-
-  const standardGroups = sortVoiceGroups(groups.filter((g) => g.isStandard));
-  const otherGroups = sortVoiceGroups(groups.filter((g) => !g.isStandard));
-
-  async function handleCreateGroup() {
-    if (!newGroupName.trim()) return;
-    const group = await createVoiceGroup(
-      newGroupName.trim(),
-      newGroupStandard,
-    );
-    if (group) {
-      setGroups([...groups, group]);
-      setNewGroupName("");
-      setNewGroupStandard(true);
-      setShowAddGroup(false);
-      setExpandedGroupId(group.id);
-    }
-  }
-
-  async function handleRenameGroup(id: string) {
-    if (!renameValue.trim()) return;
-    if (await renameVoiceGroup(id, renameValue.trim())) {
-      setGroups(
-        groups.map((g) =>
-          g.id === id ? { ...g, name: renameValue.trim() } : g,
-        ),
-      );
-    }
-    setRenamingGroupId(null);
-  }
-
-  async function handleToggleStandard(id: string, current: boolean) {
-    if (await setVoiceGroupStandard(id, !current)) {
-      setGroups(
-        groups.map((g) =>
-          g.id === id ? { ...g, isStandard: !current } : g,
-        ),
-      );
-    }
-  }
-
-  async function handleDeleteGroup(id: string) {
-    if (!window.confirm("Delete this voice group and all its parts?")) return;
-    if (await deleteVoiceGroup(id)) {
-      setGroups(groups.filter((g) => g.id !== id));
-      if (expandedGroupId === id) setExpandedGroupId(null);
-    }
-  }
-
-  async function handleAddPart(groupId: string) {
-    if (!newPartName.trim()) return;
-    const part = await addVoicePart(
-      groupId,
-      newPartName.trim(),
-      newPartColor,
-      newPartShape,
-    );
-    if (part) {
-      setGroups(
-        groups.map((g) =>
-          g.id === groupId ? { ...g, parts: [...g.parts, part] } : g,
-        ),
-      );
-      setNewPartName("");
-      setAddingPartGroupId(null);
-      const nextIdx =
-        (DEFAULT_COLORS.indexOf(newPartColor) + 1) % DEFAULT_COLORS.length;
-      setNewPartColor(DEFAULT_COLORS[nextIdx]);
-    }
-  }
-
-  async function handleUpdatePart(
-    partId: string,
-    name: string,
-    color: string,
-    shape: string,
-  ) {
-    if (await updateVoicePart(partId, name, color, shape)) {
-      setGroups(
-        groups.map((g) => ({
-          ...g,
-          parts: g.parts.map((p) =>
-            p.id === partId ? { ...p, name, color, shape } : p,
-          ),
-        })),
-      );
-    }
-  }
-
-  async function handleDeletePart(partId: string) {
-    if (await deleteVoicePart(partId)) {
-      setGroups(
-        groups.map((g) => ({
-          ...g,
-          parts: g.parts.filter((p) => p.id !== partId),
-        })),
-      );
-    }
-  }
-
-  function handlePartDragEnd(groupId: string, event: DragEndEvent) {
-    const group = groups.find((g) => g.id === groupId);
-    if (!group) return;
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = group.parts.findIndex((p) => p.id === active.id);
-    const newIndex = group.parts.findIndex((p) => p.id === over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
-
-    const reordered = [...group.parts];
-    reordered.splice(oldIndex, 1);
-    reordered.splice(newIndex, 0, group.parts[oldIndex]);
-
-    setGroups(
-      groups.map((g) => (g.id === groupId ? { ...g, parts: reordered } : g)),
-    );
-    reorderVoiceParts(groupId, reordered.map((p) => p.id));
-  }
-
-  function renderGroup(group: VoiceGroup) {
-    const isExpanded = expandedGroupId === group.id;
-    const isRenaming = renamingGroupId === group.id;
-
-    return (
-      <div
-        key={group.id}
-        className="border border-gray-200 rounded-lg overflow-hidden"
-      >
-        <div
-          className="flex items-center justify-between px-4 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100"
-          onClick={() => setExpandedGroupId(isExpanded ? null : group.id)}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-xs">{isExpanded ? "▼" : "▶"}</span>
-            {isRenaming ? (
-              <input
-                value={renameValue}
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleRenameGroup(group.id);
-                  if (e.key === "Escape") setRenamingGroupId(null);
-                }}
-                onClick={(e) => e.stopPropagation()}
-                className="border border-gray-300 rounded px-2 py-0.5 text-sm"
-                autoFocus
-              />
-            ) : (
-              <span className="font-medium">{group.name}</span>
-            )}
-            <span className="text-xs text-gray-400">
-              {group.parts.length} part{group.parts.length !== 1 ? "s" : ""}
-            </span>
-          </div>
-          <div
-            className="flex items-center gap-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <label className="flex items-center gap-1 text-xs text-gray-500">
-              <input
-                type="checkbox"
-                checked={group.isStandard}
-                onChange={() =>
-                  handleToggleStandard(group.id, group.isStandard)
-                }
-              />
-              Standard
-            </label>
-            <button
-              onClick={() => {
-                setRenamingGroupId(group.id);
-                setRenameValue(group.name);
-              }}
-              className="text-gray-400 hover:text-gray-600 text-xs"
-            >
-              Rename
-            </button>
-            <button
-              onClick={() => handleDeleteGroup(group.id)}
-              className="text-red-400 hover:text-red-600 text-xs"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-
-        {isExpanded && (
-          <div className="px-4 py-2">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={(e) => handlePartDragEnd(group.id, e)}
-              modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-            >
-              <SortableContext
-                items={group.parts.map((p) => p.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <ul>
-                  {group.parts.map((p) => (
-                    <SortablePartRow
-                      key={p.id}
-                      part={p}
-                      onUpdate={(name, color, shape) =>
-                        handleUpdatePart(p.id, name, color, shape)
-                      }
-                      onDelete={() => handleDeletePart(p.id)}
-                    />
-                  ))}
-                </ul>
-              </SortableContext>
-            </DndContext>
-
-            {group.parts.length === 0 && (
-              <p className="text-gray-400 text-sm py-2">No parts yet.</p>
-            )}
-
-            {addingPartGroupId === group.id ? (
-              <div className="flex items-center gap-2 mt-2">
-                <input
-                  value={newPartName}
-                  onChange={(e) => setNewPartName(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAddPart(group.id);
-                    if (e.key === "Escape") setAddingPartGroupId(null);
-                  }}
-                  placeholder="Part name..."
-                  className="border border-gray-300 rounded px-2 py-1 text-sm w-24"
-                  autoFocus
-                />
-                <input
-                  type="color"
-                  value={newPartColor}
-                  onChange={(e) => setNewPartColor(e.target.value)}
-                  className="w-7 h-7 border border-gray-300 rounded cursor-pointer p-0"
-                />
-                <select
-                  value={newPartShape}
-                  onChange={(e) => setNewPartShape(e.target.value)}
-                  className="border border-gray-300 rounded px-1 py-1 text-sm"
-                >
-                  {SHAPES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => handleAddPart(group.id)}
-                  className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
-                >
-                  Add
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  setAddingPartGroupId(group.id);
-                  setNewPartName("");
-                }}
-                className="text-sm text-blue-500 hover:underline mt-2"
-              >
-                + Add part
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  }
+  const cardProps = {
+    sensors,
+    addingPartGroupId,
+    newPartName,
+    newPartColor,
+    newPartShape,
+    renamingGroupId,
+    renameValue,
+    onSetAddingPartGroupId: setAddingPartGroupId,
+    onSetNewPartName: setNewPartName,
+    onSetNewPartColor: setNewPartColor,
+    onSetNewPartShape: setNewPartShape,
+    onSetRenamingGroupId: setRenamingGroupId,
+    onSetRenameValue: setRenameValue,
+    onAddPart: handleAddPart,
+    onUpdatePart: handleUpdatePart,
+    onDeletePart: handleDeletePart,
+    onPartDragEnd: handlePartDragEnd,
+    onRenameGroup: handleRenameGroup,
+    onToggleStandard: handleToggleStandard,
+    onDeleteGroup: handleDeleteGroup,
+  };
 
   return (
-    <div className="flex flex-col min-h-screen py-8 px-8">
-      <Link
-        href="/"
-        className="self-start text-sm text-blue-500 hover:underline mb-4"
-      >
-        &larr; Home
-      </Link>
-      <h1 className="text-4xl font-bold mb-6">Voice Groups</h1>
+    <div className="flex min-h-screen">
+      <NavSidebar />
+      <div className="flex-1 flex flex-col py-8 px-8">
+      <h1 className="text-4xl font-bold mb-2 text-center">Voice Groups</h1>
+      <p className="text-sm text-gray-500 text-center mb-6">
+        Standard groups appear in the chorists table and at the top of the concert
+        editor dropdown.
+      </p>
 
-      <div className="mx-auto w-full max-w-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-gray-500">
-            Standard groups appear in the roster table and at the top of the
-            concert editor dropdown.
-          </span>
-          <button
-            onClick={() => setShowAddGroup(true)}
-            className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium flex-shrink-0 ml-4"
-          >
-            + Add group
-          </button>
-        </div>
+      <div className="flex justify-center mb-6">
+        <button
+          onClick={() => setShowAddGroup(true)}
+          className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
+        >
+          + Add group
+        </button>
+      </div>
 
-        {showAddGroup && (
-          <div className="flex items-center gap-2 mb-4 p-3 border border-gray-200 rounded-lg bg-gray-50">
+      {showAddGroup && (
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
             <input
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
@@ -502,7 +455,7 @@ export default function VoiceGroupsPage() {
                 }
               }}
               placeholder="Group name..."
-              className="border border-gray-300 rounded px-2 py-1 text-sm flex-1"
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
               autoFocus
             />
             <label className="flex items-center gap-1 text-sm text-gray-600">
@@ -529,33 +482,44 @@ export default function VoiceGroupsPage() {
               Cancel
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {standardGroups.length > 0 && (
-          <>
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-              Standard
-            </h2>
-            <div className="space-y-2 mb-6">
-              {standardGroups.map(renderGroup)}
-            </div>
-          </>
-        )}
+      {standardGroups.length > 0 && (
+        <>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">
+            Standard
+          </h2>
+          <div className="flex flex-wrap gap-4 justify-center mb-8">
+            {standardGroups.map((g) => (
+              <div key={g.id} className="w-64">
+                <VoiceGroupCard group={g} {...cardProps} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
-        {otherGroups.length > 0 && (
-          <>
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-              Other
-            </h2>
-            <div className="space-y-2">{otherGroups.map(renderGroup)}</div>
-          </>
-        )}
+      {otherGroups.length > 0 && (
+        <>
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">
+            Other
+          </h2>
+          <div className="flex flex-wrap gap-4 justify-center">
+            {otherGroups.map((g) => (
+              <div key={g.id} className="w-64">
+                <VoiceGroupCard group={g} {...cardProps} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
-        {groups.length === 0 && (
-          <p className="text-gray-400 text-sm text-center mt-8">
-            No voice groups yet.
-          </p>
-        )}
+      {!loading && standardGroups.length === 0 && otherGroups.length === 0 && (
+        <p className="text-gray-400 text-sm text-center mt-8">
+          No voice groups yet.
+        </p>
+      )}
       </div>
     </div>
   );

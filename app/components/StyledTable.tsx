@@ -27,14 +27,26 @@ type ThProps = {
   children?: React.ReactNode;
   className?: string;
   compact?: boolean;
+  style?: React.CSSProperties;
+  sortDir?: "asc" | "desc" | null;
+  onSort?: () => void;
 };
 
-export function Th({ children, className = "", compact }: ThProps) {
+export function Th({ children, className = "", compact, style, sortDir, onSort }: ThProps) {
   return (
     <th
-      className={`py-2 px-3 font-semibold border-r border-gray-200 last:border-r-0 ${compact ? "w-0 whitespace-nowrap" : "text-left"} ${className}`}
+      className={`py-2 px-3 font-semibold border-r border-gray-200 last:border-r-0 ${compact ? "w-0 whitespace-nowrap" : "text-left"} ${onSort ? "cursor-pointer select-none" : ""} ${className}`}
+      style={style}
+      onClick={onSort}
     >
-      {children}
+      <span className="flex items-center gap-1">
+        {children}
+        {onSort && (
+          <span className="text-gray-400 text-xs">
+            {sortDir === "asc" ? "▲" : sortDir === "desc" ? "▼" : "⇅"}
+          </span>
+        )}
+      </span>
     </th>
   );
 }

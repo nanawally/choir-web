@@ -59,12 +59,29 @@ export async function login(username: string, password: string): Promise<boolean
 
 // Songs
 
-export async function listSongs() {
+export type Song = {
+  id: string;
+  name: string;
+  composer: string | null;
+  arranger: string | null;
+  delning: string | null;
+  languages: string | null;
+  length: string | null;
+  accompanied: boolean | null;
+  instrument: string | null;
+  year: number | null;
+  collectionName: string | null;
+  hasSoloists: boolean | null;
+  soloistNames: string | null;
+  hasSheetMusic: boolean;
+};
+
+export async function listSongs(): Promise<Song[]> {
   const res = await apiFetch("/songs");
   return res.json();
 }
 
-export async function createSong(name: string) {
+export async function createSong(name: string): Promise<Song | null> {
   const res = await apiFetch("/songs", {
     method: "POST",
     body: JSON.stringify({ name }),
@@ -72,12 +89,17 @@ export async function createSong(name: string) {
   return res.ok ? res.json() : null;
 }
 
-export async function renameSong(id: string, name: string) {
+export async function updateSong(id: string, song: Omit<Song, "id">): Promise<boolean> {
   const res = await apiFetch(`/songs/${id}`, {
     method: "PUT",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify(song),
   });
   return res.ok;
+}
+
+export async function listSongConcerts(songId: string): Promise<{ id: string; name: string }[]> {
+  const res = await apiFetch(`/songs/${songId}/concerts`);
+  return res.json();
 }
 
 export async function deleteSong(id: string) {

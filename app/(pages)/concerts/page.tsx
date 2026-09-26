@@ -9,6 +9,7 @@ import {
   duplicateConcert,
 } from "../../lib/api";
 import Link from "next/link";
+import NavSidebar from "../../components/NavSidebar";
 
 type Concert = { id: string; name: string; date: string | null; imageUrl: string | null };
 
@@ -19,6 +20,7 @@ function formatDate(iso: string): string {
 
 export default function ConcertsPage() {
   const [concerts, setConcerts] = useState<Concert[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDate, setNewDate] = useState("");
@@ -27,7 +29,7 @@ export default function ConcertsPage() {
   const [editDate, setEditDate] = useState("");
 
   useEffect(() => {
-    listConcerts().then(setConcerts);
+    listConcerts().then(setConcerts).finally(() => setLoading(false));
   }, []);
 
   // Sort by date descending (latest first), nulls last
@@ -84,13 +86,9 @@ export default function ConcertsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen py-8 px-8">
-      <Link
-        href="/"
-        className="self-start text-sm text-blue-500 hover:underline mb-4"
-      >
-        &larr; Home
-      </Link>
+    <div className="flex min-h-screen">
+      <NavSidebar />
+      <div className="flex-1 flex flex-col py-8 px-8">
       <h1 className="text-4xl font-bold mb-6 text-center">Concerts</h1>
 
       <div className="mx-auto w-full max-w-4xl">
@@ -251,11 +249,12 @@ export default function ConcertsPage() {
           ))}
         </div>
 
-        {concerts.length === 0 && !showAdd && (
+        {!loading && concerts.length === 0 && !showAdd && (
           <p className="text-gray-400 text-sm text-center mt-8">
             No concerts yet.
           </p>
         )}
+      </div>
       </div>
     </div>
   );

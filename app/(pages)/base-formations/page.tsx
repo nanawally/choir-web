@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import NavSidebar from "../../components/NavSidebar";
 import {
   listBaseFormations,
   createBaseFormation,
@@ -13,13 +14,14 @@ type BaseFormation = { id: string; name: string };
 
 export default function BaseFormationsPage() {
   const [formations, setFormations] = useState<BaseFormation[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState("");
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
 
   useEffect(() => {
-    listBaseFormations().then(setFormations);
+    listBaseFormations().then(setFormations).finally(() => setLoading(false));
   }, []);
 
   async function handleCreate() {
@@ -53,13 +55,9 @@ export default function BaseFormationsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen py-8 px-8">
-      <Link
-        href="/"
-        className="self-start text-sm text-blue-500 hover:underline mb-4"
-      >
-        &larr; Home
-      </Link>
+    <div className="flex min-h-screen">
+      <NavSidebar />
+      <div className="flex-1 flex flex-col py-8 px-8">
       <h1 className="text-4xl font-bold mb-6">Base Formations</h1>
 
       <div className="mx-auto w-full max-w-2xl">
@@ -155,11 +153,12 @@ export default function BaseFormationsPage() {
           ))}
         </div>
 
-        {formations.length === 0 && !showAdd && (
+        {!loading && formations.length === 0 && !showAdd && (
           <p className="text-gray-400 text-sm text-center mt-8">
             No base formations yet.
           </p>
         )}
+      </div>
       </div>
     </div>
   );
