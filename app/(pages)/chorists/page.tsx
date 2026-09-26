@@ -43,7 +43,7 @@ export default function RosterPage() {
     <div className="flex min-h-screen">
       <NavSidebar />
       <div className="flex-1 flex flex-col py-8 px-8">
-      <h1 className="text-4xl font-bold mb-6">Chorists</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center">Chorists</h1>
 
       <div className="mx-auto w-full max-w-3xl">
         <div className="flex items-center justify-between mb-2">

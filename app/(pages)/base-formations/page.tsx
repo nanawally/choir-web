@@ -58,7 +58,7 @@ export default function BaseFormationsPage() {
     <div className="flex min-h-screen">
       <NavSidebar />
       <div className="flex-1 flex flex-col py-8 px-8">
-      <h1 className="text-4xl font-bold mb-6">Base Formations</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center">Base Formations</h1>
 
       <div className="mx-auto w-full max-w-2xl">
         <div className="flex items-center justify-between mb-4">

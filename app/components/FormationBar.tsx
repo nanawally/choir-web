@@ -215,7 +215,7 @@ export default function FormationBar({
   }
 
   return (
-    <div className="flex flex-col gap-2 p-2 border-b border-gray-200">
+    <div className="flex flex-col gap-2 p-2">
       <h2 className="font-bold mb-1">Formations</h2>
 
       {/* Add new formation button — always visible */}
@@ -316,7 +316,7 @@ export default function FormationBar({
       )}
 
       {/* Spacer before voice groups (rendered by parent) */}
-      <div className="border-t border-gray-200 mt-2" />
+      <div className="mt-2 border-t border-gray-200" />
 
       {/* Save / action buttons — only when a formation is selected */}
       {activeFormationId && (

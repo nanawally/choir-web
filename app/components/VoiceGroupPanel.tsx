@@ -304,7 +304,7 @@ export default function VoiceGroupPanel({
   }
 
   return (
-    <div className="w-64 border-l border-gray-200 p-4 overflow-y-auto">
+    <div className="w-64 p-4 overflow-y-auto">
       <h2 className="font-bold mb-3">Voice Groups</h2>
 
       <select
