@@ -5,6 +5,7 @@ import GridCanvas from "../../../components/GridCanvas";
 import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import Link from "next/link";
 import { ArrowBigLeft, UsersRound, UserRoundGroup } from "lucide-react";
+import { shortName } from "../../../lib/choristName";
 import {
   apiFetch,
   getAssignments,
@@ -19,7 +20,7 @@ const CELL_SIZE = 50;
 const WIDTH = 800;
 const HEIGHT = 600;
 
-type Chorist = { id: string; name: string };
+type Chorist = { id: string; firstName: string; lastName: string };
 type Placement = { choristId: string; gridX: number; gridY: number };
 
 export default function BaseFormationEditor({
@@ -221,7 +222,7 @@ export default function BaseFormationEditor({
                   className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-gray-100 cursor-pointer"
                   onClick={() => handlePlace(c.id)}
                 >
-                  <span>{c.name}</span>
+                  <span>{shortName(c, chorists)}</span>
                   <span className="text-gray-400 text-xs">+</span>
                 </div>
               ))}
@@ -241,7 +242,7 @@ export default function BaseFormationEditor({
                     key={c.id}
                     className="text-sm py-0.5 px-2 text-gray-400"
                   >
-                    {c.name}
+                    {shortName(c, chorists)}
                   </div>
                 ))}
             </>

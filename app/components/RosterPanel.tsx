@@ -1,8 +1,9 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
+import { shortName } from "../lib/choristName";
 
-type Chorist = { id: string; name: string };
+type Chorist = { id: string; firstName: string; lastName: string };
 
 type Props = {
   chorists: Chorist[];
@@ -53,7 +54,7 @@ export default function RosterPanel({
             className="text-sm py-0.5 px-2 rounded hover:bg-gray-100 cursor-pointer"
             onClick={() => onPlace(c.id)}
           >
-            {c.name}
+            {shortName(c, chorists)}
           </li>
         ))}
       </ul>
@@ -76,7 +77,7 @@ export default function RosterPanel({
                 >
                   {hiddenIds.has(c.id) ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
-                <span className="flex-1 truncate">{c.name}</span>
+                <span className="flex-1 truncate">{shortName(c, chorists)}</span>
               </li>
             ))}
           </ul>

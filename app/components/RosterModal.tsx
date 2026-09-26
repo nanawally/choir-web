@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Chorist = { id: string; name: string };
+type Chorist = { id: string; firstName: string; lastName: string };
 
 type Props = {
   open: boolean;
@@ -56,7 +56,7 @@ export default function RosterModal({
                   checked={localIds.has(c.id)}
                   onChange={() => toggle(c.id)}
                 />
-                {c.name}
+                {c.firstName} {c.lastName}
               </label>
             </li>
           ))}

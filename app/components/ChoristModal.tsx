@@ -12,7 +12,8 @@ import { sortVoiceGroups } from "../lib/voiceGroupSort";
 
 type Chorist = {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   isSectionLeader: boolean;
   isArchived: boolean;
 };
@@ -38,27 +39,30 @@ export default function ChoristModal({
   onClose,
   onSaved,
 }: ChoristModalProps) {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [sectionLeader, setSectionLeader] = useState(false);
   const [parts, setParts] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (mode === "edit" && chorist) {
-      setName(chorist.name);
+      setFirstName(chorist.firstName);
+      setLastName(chorist.lastName);
       setSectionLeader(chorist.isSectionLeader);
       setParts(currentParts);
     } else {
-      setName("");
+      setFirstName("");
+      setLastName("");
       setSectionLeader(false);
       setParts({});
     }
   }, [mode, chorist, currentParts]);
 
   async function handleSave() {
-    if (!name.trim()) return;
+    if (!firstName.trim()) return;
 
     if (mode === "add") {
-      const created = await createChorist(name.trim(), sectionLeader);
+      const created = await createChorist(firstName.trim(), lastName.trim(), sectionLeader);
       if (!created) return;
       for (const group of voiceGroups) {
         const partId = parts[group.id];
@@ -67,7 +71,7 @@ export default function ChoristModal({
         }
       }
     } else if (chorist) {
-      await updateChorist(chorist.id, name.trim(), sectionLeader);
+      await updateChorist(chorist.id, firstName.trim(), lastName.trim(), sectionLeader);
       for (const group of voiceGroups) {
         const newPartId = parts[group.id] ?? "";
         const oldPartId = currentParts[group.id] ?? "";
@@ -97,12 +101,19 @@ export default function ChoristModal({
           {mode === "add" ? "Add chorist" : "Edit chorist"}
         </h2>
 
-        <label className="block text-sm font-medium mb-1">Name</label>
+        <label className="block text-sm font-medium mb-1">First name</label>
         <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 text-sm w-full mb-4"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          className="border border-gray-300 rounded px-3 py-2 text-sm w-full mb-3"
           autoFocus
+        />
+
+        <label className="block text-sm font-medium mb-1">Last name</label>
+        <input
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          className="border border-gray-300 rounded px-3 py-2 text-sm w-full mb-4"
         />
 
         <label className="flex items-center gap-2 text-sm mb-4">

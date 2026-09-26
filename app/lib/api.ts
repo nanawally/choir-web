@@ -114,18 +114,18 @@ export async function listChorists(includeArchived = false) {
   return res.json();
 }
 
-export async function createChorist(name: string, isSectionLeader = false) {
+export async function createChorist(firstName: string, lastName: string, isSectionLeader = false) {
   const res = await apiFetch("/chorists", {
     method: "POST",
-    body: JSON.stringify({ name, isSectionLeader }),
+    body: JSON.stringify({ firstName, lastName, isSectionLeader }),
   });
   return res.ok ? res.json() : null;
 }
 
-export async function updateChorist(id: string, name: string, isSectionLeader = false) {
+export async function updateChorist(id: string, firstName: string, lastName: string, isSectionLeader = false) {
   const res = await apiFetch(`/chorists/${id}`, {
     method: "PUT",
-    body: JSON.stringify({ name, isSectionLeader }),
+    body: JSON.stringify({ firstName, lastName, isSectionLeader }),
   });
   return res.ok;
 }

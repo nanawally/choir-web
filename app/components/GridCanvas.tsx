@@ -2,11 +2,12 @@ import { useRef, useState } from "react";
 import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 import Konva from "konva";
 import ChoristShape from "./ChoristShape";
+import { shortName } from "../lib/choristName";
 
 const CELL_SIZE = 50;
 const ARC_PADDING = 40; // pixels of padding around the outermost arc
 
-type Chorist = { id: string; name: string };
+type Chorist = { id: string; firstName: string; lastName: string };
 type Placement = { choristId: string; gridX: number; gridY: number };
 type VoiceGroup = {
   id: string;
@@ -399,7 +400,7 @@ export default function GridCanvas({
                     opacity={opacity}
                   />
                   <Text
-                    text={chorist.name}
+                    text={shortName(chorist, chorists)}
                     fontSize={11}
                     fill="#333"
                     opacity={opacity}

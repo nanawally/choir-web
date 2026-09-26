@@ -9,7 +9,8 @@ import { sortVoiceGroups } from "../lib/voiceGroupSort";
 
 export type Chorist = {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   isSectionLeader: boolean;
   isArchived: boolean;
 };
@@ -160,7 +161,7 @@ export function useChorists() {
   const otherStandardGroups = standardGroups.filter((g) => g.id !== fourPartGroup?.id);
 
   const filteredChorists = chorists
-    .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))
+    .filter((c) => `${c.firstName} ${c.lastName}`.toLowerCase().includes(search.toLowerCase()))
     .filter((c) => matchesFilters(c.id))
     .sort((a, b) => {
       for (const group of standardGroups) {
@@ -168,7 +169,9 @@ export function useChorists() {
         const bIdx = getPartSortIndex(b.id, group);
         if (aIdx !== bIdx) return aIdx - bIdx;
       }
-      return a.name.localeCompare(b.name);
+      const aName = `${a.lastName} ${a.firstName}`;
+      const bName = `${b.lastName} ${b.firstName}`;
+      return aName.localeCompare(bName);
     });
 
   const sortedFilterGroups = sortVoiceGroups(voiceGroups);
@@ -176,7 +179,8 @@ export function useChorists() {
   function handleDownloadCsv() {
     const csvColumns = [
       ...(fourPartGroup ? [fourPartGroup.name] : []),
-      "Name",
+      "First Name",
+      "Last Name",
       "Section Leader",
       ...otherStandardGroups.map((g) => g.name),
     ];
@@ -186,7 +190,8 @@ export function useChorists() {
       if (fourPartGroup) {
         cells.push(getPartForChorist(c.id, fourPartGroup)?.name ?? "");
       }
-      cells.push(c.name.includes(",") ? `"${c.name}"` : c.name);
+      cells.push(c.firstName.includes(",") ? `"${c.firstName}"` : c.firstName);
+      cells.push(c.lastName.includes(",") ? `"${c.lastName}"` : c.lastName);
       cells.push(c.isSectionLeader ? "Yes" : "No");
       for (const g of otherStandardGroups) {
         cells.push(getPartForChorist(c.id, g)?.name ?? "");

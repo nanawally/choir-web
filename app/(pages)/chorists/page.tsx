@@ -184,7 +184,7 @@ export default function RosterPage() {
                       </div>
                     </Td>
                   )}
-                  <Td className="font-medium">{chorist.name}</Td>
+                  <Td className="font-medium">{chorist.firstName} {chorist.lastName}</Td>
                   {otherStandardGroups.map((group) => {
                     const part = getPartForChorist(chorist.id, group);
                     return (
@@ -275,7 +275,7 @@ export default function RosterPage() {
                             </span>
                           </Td>
                         )}
-                        <Td className="font-medium">{chorist.name}</Td>
+                        <Td className="font-medium">{chorist.firstName} {chorist.lastName}</Td>
                         {otherStandardGroups.map((group) => {
                           const part = getPartForChorist(chorist.id, group);
                           return (
