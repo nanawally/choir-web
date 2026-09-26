@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { GripVertical } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -151,7 +152,7 @@ function SortablePartItem({
               className="cursor-grab active:cursor-grabbing select-none text-gray-400"
               onClick={(e) => e.stopPropagation()}
             >
-              ≡
+              <GripVertical size={14} />
             </span>
             <span
               className="w-3 h-3 rounded-full inline-block"

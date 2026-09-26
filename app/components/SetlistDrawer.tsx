@@ -16,6 +16,7 @@ import {
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { addSongToConcert, removeSongFromConcert, reorderConcertSongs } from "../lib/api";
+import { GripVertical, ArrowLeft, ArrowRight } from "lucide-react";
 
 type Formation = { id: string; name: string };
 type ConcertSong = { id: string; name: string; sortOrder: number };
@@ -65,7 +66,7 @@ function SortableFormation({
         style={{ touchAction: "none" }}
         className="cursor-grab active:cursor-grabbing select-none text-gray-400"
       >
-        ≡
+        <GripVertical size={14} />
       </span>
       <button onClick={onClick} className="flex-1 text-left hover:underline">
         {formation.name}
@@ -110,7 +111,7 @@ function SortableSongItem({
             className="cursor-grab active:cursor-grabbing select-none text-gray-400"
             onClick={(e) => e.stopPropagation()}
           >
-            ≡
+            <GripVertical size={14} />
           </span>
           {song.name}
         </span>
@@ -289,14 +290,14 @@ export function SetlistNavButtons({
         disabled={!hasPrev}
         className="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        &larr;
+        <ArrowLeft size={16} />
       </button>
       <button
         onClick={onNext}
         disabled={!hasNext}
         className="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        &rarr;
+        <ArrowRight size={16} />
       </button>
     </div>
   );

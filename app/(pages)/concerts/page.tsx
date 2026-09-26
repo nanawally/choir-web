@@ -10,6 +10,7 @@ import {
 } from "../../lib/api";
 import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
+import { ClefTreble } from "lucide-react";
 
 type Concert = { id: string; name: string; date: string | null; imageUrl: string | null };
 
@@ -159,7 +160,7 @@ export default function ConcertsPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="text-gray-300 text-4xl">♪</span>
+                    <ClefTreble size={40} className="text-gray-300" />
                   )}
                 </div>
               </Link>

@@ -5,6 +5,7 @@ import { type Song, listSongConcerts } from "../../lib/api";
 import { Table, Thead, TheadRow, Th, Tbody, Tr, Td } from "../../components/StyledTable";
 import NavSidebar from "../../components/NavSidebar";
 import { useSongs, ALL_COLUMNS, FILTER_COLUMNS } from "../../hooks/useSongs";
+import { EllipsisVertical, ChevronDown, ChevronRight, Download, X, SquarePen, Columns3 } from "lucide-react";
 
 export default function SongsPage() {
   const {
@@ -67,7 +68,7 @@ export default function SongsPage() {
             className="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50"
             title="Filter"
           >
-            ⋮
+            <EllipsisVertical size={16} />
           </button>
           {filterMenuOpen && (
             <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-56">
@@ -84,7 +85,7 @@ export default function SongsPage() {
                     >
                       <span>{fc.label}</span>
                       <span className="text-gray-400 text-xs">
-                        {filterExpandedCol === fc.key ? "▼" : "▶"}
+                        {filterExpandedCol === fc.key ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                       </span>
                     </button>
                     {filterExpandedCol === fc.key && (
@@ -122,7 +123,7 @@ export default function SongsPage() {
             className="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50"
             title="Download CSV"
           >
-            ⬇
+            <Download size={16} />
           </button>
           <div className="relative">
             <button
@@ -130,11 +131,7 @@ export default function SongsPage() {
               className="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50"
               title="Column visibility"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="1" y="1" width="14" height="14" rx="1" />
-                <line x1="6" y1="1" x2="6" y2="15" />
-                <line x1="11" y1="1" x2="11" y2="15" />
-              </svg>
+              <Columns3 size={16} />
             </button>
             {columnPickerOpen && (
               <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-48 py-1">
@@ -170,7 +167,7 @@ export default function SongsPage() {
                 onClick={() => removeFilter(f.column, f.value)}
                 className="hover:text-blue-600"
               >
-                ×
+                <X size={12} />
               </button>
             </span>
           ))}
@@ -532,7 +529,7 @@ function SongModal({
             className="text-gray-400 hover:text-gray-600 text-lg"
             title="Edit"
           >
-            ✏️
+            <SquarePen size={16} />
           </button>
         </div>
 

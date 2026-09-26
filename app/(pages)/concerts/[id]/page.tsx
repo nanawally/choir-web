@@ -9,6 +9,7 @@ import FormationBar from "../../../components/FormationBar";
 import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import SetlistDrawer, { SetlistNavButtons } from "@/app/components/SetlistDrawer";
 import Link from "next/link";
+import { ArrowBigLeft, SquareMenu, UsersRound, UserRoundGroup } from "lucide-react";
 
 const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
 
@@ -117,7 +118,7 @@ export default function ConcertEditor({
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100 text-center text-sm"
             title="Back to concerts"
           >
-            &larr;
+            <ArrowBigLeft size={20} />
           </Link>
           <button
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
@@ -126,7 +127,7 @@ export default function ConcertEditor({
               editor.setShowChorists(false);
             }}
           >
-            ☰
+            <SquareMenu size={20} />
           </button>
           <button
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
@@ -135,7 +136,7 @@ export default function ConcertEditor({
               editor.setShowSetlist(false);
             }}
           >
-            👥
+            <UsersRound size={20} />
           </button>
         </div>
 
@@ -175,7 +176,7 @@ export default function ConcertEditor({
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
             onClick={() => editor.setShowFormations(!editor.showFormations)}
           >
-            🎵
+            <UserRoundGroup size={20} />
           </button>
         </div>
       </div>

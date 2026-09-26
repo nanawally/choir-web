@@ -4,6 +4,7 @@ import { use, useCallback, useEffect, useRef, useState } from "react";
 import GridCanvas from "../../../components/GridCanvas";
 import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import Link from "next/link";
+import { ArrowBigLeft, UsersRound, UserRoundGroup } from "lucide-react";
 import {
   apiFetch,
   getAssignments,
@@ -265,13 +266,13 @@ export default function BaseFormationEditor({
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100 text-center text-sm"
             title="Back to base formations"
           >
-            &larr;
+            <ArrowBigLeft size={20} />
           </Link>
           <button
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
             onClick={() => setShowChorists(!showChorists)}
           >
-            👥
+            <UsersRound size={20} />
           </button>
         </div>
 
@@ -337,7 +338,7 @@ export default function BaseFormationEditor({
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
             onClick={() => setShowVoiceGroups(!showVoiceGroups)}
           >
-            🎵
+            <UserRoundGroup size={20} />
           </button>
         </div>
       </div>

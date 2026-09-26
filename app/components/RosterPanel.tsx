@@ -1,5 +1,7 @@
 "use client";
 
+import { Eye, EyeOff } from "lucide-react";
+
 type Chorist = { id: string; name: string };
 
 type Props = {
@@ -72,7 +74,7 @@ export default function RosterPanel({
                     hiddenIds.has(c.id) ? "Show on grid" : "Hide from grid"
                   }
                 >
-                  {hiddenIds.has(c.id) ? "🚫" : "👁"}
+                  {hiddenIds.has(c.id) ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
                 <span className="flex-1 truncate">{c.name}</span>
               </li>

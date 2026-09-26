@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+
 type StyledTableProps = {
   children: React.ReactNode;
   className?: string;
@@ -43,7 +45,7 @@ export function Th({ children, className = "", compact, style, sortDir, onSort }
         {children}
         {onSort && (
           <span className="text-gray-400 text-xs">
-            {sortDir === "asc" ? "▲" : sortDir === "desc" ? "▼" : "⇅"}
+            {sortDir === "asc" ? <ChevronUp size={14} /> : sortDir === "desc" ? <ChevronDown size={14} /> : <ChevronsUpDown size={14} />}
           </span>
         )}
       </span>

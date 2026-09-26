@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GripVertical, EllipsisVertical, ChevronUp, ChevronRight } from "lucide-react";
 import NavSidebar from "../../components/NavSidebar";
 import {
   useVoiceGroups,
@@ -69,7 +70,7 @@ function SortablePartRow({
         style={{ touchAction: "none" }}
         className="cursor-grab active:cursor-grabbing text-gray-400 select-none"
       >
-        ≡
+        <GripVertical size={14} />
       </span>
       {editing ? (
         <div className="flex items-center gap-2 flex-1">
@@ -227,7 +228,7 @@ function VoiceGroupCard({
           className="text-gray-400 hover:text-gray-600 text-sm px-1"
           title="Options"
         >
-          ⋮
+          <EllipsisVertical size={16} />
         </button>
       </div>
 
@@ -293,7 +294,7 @@ function VoiceGroupCard({
             onClick={() => setExpanded(!expanded)}
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 h-8 px-2 border-b border-gray-100 w-full"
           >
-            <span>{expanded ? "▲" : "▶"}</span>
+            <span>{expanded ? <ChevronUp size={14} /> : <ChevronRight size={14} />}</span>
             {expanded ? "Show less" : "Show more"}
           </button>
         )}
