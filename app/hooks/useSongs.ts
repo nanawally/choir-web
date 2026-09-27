@@ -76,7 +76,6 @@ export function useSongs() {
   const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_VISIBLE);
   const [columnPickerOpen, setColumnPickerOpen] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const [newSongName, setNewSongName] = useState("");
   const [editingSong, setEditingSong] = useState<Song | null>(null);
   const [filters, setFilters] = useState<ActiveFilter[]>([]);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
@@ -210,12 +209,16 @@ export function useSongs() {
     });
   }
 
-  async function handleCreate() {
-    if (!newSongName.trim()) return;
-    const song = await createSong(newSongName.trim());
+  async function handleCreate(fields: Omit<Song, "id" | "hasSheetMusicFile">) {
+    if (!fields.name.trim()) return;
+    const song = await createSong(fields.name.trim());
     if (song) {
-      setSongs([...songs, song]);
-      setNewSongName("");
+      const { hasSheetMusicFile, ...updateFields } = { ...song, ...fields };
+      if (await updateSong(song.id, updateFields)) {
+        setSongs([...songs, { ...song, ...fields }]);
+      } else {
+        setSongs([...songs, song]);
+      }
       setShowAdd(false);
     }
   }
@@ -267,8 +270,6 @@ export function useSongs() {
     setColumnPickerOpen,
     showAdd,
     setShowAdd,
-    newSongName,
-    setNewSongName,
     editingSong,
     setEditingSong,
     filters,
