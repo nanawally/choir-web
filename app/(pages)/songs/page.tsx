@@ -576,13 +576,11 @@ function SongModal({
           </div>
           <div className="flex items-start gap-2">
             {current.hasSheetMusicFile && (
-              <button
-                onClick={handleViewPdf}
-                className="text-gray-400 hover:text-gray-600"
-                title="View sheet music"
-              >
-                <FileText size={20} />
-              </button>
+              <img
+                src="/musical-score-icon.png"
+                alt="Sheet music available"
+                className="w-10 h-10"
+              />
             )}
             <button
               onClick={() => {
@@ -637,7 +635,7 @@ function SongModal({
 
         {/* Sheet music file */}
         <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
-          <span className="block text-xs text-gray-500 mb-2">Sheet music</span>
+          <h3 className="text-base font-semibold mb-3">Sheet Music</h3>
           {current.hasSheetMusicFile ? (
             <div>
               {pdfUrl && (
