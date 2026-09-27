@@ -91,9 +91,10 @@ export async function createSong(name: string): Promise<Song | null> {
 }
 
 export async function updateSong(id: string, song: Omit<Song, "id">): Promise<boolean> {
+  const { hasSheetMusicFile, ...payload } = song;
   const res = await apiFetch(`/songs/${id}`, {
     method: "PUT",
-    body: JSON.stringify(song),
+    body: JSON.stringify(payload),
   });
   return res.ok;
 }
