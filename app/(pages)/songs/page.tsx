@@ -632,7 +632,7 @@ function SongModal({
             <div>
               {pdfUrl && (
                 <div className="mb-3">
-                  <PdfPreview url={pdfUrl} width={400} onClick={handleViewPdf} />
+                  <PdfPreview url={pdfUrl} onClick={handleViewPdf} />
                 </div>
               )}
               <div className="flex items-center gap-3">
