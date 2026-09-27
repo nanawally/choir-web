@@ -213,7 +213,8 @@ export function useSongs() {
     if (!fields.name.trim()) return;
     const song = await createSong(fields.name.trim());
     if (song) {
-      const { hasSheetMusicFile, ...updateFields } = { ...song, ...fields };
+      const merged = { ...song, ...fields };
+      const { id: _id, ...updateFields } = merged;
       if (await updateSong(song.id, updateFields)) {
         setSongs([...songs, { ...song, ...fields }]);
       } else {
