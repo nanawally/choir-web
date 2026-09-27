@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { type Song, listSongConcerts, uploadSheetMusic, getSheetMusicUrl, deleteSheetMusic, getToken } from "../../lib/api";
+import dynamic from "next/dynamic";
+
+const PdfPreview = dynamic(() => import("../../components/PdfPreview"), { ssr: false });
 import { Table, Thead, TheadRow, Th, Tbody, Tr, Td } from "../../components/StyledTable";
 import NavSidebar from "../../components/NavSidebar";
 import { useSongs, ALL_COLUMNS, FILTER_COLUMNS } from "../../hooks/useSongs";
@@ -327,11 +330,29 @@ function SongModal({
   const [concerts, setConcerts] = useState<{ id: string; name: string }[]>([]);
   const [showAllConcerts, setShowAllConcerts] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     listSongConcerts(song.id).then(setConcerts);
   }, [song.id]);
+
+  useEffect(() => {
+    if (!current.hasSheetMusicFile) {
+      setPdfUrl(null);
+      return;
+    }
+    const url = getSheetMusicUrl(current.id);
+    const token = getToken();
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((res) => res.ok ? res.blob() : null)
+      .then((blob) => {
+        if (blob) setPdfUrl(URL.createObjectURL(blob));
+      });
+    return () => {
+      setPdfUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+    };
+  }, [current.id, current.hasSheetMusicFile]);
 
   async function handleUpload(file: File) {
     setUploading(true);
@@ -606,23 +627,30 @@ function SongModal({
 
         {/* Sheet music file */}
         <div className="mt-4 pt-4 border-t border-gray-100">
-          <span className="block text-xs text-gray-500 mb-2">Sheet music file</span>
+          <span className="block text-xs text-gray-500 mb-2">Sheet music</span>
           {current.hasSheetMusicFile ? (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleViewPdf}
-                className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800"
-              >
-                <FileText size={16} />
-                View PDF
-              </button>
-              <button
-                onClick={handleDeleteSheetMusic}
-                className="flex items-center gap-1 text-sm text-red-400 hover:text-red-600"
-              >
-                <Trash2 size={14} />
-                Delete
-              </button>
+            <div>
+              {pdfUrl && (
+                <div className="mb-3">
+                  <PdfPreview url={pdfUrl} width={400} onClick={handleViewPdf} />
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleViewPdf}
+                  className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800"
+                >
+                  <FileText size={16} />
+                  View full PDF
+                </button>
+                <button
+                  onClick={handleDeleteSheetMusic}
+                  className="flex items-center gap-1 text-sm text-red-400 hover:text-red-600"
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </button>
+              </div>
             </div>
           ) : (
             <div>
