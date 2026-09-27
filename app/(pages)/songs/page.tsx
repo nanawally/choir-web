@@ -574,16 +574,27 @@ function SongModal({
               <p className="text-sm text-gray-500">{current.composer}</p>
             )}
           </div>
-          <button
-            onClick={() => {
-              setForm({ ...current });
-              setEditing(true);
-            }}
-            className="text-gray-400 hover:text-gray-600 text-lg"
-            title="Edit"
-          >
-            <SquarePen size={16} />
-          </button>
+          <div className="flex items-start gap-2">
+            {current.hasSheetMusicFile && (
+              <button
+                onClick={handleViewPdf}
+                className="text-gray-400 hover:text-gray-600"
+                title="View sheet music"
+              >
+                <FileText size={20} />
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setForm({ ...current });
+                setEditing(true);
+              }}
+              className="text-gray-400 hover:text-gray-600"
+              title="Edit"
+            >
+              <SquarePen size={16} />
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-x-6 gap-y-4 mb-6">
@@ -604,29 +615,28 @@ function SongModal({
             flag={current.hasSoloists}
             details={current.soloistNames}
           />
+          {concerts.length > 0 && (
+            <div>
+              <span className="block text-xs text-gray-500 mb-0.5">Used in</span>
+              <ul className="text-sm text-gray-700 space-y-0.5">
+                {visibleConcerts.map((c) => (
+                  <li key={c.id}>{c.name}</li>
+                ))}
+              </ul>
+              {concerts.length > 3 && (
+                <button
+                  onClick={() => setShowAllConcerts(!showAllConcerts)}
+                  className="text-xs text-blue-500 hover:underline mt-1"
+                >
+                  {showAllConcerts ? "Show less" : `Show ${concerts.length - 3} more`}
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
-        {concerts.length > 0 && (
-          <div>
-            <span className="block text-xs text-gray-500 mb-1">Used in</span>
-            <ul className="text-sm text-gray-700 space-y-0.5">
-              {visibleConcerts.map((c) => (
-                <li key={c.id}>{c.name}</li>
-              ))}
-            </ul>
-            {concerts.length > 3 && (
-              <button
-                onClick={() => setShowAllConcerts(!showAllConcerts)}
-                className="text-xs text-blue-500 hover:underline mt-1"
-              >
-                {showAllConcerts ? "Show less" : `Show ${concerts.length - 3} more`}
-              </button>
-            )}
-          </div>
-        )}
-
         {/* Sheet music file */}
-        <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
           <span className="block text-xs text-gray-500 mb-2">Sheet music</span>
           {current.hasSheetMusicFile ? (
             <div>
