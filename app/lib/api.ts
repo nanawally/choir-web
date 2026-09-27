@@ -74,6 +74,7 @@ export type Song = {
   hasSoloists: boolean | null;
   soloistNames: string | null;
   hasSheetMusic: boolean;
+  hasSheetMusicFile: boolean;
 };
 
 export async function listSongs(): Promise<Song[]> {
@@ -104,6 +105,27 @@ export async function listSongConcerts(songId: string): Promise<{ id: string; na
 
 export async function deleteSong(id: string) {
   const res = await apiFetch(`/songs/${id}`, { method: "DELETE" });
+  return res.ok;
+}
+
+export async function uploadSheetMusic(songId: string, file: File): Promise<{ originalSize: number; compressedSize: number } | null> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const token = getToken();
+  const res = await fetch(`${API_URL}/songs/${songId}/sheet-music`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  return res.ok ? res.json() : null;
+}
+
+export function getSheetMusicUrl(songId: string): string {
+  return `${API_URL}/songs/${songId}/sheet-music`;
+}
+
+export async function deleteSheetMusic(songId: string): Promise<boolean> {
+  const res = await apiFetch(`/songs/${songId}/sheet-music`, { method: "DELETE" });
   return res.ok;
 }
 

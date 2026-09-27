@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { type Song, listSongConcerts } from "../../lib/api";
+import { useEffect, useRef, useState } from "react";
+import { type Song, listSongConcerts, uploadSheetMusic, getSheetMusicUrl, deleteSheetMusic, getToken } from "../../lib/api";
 import { Table, Thead, TheadRow, Th, Tbody, Tr, Td } from "../../components/StyledTable";
 import NavSidebar from "../../components/NavSidebar";
 import { useSongs, ALL_COLUMNS, FILTER_COLUMNS } from "../../hooks/useSongs";
-import { EllipsisVertical, ChevronDown, ChevronRight, Download, X, SquarePen, Columns3 } from "lucide-react";
+import { EllipsisVertical, ChevronDown, ChevronRight, Download, X, SquarePen, Columns3, Upload, FileText, Trash2 } from "lucide-react";
 
 export default function SongsPage() {
   const {
@@ -326,10 +326,42 @@ function SongModal({
   const [form, setForm] = useState<Song>({ ...song });
   const [concerts, setConcerts] = useState<{ id: string; name: string }[]>([]);
   const [showAllConcerts, setShowAllConcerts] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     listSongConcerts(song.id).then(setConcerts);
   }, [song.id]);
+
+  async function handleUpload(file: File) {
+    setUploading(true);
+    const result = await uploadSheetMusic(current.id, file);
+    if (result) {
+      setCurrent((c) => ({ ...c, hasSheetMusicFile: true, hasSheetMusic: true }));
+      setForm((f) => ({ ...f, hasSheetMusicFile: true, hasSheetMusic: true }));
+    }
+    setUploading(false);
+  }
+
+  async function handleDeleteSheetMusic() {
+    if (!window.confirm("Delete the uploaded sheet music?")) return;
+    if (await deleteSheetMusic(current.id)) {
+      setCurrent((c) => ({ ...c, hasSheetMusicFile: false }));
+      setForm((f) => ({ ...f, hasSheetMusicFile: false }));
+    }
+  }
+
+  function handleViewPdf() {
+    const url = getSheetMusicUrl(current.id);
+    const token = getToken();
+    // Open in new tab — need to fetch with auth and open as blob
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then((res) => res.blob())
+      .then((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, "_blank");
+      });
+  }
 
   function set<K extends keyof Song>(key: K, value: Song[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -571,6 +603,50 @@ function SongModal({
             )}
           </div>
         )}
+
+        {/* Sheet music file */}
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <span className="block text-xs text-gray-500 mb-2">Sheet music file</span>
+          {current.hasSheetMusicFile ? (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleViewPdf}
+                className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800"
+              >
+                <FileText size={16} />
+                View PDF
+              </button>
+              <button
+                onClick={handleDeleteSheetMusic}
+                className="flex items-center gap-1 text-sm text-red-400 hover:text-red-600"
+              >
+                <Trash2 size={14} />
+                Delete
+              </button>
+            </div>
+          ) : (
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleUpload(file);
+                }}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50"
+              >
+                <Upload size={16} />
+                {uploading ? "Uploading..." : "Upload PDF"}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
