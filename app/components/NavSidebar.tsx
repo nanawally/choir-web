@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { href: "/chorists", label: "Chorists" },
   { href: "/voice-groups", label: "Voice Groups" },
   { href: "/base-formations", label: "Base Formations" },
+  { href: "/krysslistan", label: "Krysslistan" },
+  { href: "/term-plan", label: "Terminsplan" },
 ];
 
 export default function NavSidebar() {
