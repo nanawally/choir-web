@@ -224,10 +224,13 @@ export function useSongs() {
         const result = await uploadSheetMusic(song.id, file);
         if (result) hasSheetMusicFile = true;
       }
-      const finalSong = updated
-        ? { ...song, ...fields, hasSheetMusicFile }
-        : { ...song, hasSheetMusicFile };
-      setSongs([...songs, finalSong]);
+      const finalSong = {
+        ...song,
+        ...fields,
+        hasSheetMusicFile,
+        hasSheetMusic: fields.hasSheetMusic || hasSheetMusicFile,
+      };
+      setSongs((prev) => [...prev, finalSong]);
       setShowAdd(false);
     }
   }
