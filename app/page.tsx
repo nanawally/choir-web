@@ -67,6 +67,26 @@ export default function Home() {
             </p>
           </Link>
         </div>
+        <div className="flex flex-col mt-4 md:flex-row gap-4">
+          <Link
+            href="/krysslistan"
+            className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
+          >
+            <h2 className="text-lg font-semibold">Krysslistan</h2>
+            <p className="text-sm text-gray-500">
+              Attendance tracking
+            </p>
+          </Link>
+          <Link
+            href="/term-plan"
+            className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
+          >
+            <h2 className="text-lg font-semibold">Terminsplan</h2>
+            <p className="text-sm text-gray-500">
+              Semester schedule
+            </p>
+          </Link>
+        </div>
       </main>
     </div>
   );
