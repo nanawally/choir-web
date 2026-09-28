@@ -132,7 +132,7 @@ export default function SongsPage() {
                                 checked={isFilterActive(fc.key, val)}
                                 onChange={() => toggleFilter(fc, val)}
                               />
-                              {val}
+                              {fc.type === "bool" ? (val === "Yes" ? t("common.yes") : t("common.no")) : val}
                             </label>
                           ))}
                         </div>
