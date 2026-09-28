@@ -4,9 +4,11 @@ import ChoristModal from "../../components/ChoristModal";
 import { Table, Thead, TheadRow, Th, Tbody, Tr, Td } from "../../components/StyledTable";
 import NavSidebar from "../../components/NavSidebar";
 import { useChorists } from "../../hooks/useChorists";
+import { useTranslation } from "../../lib/LanguageContext";
 import { EllipsisVertical, ChevronDown, ChevronRight, Download, X, Star, SquarePen } from "lucide-react";
 
 export default function RosterPage() {
+  const { t } = useTranslation();
   const {
     loading,
     search,
@@ -43,7 +45,7 @@ export default function RosterPage() {
     <div className="flex min-h-screen">
       <NavSidebar />
       <div className="flex-1 flex flex-col py-8 px-8">
-      <h1 className="text-4xl font-bold mb-6 text-center">Chorists</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center">{t("chorists.title")}</h1>
 
       <div className="mx-auto w-full max-w-3xl">
         <div className="flex items-center justify-between mb-2">
@@ -51,7 +53,7 @@ export default function RosterPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name..."
+              placeholder={t("chorists.searchByName")}
               className="border border-gray-300 rounded px-3 py-2 text-sm w-64"
             />
             <div className="relative" ref={filterRef}>
@@ -117,13 +119,13 @@ export default function RosterPage() {
               onClick={openArchivedModal}
               className="px-3 py-2 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50"
             >
-              Archived Chorists
+              {t("chorists.archived")}
             </button>
             <button
               onClick={() => setModal({ mode: "add" })}
               className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
             >
-              + Add chorist
+              {t("chorists.addChorist")}
             </button>
           </div>
         </div>
@@ -148,7 +150,7 @@ export default function RosterPage() {
               onClick={clearFilters}
               className="text-xs text-gray-500 hover:text-gray-700"
             >
-              Clear all
+              {t("common.clearAll")}
             </button>
           </div>
         )}
@@ -157,7 +159,7 @@ export default function RosterPage() {
           <Thead>
             <TheadRow>
               {fourPartGroup && <Th compact />}
-              <Th>Name</Th>
+              <Th>{t("common.name")}</Th>
               {otherStandardGroups.map((g) => (
                 <Th key={g.id}>{g.name}</Th>
               ))}
@@ -210,7 +212,7 @@ export default function RosterPage() {
 
         {!loading && filteredChorists.length === 0 && (
           <p className="text-gray-400 text-sm mt-4 text-center">
-            {search ? "No chorists match your search." : "No chorists yet."}
+            {search ? t("chorists.noMatch") : t("chorists.noChorists")}
           </p>
         )}
       </div>
@@ -235,7 +237,7 @@ export default function RosterPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Archived Chorists</h2>
+              <h2 className="text-lg font-semibold">{t("chorists.archived")}</h2>
               <button
                 onClick={() => setArchivedOpen(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -246,14 +248,14 @@ export default function RosterPage() {
 
             {archivedChorists.length === 0 ? (
               <p className="text-gray-400 text-sm text-center py-4">
-                No archived chorists.
+                {t("chorists.noArchived")}
               </p>
             ) : (
               <Table>
                 <Thead>
                   <TheadRow>
                     {fourPartGroup && <Th compact />}
-                    <Th>Name</Th>
+                    <Th>{t("common.name")}</Th>
                     {otherStandardGroups.map((g) => (
                       <Th key={g.id}>{g.name}</Th>
                     ))}
@@ -289,7 +291,7 @@ export default function RosterPage() {
                             onClick={() => handleUnarchive(chorist.id)}
                             className="text-blue-500 hover:text-blue-700 text-xs font-medium"
                           >
-                            Unarchive
+                            {t("chorists.unarchive")}
                           </button>
                         </Td>
                       </Tr>

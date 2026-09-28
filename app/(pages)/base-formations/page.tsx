@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslation } from "../../lib/LanguageContext";
 import NavSidebar from "../../components/NavSidebar";
 import {
   listBaseFormations,
@@ -13,6 +14,7 @@ import {
 type BaseFormation = { id: string; name: string };
 
 export default function BaseFormationsPage() {
+  const { t } = useTranslation();
   const [formations, setFormations] = useState<BaseFormation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -47,7 +49,7 @@ export default function BaseFormationsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Delete this base formation and all its placements?"))
+    if (!window.confirm(t("baseFormations.confirmDelete")))
       return;
     if (await deleteFormation(id)) {
       setFormations(formations.filter((f) => f.id !== id));
@@ -58,18 +60,18 @@ export default function BaseFormationsPage() {
     <div className="flex min-h-screen">
       <NavSidebar />
       <div className="flex-1 flex flex-col py-8 px-8">
-      <h1 className="text-4xl font-bold mb-6 text-center">Base Formations</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center">{t("baseFormations.title")}</h1>
 
       <div className="mx-auto w-full max-w-2xl">
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm text-gray-500">
-            Base formations are templates that can be copied into concerts.
+            {t("baseFormations.description")}
           </span>
           <button
             onClick={() => setShowAdd(true)}
             className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium flex-shrink-0 ml-4"
           >
-            + New base formation
+            {t("baseFormations.newFormation")}
           </button>
         </div>
 
@@ -85,7 +87,7 @@ export default function BaseFormationsPage() {
                   setNewName("");
                 }
               }}
-              placeholder="Formation name..."
+              placeholder={t("baseFormations.formationName")}
               className="border border-gray-300 rounded px-2 py-1 text-sm flex-1"
               autoFocus
             />
@@ -93,7 +95,7 @@ export default function BaseFormationsPage() {
               onClick={handleCreate}
               className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
             >
-              Create
+              {t("common.create")}
             </button>
             <button
               onClick={() => {
@@ -102,7 +104,7 @@ export default function BaseFormationsPage() {
               }}
               className="px-3 py-1 border border-gray-300 rounded text-sm"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
           </div>
         )}
@@ -140,13 +142,13 @@ export default function BaseFormationsPage() {
                   }}
                   className="text-gray-400 hover:text-gray-600 text-xs"
                 >
-                  Rename
+                  {t("common.rename")}
                 </button>
                 <button
                   onClick={() => handleDelete(f.id)}
                   className="text-red-400 hover:text-red-600 text-xs"
                 >
-                  Delete
+                  {t("common.delete")}
                 </button>
               </div>
             </div>
@@ -155,7 +157,7 @@ export default function BaseFormationsPage() {
 
         {!loading && formations.length === 0 && !showAdd && (
           <p className="text-gray-400 text-sm text-center mt-8">
-            No base formations yet.
+            {t("baseFormations.noFormations")}
           </p>
         )}
       </div>

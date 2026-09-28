@@ -8,6 +8,7 @@ import {
   type Song,
 } from "../lib/api";
 import { useTableSort } from "../lib/useTableSort";
+import { useTranslation } from "../lib/LanguageContext";
 
 type ColumnDef = {
   key: keyof Song;
@@ -71,6 +72,7 @@ export const FILTER_COLUMNS: { key: keyof Song; label: string; type: "text" | "b
 ];
 
 export function useSongs() {
+  const { t } = useTranslation();
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -231,7 +233,7 @@ export function useSongs() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Delete this song and remove it from all concerts?")) return;
+    if (!window.confirm(t("songs.confirmDelete"))) return;
     if (await deleteSong(id)) {
       setSongs(songs.filter((s) => s.id !== id));
     }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { GripVertical, EllipsisVertical, ChevronUp, ChevronRight } from "lucide-react";
 import NavSidebar from "../../components/NavSidebar";
+import { useTranslation } from "../../lib/LanguageContext";
 import {
   useVoiceGroups,
   SHAPES,
@@ -39,6 +40,7 @@ function SortablePartRow({
   onUpdate: (name: string, color: string, shape: string) => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(part.name);
   const [color, setColor] = useState(part.color);
@@ -105,13 +107,13 @@ function SortablePartRow({
             onClick={save}
             className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
           >
-            Save
+            {t("common.save")}
           </button>
           <button
             onClick={() => setEditing(false)}
             className="px-2 py-0.5 border border-gray-300 rounded text-xs"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
         </div>
       ) : (
@@ -138,7 +140,7 @@ function SortablePartRow({
               onClick={onDelete}
               className="text-red-400 hover:text-red-600 text-xs"
             >
-              Delete
+              {t("common.delete")}
             </button>
           </div>
         </div>
@@ -192,6 +194,7 @@ function VoiceGroupCard({
   onToggleStandard: (id: string, current: boolean) => void;
   onDeleteGroup: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const isRenaming = renamingGroupId === group.id;
@@ -220,7 +223,7 @@ function VoiceGroupCard({
             <span className="font-medium text-sm">{group.name}</span>
           )}
           <span className="text-xs text-gray-400">
-            {group.parts.length} part{group.parts.length !== 1 ? "s" : ""}
+            {group.parts.length} {group.parts.length !== 1 ? t("voiceGroups.partsCount") : t("voiceGroups.partCount")}
           </span>
         </div>
         <button
@@ -241,7 +244,7 @@ function VoiceGroupCard({
               checked={group.isStandard}
               onChange={() => onToggleStandard(group.id, group.isStandard)}
             />
-            Standard
+            {t("common.standard")}
           </label>
           <button
             onClick={() => {
@@ -250,13 +253,13 @@ function VoiceGroupCard({
             }}
             className="text-gray-400 hover:text-gray-600 text-xs"
           >
-            Rename
+            {t("common.rename")}
           </button>
           <button
             onClick={() => onDeleteGroup(group.id)}
             className="text-red-400 hover:text-red-600 text-xs"
           >
-            Delete
+            {t("common.delete")}
           </button>
         </div>
       )}
@@ -295,7 +298,7 @@ function VoiceGroupCard({
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 h-8 px-2 border-b border-gray-100 w-full"
           >
             <span>{expanded ? <ChevronUp size={14} /> : <ChevronRight size={14} />}</span>
-            {expanded ? "Show less" : "Show more"}
+            {expanded ? t("common.showLess") : t("common.showMore")}
           </button>
         )}
 
@@ -319,7 +322,7 @@ function VoiceGroupCard({
                 if (e.key === "Enter") onAddPart(group.id);
                 if (e.key === "Escape") onSetAddingPartGroupId(null);
               }}
-              placeholder="Part name..."
+              placeholder={t("voiceGroups.partName")}
               className="border border-gray-300 rounded px-2 py-0.5 text-sm w-20"
               autoFocus
             />
@@ -344,7 +347,7 @@ function VoiceGroupCard({
               onClick={() => onAddPart(group.id)}
               className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
             >
-              Add
+              {t("common.add")}
             </button>
           </div>
         ) : (
@@ -355,7 +358,7 @@ function VoiceGroupCard({
             }}
             className="text-sm text-blue-500 hover:underline py-1.5 px-2"
           >
-            + Add part
+            {t("voiceGroups.addPart")}
           </button>
         )}
       </div>
@@ -364,6 +367,7 @@ function VoiceGroupCard({
 }
 
 export default function VoiceGroupsPage() {
+  const { t } = useTranslation();
   const {
     loading,
     standardGroups,
@@ -427,10 +431,9 @@ export default function VoiceGroupsPage() {
     <div className="flex min-h-screen">
       <NavSidebar />
       <div className="flex-1 flex flex-col py-8 px-8">
-      <h1 className="text-4xl font-bold mb-2 text-center">Voice Groups</h1>
+      <h1 className="text-4xl font-bold mb-2 text-center">{t("voiceGroups.title")}</h1>
       <p className="text-sm text-gray-500 text-center mb-6">
-        Standard groups appear in the chorists table and at the top of the concert
-        editor dropdown.
+        {t("voiceGroups.description")}
       </p>
 
       <div className="flex justify-center mb-6">
@@ -438,7 +441,7 @@ export default function VoiceGroupsPage() {
           onClick={() => setShowAddGroup(true)}
           className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
         >
-          + Add group
+          {t("voiceGroups.addGroup")}
         </button>
       </div>
 
@@ -455,7 +458,7 @@ export default function VoiceGroupsPage() {
                   setNewGroupName("");
                 }
               }}
-              placeholder="Group name..."
+              placeholder={t("voiceGroups.groupName")}
               className="border border-gray-300 rounded px-2 py-1 text-sm"
               autoFocus
             />
@@ -465,13 +468,13 @@ export default function VoiceGroupsPage() {
                 checked={newGroupStandard}
                 onChange={(e) => setNewGroupStandard(e.target.checked)}
               />
-              Standard
+              {t("common.standard")}
             </label>
             <button
               onClick={handleCreateGroup}
               className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
             >
-              Create
+              {t("common.create")}
             </button>
             <button
               onClick={() => {
@@ -480,7 +483,7 @@ export default function VoiceGroupsPage() {
               }}
               className="px-3 py-1 border border-gray-300 rounded text-sm"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
           </div>
         </div>
@@ -489,7 +492,7 @@ export default function VoiceGroupsPage() {
       {standardGroups.length > 0 && (
         <>
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">
-            Standard
+            {t("common.standard")}
           </h2>
           <div className="flex flex-wrap gap-4 justify-center mb-8">
             {standardGroups.map((g) => (
@@ -504,7 +507,7 @@ export default function VoiceGroupsPage() {
       {otherGroups.length > 0 && (
         <>
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">
-            Other
+            {t("common.other")}
           </h2>
           <div className="flex flex-wrap gap-4 justify-center">
             {otherGroups.map((g) => (
@@ -518,7 +521,7 @@ export default function VoiceGroupsPage() {
 
       {!loading && standardGroups.length === 0 && otherGroups.length === 0 && (
         <p className="text-gray-400 text-sm text-center mt-8">
-          No voice groups yet.
+          {t("voiceGroups.noGroups")}
         </p>
       )}
       </div>

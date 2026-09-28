@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "../../lib/api";
+import { useTranslation } from "../../lib/LanguageContext";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,7 +33,7 @@ export default function LoginPage() {
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
+          placeholder={t("login.username")}
           className="border border-gray-300 rounded px-3 py-2 text-sm"
           autoFocus
         />
@@ -39,18 +41,18 @@ export default function LoginPage() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
+          placeholder={t("login.password")}
           className="border border-gray-300 rounded px-3 py-2 text-sm"
         />
         {error && (
-          <p className="text-red-500 text-sm text-center">Invalid credentials</p>
+          <p className="text-red-500 text-sm text-center">{t("login.invalidCredentials")}</p>
         )}
         <button
           type="submit"
           disabled={loading}
           className="px-4 py-2 bg-blue-500 text-white rounded text-sm font-medium disabled:opacity-50"
         >
-          {loading ? "Logging in..." : "Log in"}
+          {loading ? t("login.loggingIn") : t("login.logIn")}
         </button>
       </form>
     </div>

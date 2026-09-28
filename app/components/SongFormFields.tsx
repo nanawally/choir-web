@@ -1,6 +1,7 @@
 "use client";
 
 import type { Song } from "../lib/api";
+import { useTranslation } from "../lib/LanguageContext";
 
 export function SongFormFields({
   form,
@@ -9,9 +10,10 @@ export function SongFormFields({
   form: Song;
   set: <K extends keyof Song>(key: K, value: Song[K]) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3">
-      <Field label="Name">
+      <Field label={t("common.name")}>
         <input
           value={form.name}
           onChange={(e) => set("name", e.target.value)}
@@ -19,35 +21,35 @@ export function SongFormFields({
           autoFocus
         />
       </Field>
-      <Field label="Composer">
+      <Field label={t("songs.composer")}>
         <input
           value={form.composer ?? ""}
           onChange={(e) => set("composer", e.target.value || null)}
           className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
         />
       </Field>
-      <Field label="Arranger">
+      <Field label={t("songs.arranger")}>
         <input
           value={form.arranger ?? ""}
           onChange={(e) => set("arranger", e.target.value || null)}
           className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
         />
       </Field>
-      <Field label="Delning">
+      <Field label={t("songs.delning")}>
         <input
           value={form.delning ?? ""}
           onChange={(e) => set("delning", e.target.value || null)}
           className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
         />
       </Field>
-      <Field label="Languages (comma-separated)">
+      <Field label={t("songs.languagesHint")}>
         <input
           value={form.languages ?? ""}
           onChange={(e) => set("languages", e.target.value || null)}
           className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
         />
       </Field>
-      <Field label="Length (MM:SS or MM)">
+      <Field label={t("songs.lengthHint")}>
         <input
           value={form.length ?? ""}
           onChange={(e) => set("length", e.target.value || null)}
@@ -56,7 +58,7 @@ export function SongFormFields({
         />
       </Field>
       <div className="flex items-center gap-4">
-        <Field label="Accompanied">
+        <Field label={t("songs.accompanied")}>
           <select
             value={form.accompanied == null ? "" : form.accompanied ? "yes" : "no"}
             onChange={(e) => {
@@ -67,12 +69,12 @@ export function SongFormFields({
             className="border border-gray-300 rounded px-2 py-1 text-sm"
           >
             <option value="">—</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="yes">{t("common.yes")}</option>
+            <option value="no">{t("common.no")}</option>
           </select>
         </Field>
         {form.accompanied && (
-          <Field label="Instrument">
+          <Field label={t("songs.instrument")}>
             <input
               value={form.instrument ?? ""}
               onChange={(e) => set("instrument", e.target.value || null)}
@@ -83,7 +85,7 @@ export function SongFormFields({
         )}
       </div>
       <div className="flex items-center gap-4">
-        <Field label="Soloists">
+        <Field label={t("songs.soloists")}>
           <select
             value={form.hasSoloists == null ? "" : form.hasSoloists ? "yes" : "no"}
             onChange={(e) => {
@@ -94,12 +96,12 @@ export function SongFormFields({
             className="border border-gray-300 rounded px-2 py-1 text-sm"
           >
             <option value="">—</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="yes">{t("common.yes")}</option>
+            <option value="no">{t("common.no")}</option>
           </select>
         </Field>
         {form.hasSoloists && (
-          <Field label="Soloist names (comma-separated)">
+          <Field label={t("songs.soloistNamesHint")}>
             <input
               value={form.soloistNames ?? ""}
               onChange={(e) => set("soloistNames", e.target.value || null)}
@@ -110,7 +112,7 @@ export function SongFormFields({
         )}
       </div>
       <div className="flex items-center gap-4">
-        <Field label="Year">
+        <Field label={t("songs.year")}>
           <input
             type="number"
             value={form.year ?? ""}
@@ -118,18 +120,18 @@ export function SongFormFields({
             className="w-24 border border-gray-300 rounded px-2 py-1 text-sm"
           />
         </Field>
-        <Field label="Sheet music">
+        <Field label={t("songs.sheetMusic")}>
           <label className="flex items-center gap-1 text-sm">
             <input
               type="checkbox"
               checked={form.hasSheetMusic}
               onChange={(e) => set("hasSheetMusic", e.target.checked)}
             />
-            Available
+            {t("songs.available")}
           </label>
         </Field>
       </div>
-      <Field label="Collection">
+      <Field label={t("songs.collection")}>
         <input
           value={form.collectionName ?? ""}
           onChange={(e) => set("collectionName", e.target.value || null)}

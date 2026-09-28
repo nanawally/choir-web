@@ -9,6 +9,7 @@ import {
   archiveChorist,
 } from "../lib/api";
 import { sortVoiceGroups } from "../lib/voiceGroupSort";
+import { useTranslation } from "../lib/LanguageContext";
 
 type Chorist = {
   id: string;
@@ -39,6 +40,7 @@ export default function ChoristModal({
   onClose,
   onSaved,
 }: ChoristModalProps) {
+  const { t } = useTranslation();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [sectionLeader, setSectionLeader] = useState(false);
@@ -89,7 +91,7 @@ export default function ChoristModal({
   }
 
   async function handleArchive() {
-    if (!chorist || !window.confirm("Archive this chorist?")) return;
+    if (!chorist || !window.confirm(t("chorists.confirmArchive"))) return;
     await archiveChorist(chorist.id);
     onSaved();
   }
@@ -98,10 +100,10 @@ export default function ChoristModal({
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4">
-          {mode === "add" ? "Add chorist" : "Edit chorist"}
+          {mode === "add" ? t("chorists.addTitle") : t("chorists.editTitle")}
         </h2>
 
-        <label className="block text-sm font-medium mb-1">First name</label>
+        <label className="block text-sm font-medium mb-1">{t("chorists.firstName")}</label>
         <input
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
@@ -109,7 +111,7 @@ export default function ChoristModal({
           autoFocus
         />
 
-        <label className="block text-sm font-medium mb-1">Last name</label>
+        <label className="block text-sm font-medium mb-1">{t("chorists.lastName")}</label>
         <input
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
@@ -122,7 +124,7 @@ export default function ChoristModal({
             checked={sectionLeader}
             onChange={(e) => setSectionLeader(e.target.checked)}
           />
-          Section leader (stämledare)
+          {t("chorists.sectionLeader")}
         </label>
 
         <div className="space-y-3 mb-6">
@@ -138,7 +140,7 @@ export default function ChoristModal({
                 }
                 className="border border-gray-300 rounded px-3 py-2 text-sm w-full bg-white"
               >
-                <option value="">— Unassigned —</option>
+                <option value="">{t("common.unassigned")}</option>
                 {group.parts.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -156,7 +158,7 @@ export default function ChoristModal({
                 onClick={handleArchive}
                 className="text-sm text-red-500 hover:text-red-700"
               >
-                Archive
+                {t("chorists.archive")}
               </button>
             )}
           </div>
@@ -165,13 +167,13 @@ export default function ChoristModal({
               onClick={onClose}
               className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               onClick={handleSave}
               className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
             >
-              {mode === "add" ? "Add" : "Save"}
+              {mode === "add" ? t("common.add") : t("common.save")}
             </button>
           </div>
         </div>

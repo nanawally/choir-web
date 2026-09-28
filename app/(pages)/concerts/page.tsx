@@ -10,6 +10,7 @@ import {
 } from "../../lib/api";
 import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
+import { useTranslation } from "../../lib/LanguageContext";
 import { ClefTreble } from "lucide-react";
 
 type Concert = { id: string; name: string; date: string | null; imageUrl: string | null };
@@ -28,6 +29,7 @@ export default function ConcertsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editDate, setEditDate] = useState("");
+  const { t } = useTranslation();
 
   useEffect(() => {
     listConcerts().then(setConcerts).finally(() => setLoading(false));
@@ -67,7 +69,7 @@ export default function ConcertsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm("Delete this concert and all its formations?")) return;
+    if (!window.confirm(t("concerts.confirmDelete"))) return;
     if (await deleteConcert(id)) {
       setConcerts(concerts.filter((c) => c.id !== id));
     }
@@ -76,7 +78,7 @@ export default function ConcertsPage() {
   async function handleDuplicate(id: string) {
     const original = concerts.find((c) => c.id === id);
     const name = window.prompt(
-      "Name for the copy:",
+      t("concerts.nameForCopy"),
       (original?.name ?? "") + " (copy)",
     );
     if (!name) return;
@@ -90,7 +92,7 @@ export default function ConcertsPage() {
     <div className="flex min-h-screen">
       <NavSidebar />
       <div className="flex-1 flex flex-col py-8 px-8">
-      <h1 className="text-4xl font-bold mb-6 text-center">Concerts</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center">{t("concerts.title")}</h1>
 
       <div className="mx-auto w-full max-w-4xl">
         <div className="flex justify-end mb-6">
@@ -98,7 +100,7 @@ export default function ConcertsPage() {
             onClick={() => setShowAdd(true)}
             className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
           >
-            + New concert
+            {t("concerts.newConcert")}
           </button>
         </div>
 
@@ -115,7 +117,7 @@ export default function ConcertsPage() {
                   setNewDate("");
                 }
               }}
-              placeholder="Concert name..."
+              placeholder={t("concerts.concertName")}
               className="border border-gray-300 rounded px-2 py-1 text-sm flex-1"
               autoFocus
             />
@@ -129,7 +131,7 @@ export default function ConcertsPage() {
               onClick={handleCreate}
               className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
             >
-              Create
+              {t("common.create")}
             </button>
             <button
               onClick={() => {
@@ -139,7 +141,7 @@ export default function ConcertsPage() {
               }}
               className="px-3 py-1 border border-gray-300 rounded text-sm"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
           </div>
         )}
@@ -190,13 +192,13 @@ export default function ConcertsPage() {
                         onClick={() => handleUpdate(c.id)}
                         className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
                       >
-                        Save
+                        {t("common.save")}
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
                         className="px-2 py-0.5 border border-gray-300 rounded text-xs"
                       >
-                        Cancel
+                        {t("common.cancel")}
                       </button>
                     </div>
                   </div>
@@ -226,16 +228,16 @@ export default function ConcertsPage() {
                       setEditDate(c.date || "");
                     }}
                     className="px-1.5 py-0.5 bg-white/90 border border-gray-300 rounded text-xs shadow-sm"
-                    title="Edit"
+                    title={t("common.edit")}
                   >
-                    Edit
+                    {t("common.edit")}
                   </button>
                   <button
                     onClick={() => handleDuplicate(c.id)}
                     className="px-1.5 py-0.5 bg-white/90 border border-gray-300 rounded text-xs shadow-sm"
                     title="Duplicate"
                   >
-                    Copy
+                    {t("common.copy")}
                   </button>
                   <button
                     onClick={() => handleDelete(c.id)}
@@ -252,7 +254,7 @@ export default function ConcertsPage() {
 
         {!loading && concerts.length === 0 && !showAdd && (
           <p className="text-gray-400 text-sm text-center mt-8">
-            No concerts yet.
+            {t("concerts.noConcerts")}
           </p>
         )}
       </div>

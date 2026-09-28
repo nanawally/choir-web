@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getToken } from "./lib/api";
 import NavSidebar from "./components/NavSidebar";
+import { useTranslation } from "./lib/LanguageContext";
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!getToken()) {
@@ -25,46 +27,36 @@ export default function Home() {
             href="/concerts"
             className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
           >
-            <h2 className="text-lg font-semibold">Concerts</h2>
-            <p className="text-sm text-gray-500">
-              Manage concerts and formations
-            </p>
+            <h2 className="text-lg font-semibold">{t("nav.concerts")}</h2>
+            <p className="text-sm text-gray-500">{t("home.manageConcerts")}</p>
           </Link>
           <Link
             href="/songs"
             className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
           >
-            <h2 className="text-lg font-semibold">Songs</h2>
-            <p className="text-sm text-gray-500">
-              Manage your song library
-            </p>
+            <h2 className="text-lg font-semibold">{t("nav.songs")}</h2>
+            <p className="text-sm text-gray-500">{t("home.manageSongs")}</p>
           </Link>
           <Link
             href="/chorists"
             className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
           >
-            <h2 className="text-lg font-semibold">Chorists</h2>
-            <p className="text-sm text-gray-500">
-              Manage choir members and voice assignments
-            </p>
+            <h2 className="text-lg font-semibold">{t("nav.chorists")}</h2>
+            <p className="text-sm text-gray-500">{t("home.manageChorists")}</p>
           </Link>
           <Link
             href="/voice-groups"
             className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
           >
-            <h2 className="text-lg font-semibold">Voice Groups</h2>
-            <p className="text-sm text-gray-500">
-              Manage voice groups and parts
-            </p>
+            <h2 className="text-lg font-semibold">{t("nav.voiceGroups")}</h2>
+            <p className="text-sm text-gray-500">{t("home.manageVoiceGroups")}</p>
           </Link>
           <Link
             href="/base-formations"
             className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
           >
-            <h2 className="text-lg font-semibold">Base Formations</h2>
-            <p className="text-sm text-gray-500">
-              Template formations for new concerts
-            </p>
+            <h2 className="text-lg font-semibold">{t("nav.baseFormations")}</h2>
+            <p className="text-sm text-gray-500">{t("home.manageBaseFormations")}</p>
           </Link>
         </div>
         <div className="flex flex-col mt-4 md:flex-row gap-4">
@@ -72,19 +64,15 @@ export default function Home() {
             href="/krysslistan"
             className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
           >
-            <h2 className="text-lg font-semibold">Krysslistan</h2>
-            <p className="text-sm text-gray-500">
-              Attendance tracking
-            </p>
+            <h2 className="text-lg font-semibold">{t("nav.krysslistan")}</h2>
+            <p className="text-sm text-gray-500">{t("home.attendance")}</p>
           </Link>
           <Link
             href="/term-plan"
             className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
           >
-            <h2 className="text-lg font-semibold">Terminsplan</h2>
-            <p className="text-sm text-gray-500">
-              Semester schedule
-            </p>
+            <h2 className="text-lg font-semibold">{t("nav.termPlan")}</h2>
+            <p className="text-sm text-gray-500">{t("home.schedule")}</p>
           </Link>
         </div>
       </main>
