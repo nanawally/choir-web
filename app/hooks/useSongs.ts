@@ -218,19 +218,12 @@ export function useSongs() {
     if (song) {
       const merged = { ...song, ...fields };
       const { id: _id, ...updateFields } = merged;
-      const updated = await updateSong(song.id, updateFields);
-      let hasSheetMusicFile = false;
+      await updateSong(song.id, updateFields);
       if (file) {
-        const result = await uploadSheetMusic(song.id, file);
-        if (result) hasSheetMusicFile = true;
+        await uploadSheetMusic(song.id, file);
       }
-      const finalSong = {
-        ...song,
-        ...fields,
-        hasSheetMusicFile,
-        hasSheetMusic: fields.hasSheetMusic || hasSheetMusicFile,
-      };
-      setSongs((prev) => [...prev, finalSong]);
+      const refreshed = await listSongs();
+      setSongs(refreshed);
       setShowAdd(false);
     }
   }
