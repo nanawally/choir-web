@@ -69,6 +69,27 @@ const translations = {
   "common.other": { en: "Other", sv: "Övrig" },
   "common.name": { en: "Name", sv: "Namn" },
   "common.unassigned": { en: "— Unassigned —", sv: "— Ej tilldelad —" },
+  "common.duplicate": { en: "Duplicate", sv: "Duplicera" },
+  "common.saving": { en: "Saving...", sv: "Sparar..." },
+  "common.downloadCsv": { en: "Download CSV", sv: "Ladda ner CSV" },
+  "common.downloadPng": { en: "Download PNG", sv: "Ladda ner PNG" },
+  "common.columnVisibility": {
+    en: "Column visibility",
+    sv: "Kolumnsynlighet",
+  },
+  "common.options": { en: "Options", sv: "Alternativ" },
+  "common.doubleClickToEdit": {
+    en: "Double-click to edit",
+    sv: "Dubbelklicka för att redigera",
+  },
+  "common.clickToRename": {
+    en: "Click to rename",
+    sv: "Klicka för att byta namn",
+  },
+  "common.clickToOpenPdf": {
+    en: "Click to open full PDF",
+    sv: "Klicka för att öppna hela PDF:en",
+  },
 
   // Songs
   "songs.title": { en: "Songs", sv: "Stycken" },
@@ -164,6 +185,10 @@ const translations = {
     en: "Archive this chorist?",
     sv: "Arkivera denna korist?",
   },
+  "chorists.sectionLeaderTooltip": {
+    en: "Section leader",
+    sv: "Stämledare",
+  },
 
   // Voice Groups
   "voiceGroups.title": { en: "Voice Groups", sv: "Stämdelningar" },
@@ -181,6 +206,10 @@ const translations = {
   "voiceGroups.partName": { en: "Part name...", sv: "Stämnamn..." },
   "voiceGroups.partCount": { en: "part", sv: "stämma" },
   "voiceGroups.partsCount": { en: "parts", sv: "stämmor" },
+  "voiceGroups.deleteGroup": {
+    en: "Delete group",
+    sv: "Ta bort stämdelning",
+  },
 
   // Base Formations
   "baseFormations.title": { en: "Base Formations", sv: "Grunduppställningar" },
@@ -203,6 +232,86 @@ const translations = {
   "baseFormations.confirmDelete": {
     en: "Delete this base formation and all its placements?",
     sv: "Ta bort grunduppställningen och alla dess placeringar?",
+  },
+  "baseFormations.backToBaseFormations": {
+    en: "Back to base formations",
+    sv: "Tillbaka till grunduppställningar",
+  },
+  "baseFormations.chorists": { en: "Chorists", sv: "Korister" },
+  "baseFormations.allPlaced": {
+    en: "All chorists placed.",
+    sv: "Alla korister placerade.",
+  },
+  "baseFormations.placed": { en: "Placed", sv: "Placerade" },
+
+  // Formations
+  "formations.addFormation": {
+    en: "Add Formation",
+    sv: "Lägg till uppställning",
+  },
+  "formations.newEmpty": {
+    en: "New empty formation",
+    sv: "Ny tom uppställning",
+  },
+  "formations.formationName": {
+    en: "Formation name",
+    sv: "Uppställningsnamn",
+  },
+  "formations.startFromBase": {
+    en: "Start from base formation",
+    sv: "Utgå från grunduppställning",
+  },
+  "formations.reuseFromConcert": {
+    en: "Reuse from this concert",
+    sv: "Återanvänd från denna konsert",
+  },
+  "formations.saveFormation": {
+    en: "Save formation",
+    sv: "Spara uppställning",
+  },
+  "formations.addNewFormation": {
+    en: "Add new formation",
+    sv: "Lägg till ny uppställning",
+  },
+  "formations.confirmDelete": {
+    en: "Delete this formation?",
+    sv: "Ta bort denna uppställning?",
+  },
+  "formations.arcRows": {
+    en: "Arc rows (empty = rectangular grid)",
+    sv: "Bågade rader (tomt = rektangulärt rutnät)",
+  },
+  "formations.arcRowsShort": { en: "Arc rows", sv: "Bågade rader" },
+  "formations.addRow": { en: "+ Add row", sv: "+ Lägg till rad" },
+  "formations.row": { en: "Row", sv: "Rad" },
+  "formations.copyTo": { en: "Copy to...", sv: "Kopiera till..." },
+  "formations.copyToWhichConcert": {
+    en: "Copy to which concert?",
+    sv: "Kopiera till vilken konsert?",
+  },
+  "formations.copiedTo": { en: "Copied to", sv: "Kopierad till" },
+  "formations.noConcertsToCopy": {
+    en: "No other concerts to copy to.",
+    sv: "Inga andra konserter att kopiera till.",
+  },
+  "formations.enterNumber": {
+    en: "Enter number:",
+    sv: "Ange nummer:",
+  },
+  "formations.formations": { en: "Formations", sv: "Uppställningar" },
+  "formations.arc": { en: "Arc", sv: "Båge" },
+  "formations.grid": { en: "Grid", sv: "Rutnät" },
+  "formations.title": { en: "Formation", sv: "Uppställning" },
+
+  // Roster
+  "roster.title": { en: "Concert Roster", sv: "Konsertkorister" },
+  "roster.editRoster": { en: "Edit Roster", sv: "Redigera korister" },
+  "roster.unplaced": { en: "Unplaced", sv: "Ej placerade" },
+  "roster.placed": { en: "Placed", sv: "Placerade" },
+  "roster.showOnGrid": { en: "Show on grid", sv: "Visa i rutnätet" },
+  "roster.hideFromGrid": {
+    en: "Hide from grid",
+    sv: "Dölj från rutnätet",
   },
 
   // Krysslistan

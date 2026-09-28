@@ -130,7 +130,7 @@ function SortablePartRow({
               setShape(part.shape);
               setEditing(true);
             }}
-            title="Double-click to edit"
+            title={t("common.doubleClickToEdit")}
           >
             {part.name}
           </span>
@@ -229,7 +229,7 @@ function VoiceGroupCard({
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="text-gray-400 hover:text-gray-600 text-sm px-1"
-          title="Options"
+          title={t("common.options")}
         >
           <EllipsisVertical size={16} />
         </button>

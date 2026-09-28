@@ -9,49 +9,64 @@ import {
 } from "../lib/api";
 import { useTableSort } from "../lib/useTableSort";
 import { useTranslation } from "../lib/LanguageContext";
+import type { TranslationKey } from "../lib/translations";
 
-type ColumnDef = {
+export type ColumnDef = {
   key: keyof Song;
-  label: string;
-  render?: (song: Song) => string;
+  labelKey: TranslationKey;
+  render?: (song: Song, t: (key: TranslationKey) => string) => string;
   width?: string;
 };
 
 export const ALL_COLUMNS: ColumnDef[] = [
-  { key: "name", label: "Name" },
-  { key: "composer", label: "Composer", width: "120px" },
-  { key: "arranger", label: "Arranger", width: "120px" },
-  { key: "delning", label: "Delning", width: "100px" },
-  { key: "languages", label: "Languages", width: "120px" },
-  { key: "length", label: "Length", width: "80px" },
+  { key: "name", labelKey: "common.name" },
+  { key: "composer", labelKey: "songs.composer", width: "120px" },
+  { key: "arranger", labelKey: "songs.arranger", width: "120px" },
+  { key: "delning", labelKey: "songs.delning", width: "100px" },
+  { key: "languages", labelKey: "songs.languages", width: "120px" },
+  { key: "length", labelKey: "songs.length", width: "80px" },
   {
     key: "accompanied",
-    label: "Accompanied",
+    labelKey: "songs.accompanied",
     width: "130px",
-    render: (s) => {
+    render: (s, t) => {
       if (s.accompanied == null) return "";
-      if (!s.accompanied) return "No";
-      return s.instrument ? `Yes — ${s.instrument}` : "Yes";
+      if (!s.accompanied) return t("common.no");
+      return s.instrument ? `${t("common.yes")} — ${s.instrument}` : t("common.yes");
     },
   },
-  { key: "year", label: "Year", width: "70px" },
-  { key: "collectionName", label: "Collection", width: "130px" },
+  { key: "year", labelKey: "songs.year", width: "70px" },
+  { key: "collectionName", labelKey: "songs.collection", width: "130px" },
   {
     key: "hasSoloists",
-    label: "Soloists",
+    labelKey: "songs.soloists",
     width: "120px",
-    render: (s) => {
+    render: (s, t) => {
       if (s.hasSoloists == null) return "";
-      if (!s.hasSoloists) return "No";
-      return s.soloistNames ? `Yes — ${s.soloistNames}` : "Yes";
+      if (!s.hasSoloists) return t("common.no");
+      return s.soloistNames ? `${t("common.yes")} — ${s.soloistNames}` : t("common.yes");
     },
   },
   {
     key: "hasSheetMusicFile",
-    label: "Sheet music",
+    labelKey: "songs.sheetMusic",
     width: "100px",
-    render: (s) => (s.hasSheetMusicFile ? "Yes" : "No"),
+    render: (s, t) => (s.hasSheetMusicFile ? t("common.yes") : t("common.no")),
   },
+];
+
+export type FilterColumnDef = { key: keyof Song; labelKey: TranslationKey; type: "text" | "bool" | "range" };
+
+export const FILTER_COLUMNS: FilterColumnDef[] = [
+  { key: "composer", labelKey: "songs.composer", type: "text" },
+  { key: "arranger", labelKey: "songs.arranger", type: "text" },
+  { key: "delning", labelKey: "songs.delning", type: "text" },
+  { key: "languages", labelKey: "songs.languages", type: "text" },
+  { key: "accompanied", labelKey: "songs.accompanied", type: "bool" },
+  { key: "year", labelKey: "songs.year", type: "range" },
+  { key: "collectionName", labelKey: "songs.collection", type: "text" },
+  { key: "hasSoloists", labelKey: "songs.soloists", type: "bool" },
+  { key: "hasSheetMusicFile", labelKey: "songs.sheetMusic", type: "bool" },
 ];
 
 const DEFAULT_VISIBLE = ["name", "composer", "arranger", "year", "collectionName"];
@@ -59,18 +74,6 @@ const STORAGE_KEY = "songs-visible-columns";
 
 export type ActiveFilter = { column: string; columnLabel: string; value: string };
 export type YearRange = { from: number | null; to: number | null };
-
-export const FILTER_COLUMNS: { key: keyof Song; label: string; type: "text" | "bool" | "range" }[] = [
-  { key: "composer", label: "Composer", type: "text" },
-  { key: "arranger", label: "Arranger", type: "text" },
-  { key: "delning", label: "Delning", type: "text" },
-  { key: "languages", label: "Languages", type: "text" },
-  { key: "accompanied", label: "Accompanied", type: "bool" },
-  { key: "year", label: "Year", type: "range" },
-  { key: "collectionName", label: "Collection", type: "text" },
-  { key: "hasSoloists", label: "Soloists", type: "bool" },
-  { key: "hasSheetMusicFile", label: "Sheet music", type: "bool" },
-];
 
 export function useSongs() {
   const { t } = useTranslation();
@@ -149,7 +152,7 @@ export function useSongs() {
     if (isFilterActive(fc.key, value)) {
       setFilters(filters.filter((f) => !(f.column === fc.key && f.value === value)));
     } else {
-      setFilters([...filters, { column: fc.key, columnLabel: fc.label, value }]);
+      setFilters([...filters, { column: fc.key, columnLabel: t(fc.labelKey), value }]);
     }
   }
 
@@ -256,11 +259,11 @@ export function useSongs() {
   }
 
   function handleDownloadCsv() {
-    const header = columns.map((c) => c.label).join(",");
+    const header = columns.map((c) => t(c.labelKey)).join(",");
     const rows = filtered.map((s) =>
       columns
         .map((c) => {
-          const val = c.render ? c.render(s) : (s[c.key] ?? "");
+          const val = c.render ? c.render(s, t) : (s[c.key] ?? "");
           const str = String(val);
           return str.includes(",") || str.includes('"')
             ? `"${str.replace(/"/g, '""')}"`

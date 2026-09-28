@@ -15,6 +15,7 @@ import {
   updateRowSizes,
 } from "../lib/api";
 import AddFormationModal from "./AddFormationModal";
+import { useTranslation } from "../lib/LanguageContext";
 
 type Concert = { id: string; name: string };
 type Formation = { id: string; name: string; sortOrder: number };
@@ -59,6 +60,7 @@ export default function FormationBar({
   formations,
   onFormationsChange,
 }: Props) {
+  const { t } = useTranslation();
   const [saving, setSaving] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingName, setEditingName] = useState(false);
@@ -123,7 +125,7 @@ export default function FormationBar({
 
   async function handleDeleteFormation() {
     if (!activeFormationId) return;
-    if (!window.confirm("Delete this formation?")) return;
+    if (!window.confirm(t("formations.confirmDelete"))) return;
     if (await deleteFormation(activeFormationId)) {
       onFormationsChange(formations.filter((f) => f.id !== activeFormationId));
       onActiveFormationIdChange(null);
@@ -183,21 +185,21 @@ export default function FormationBar({
       (c: Concert) => c.id !== concertId,
     );
     if (otherConcerts.length === 0) {
-      window.alert("No other concerts to copy to.");
+      window.alert(t("formations.noConcertsToCopy"));
       return;
     }
     const choice = window.prompt(
-      "Copy to which concert?\n" +
+      t("formations.copyToWhichConcert") + "\n" +
         otherConcerts
           .map((c: Concert, i: number) => `${i + 1}. ${c.name}`)
           .join("\n") +
-        "\n\nEnter number:",
+        `\n\n${t("formations.enterNumber")}`,
     );
     if (!choice) return;
     const idx = parseInt(choice, 10) - 1;
     if (isNaN(idx) || idx < 0 || idx >= otherConcerts.length) return;
     await copyFormationToConcert(activeFormationId, otherConcerts[idx].id);
-    window.alert(`Copied to "${otherConcerts[idx].name}".`);
+    window.alert(`${t("formations.copiedTo")} "${otherConcerts[idx].name}".`);
   }
 
   function handleSetArcMode(arc: boolean) {
@@ -216,14 +218,14 @@ export default function FormationBar({
 
   return (
     <div className="flex flex-col gap-2 p-2">
-      <h2 className="font-bold mb-1">Formations</h2>
+      <h2 className="font-bold mb-1">{t("formations.formations")}</h2>
 
       {/* Add new formation button — always visible */}
       <button
         onClick={() => setShowAddModal(true)}
         className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm w-fit"
       >
-        Add new formation
+        {t("formations.addNewFormation")}
       </button>
 
       {/* Everything below only shows when a formation is selected */}
@@ -250,7 +252,7 @@ export default function FormationBar({
                 setNameInput(formationName || "");
                 setEditingName(true);
               }}
-              title="Click to rename"
+              title={t("common.clickToRename")}
             >
               {formationName}
             </p>
@@ -262,19 +264,19 @@ export default function FormationBar({
             onChange={(e) => handleSetArcMode(e.target.value === "arc")}
             className="mt-1 border border-gray-300 rounded px-2 py-1.5 text-sm w-fit"
           >
-            <option value="arc">Arc</option>
-            <option value="grid">Grid</option>
+            <option value="arc">{t("formations.arc")}</option>
+            <option value="grid">{t("formations.grid")}</option>
           </select>
 
           {/* Arc row configuration — only visible in arc mode */}
           {isArcMode && (
             <div className="mt-1">
               <h4 className="text-xs font-medium mb-1 text-gray-500">
-                Arc rows (empty = rectangular grid)
+                {t("formations.arcRows")}
               </h4>
               {rowSizes.map((size, i) => (
                 <div key={i} className="flex items-center gap-1 mb-1">
-                  <span className="text-xs w-12">Row {i + 1}:</span>
+                  <span className="text-xs w-12">{`${t("formations.row")} ${i + 1}:`}</span>
                   <input
                     type="number"
                     value={size}
@@ -308,7 +310,7 @@ export default function FormationBar({
                 }}
                 className="text-xs text-blue-500 hover:underline"
               >
-                + Add row
+                {t("formations.addRow")}
               </button>
             </div>
           )}
@@ -326,26 +328,26 @@ export default function FormationBar({
             disabled={saving}
             className="px-3 py-1.5 bg-green-500 text-white rounded text-sm w-fit font-medium disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save formation"}
+            {saving ? t("common.saving") : t("formations.saveFormation")}
           </button>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={handleDuplicateFormation}
               className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
             >
-              Duplicate
+              {t("common.duplicate")}
             </button>
             <button
               onClick={handleCopyToConcert}
               className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
             >
-              Copy to...
+              {t("formations.copyTo")}
             </button>
             <button
               onClick={handleDeleteFormation}
               className="px-2 py-1 bg-red-500 text-white rounded text-sm"
             >
-              Delete
+              {t("common.delete")}
             </button>
           </div>
         </div>

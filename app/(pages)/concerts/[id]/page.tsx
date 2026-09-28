@@ -10,6 +10,7 @@ import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import SetlistDrawer, { SetlistNavButtons } from "@/app/components/SetlistDrawer";
 import Link from "next/link";
 import { ArrowBigLeft, SquareMenu, UsersRound, UserRoundGroup } from "lucide-react";
+import { useTranslation } from "../../../lib/LanguageContext";
 
 const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
 
@@ -19,6 +20,7 @@ export default function ConcertEditor({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { t } = useTranslation();
   const editor = useConcertEditor(id);
   const leftOpen = editor.showSetlist || editor.showChorists;
   const rightOpen = editor.showFormations;
@@ -116,7 +118,7 @@ export default function ConcertEditor({
           <Link
             href="/concerts"
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100 text-center text-sm"
-            title="Back to concerts"
+            title={t("concerts.backToConcerts")}
           >
             <ArrowBigLeft size={20} />
           </Link>

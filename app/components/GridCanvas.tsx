@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { useTranslation } from "../lib/LanguageContext";
 import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 import Konva from "konva";
 import ChoristShape from "./ChoristShape";
@@ -81,6 +82,7 @@ export default function GridCanvas({
   virtualWidth,
   virtualHeight,
 }: Props) {
+  const { t } = useTranslation();
   const stageRef = useRef<Konva.Stage>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
     null,
@@ -228,7 +230,7 @@ export default function GridCanvas({
         onClick={handleDownload}
         className="absolute top-1 right-14 z-10 px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
       >
-        Download PNG
+        {t("common.downloadPng")}
       </button>
       <Stage
         ref={stageRef}

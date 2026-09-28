@@ -6,6 +6,7 @@ import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import Link from "next/link";
 import { ArrowBigLeft, UsersRound, UserRoundGroup } from "lucide-react";
 import { shortName } from "../../../lib/choristName";
+import { useTranslation } from "../../../lib/LanguageContext";
 import {
   apiFetch,
   getAssignments,
@@ -29,6 +30,7 @@ export default function BaseFormationEditor({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { t } = useTranslation();
 
   const [chorists, setChorists] = useState<Chorist[]>([]);
   const [placements, setPlacements] = useState<Placement[]>([]);
@@ -212,7 +214,7 @@ export default function BaseFormationEditor({
       {/* Left drawer — chorist list */}
       {showChorists && (
         <div className="absolute top-0 left-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-10">
-          <h2 className="font-bold mb-3">Chorists</h2>
+          <h2 className="font-bold mb-3">{t("baseFormations.chorists")}</h2>
           <div className="space-y-1">
             {chorists
               .filter((c) => !placedIds.has(c.id))
@@ -228,12 +230,12 @@ export default function BaseFormationEditor({
               ))}
           </div>
           {chorists.filter((c) => !placedIds.has(c.id)).length === 0 && (
-            <p className="text-gray-400 text-sm mt-2">All chorists placed.</p>
+            <p className="text-gray-400 text-sm mt-2">{t("baseFormations.allPlaced")}</p>
           )}
           {chorists.filter((c) => placedIds.has(c.id)).length > 0 && (
             <>
               <h3 className="text-xs font-medium text-gray-500 mt-4 mb-1">
-                Placed
+                {t("baseFormations.placed")}
               </h3>
               {chorists
                 .filter((c) => placedIds.has(c.id))
@@ -265,7 +267,7 @@ export default function BaseFormationEditor({
           <Link
             href="/base-formations"
             className="bg-white rounded-lg shadow p-2 hover:bg-gray-100 text-center text-sm"
-            title="Back to base formations"
+            title={t("baseFormations.backToBaseFormations")}
           >
             <ArrowBigLeft size={20} />
           </Link>
@@ -304,7 +306,7 @@ export default function BaseFormationEditor({
                     setNameInput(formationName);
                     setEditingName(true);
                   }}
-                  title="Click to rename"
+                  title={t("common.clickToRename")}
                 >
                   {formationName}
                 </span>
@@ -349,7 +351,7 @@ export default function BaseFormationEditor({
         <div className="absolute top-0 right-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-10">
           {/* Formation controls */}
           <div className="flex flex-col gap-2 p-2 border-b border-gray-200 mb-4">
-            <h2 className="font-bold mb-1">Formation</h2>
+            <h2 className="font-bold mb-1">{t("formations.title")}</h2>
 
             {/* Layout mode */}
             <select
@@ -357,19 +359,19 @@ export default function BaseFormationEditor({
               onChange={(e) => handleSetArcMode(e.target.value === "arc")}
               className="border border-gray-300 rounded px-2 py-1.5 text-sm w-fit"
             >
-              <option value="arc">Arc</option>
-              <option value="grid">Grid</option>
+              <option value="arc">{t("formations.arc")}</option>
+              <option value="grid">{t("formations.grid")}</option>
             </select>
 
             {/* Arc rows */}
             {isArcMode && (
               <div className="mt-1">
                 <h4 className="text-xs font-medium mb-1 text-gray-500">
-                  Arc rows
+                  {t("formations.arcRowsShort")}
                 </h4>
                 {rowSizes.map((size, i) => (
                   <div key={i} className="flex items-center gap-1 mb-1">
-                    <span className="text-xs w-12">Row {i + 1}:</span>
+                    <span className="text-xs w-12">{`${t("formations.row")} ${i + 1}:`}</span>
                     <input
                       type="number"
                       value={size}
@@ -405,7 +407,7 @@ export default function BaseFormationEditor({
                   }}
                   className="text-xs text-blue-500 hover:underline"
                 >
-                  + Add row
+                  {t("formations.addRow")}
                 </button>
               </div>
             )}
@@ -415,7 +417,7 @@ export default function BaseFormationEditor({
               disabled={saving}
               className="px-3 py-1.5 bg-green-500 text-white rounded text-sm w-fit font-medium disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save formation"}
+              {saving ? t("common.saving") : t("formations.saveFormation")}
             </button>
           </div>
 

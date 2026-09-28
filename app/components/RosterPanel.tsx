@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff } from "lucide-react";
 import { shortName } from "../lib/choristName";
+import { useTranslation } from "../lib/LanguageContext";
 
 type Chorist = { id: string; firstName: string; lastName: string };
 
@@ -23,6 +24,7 @@ export default function RosterPanel({
   onEditRoster,
 }: Props) {
 
+  const { t } = useTranslation();
   const unplaced = chorists.filter((c) => !placedIds.has(c.id));
   const placed = chorists.filter((c) => placedIds.has(c.id));
 
@@ -43,10 +45,10 @@ export default function RosterPanel({
         onClick={() => onEditRoster()}
         className="m-4 px-3 py-1 bg-blue-500 text-white rounded text-sm"
       >
-        Edit Roster
+        {t("roster.editRoster")}
       </button>
 
-      <h3 className="text-xs text-gray-500 font-medium mb-1">Unplaced</h3>
+      <h3 className="text-xs text-gray-500 font-medium mb-1">{t("roster.unplaced")}</h3>
       <ul className="space-y-1 mb-4">
         {unplaced.map((c) => (
           <li
@@ -61,7 +63,7 @@ export default function RosterPanel({
 
       {placed.length > 0 && (
         <>
-          <h3 className="text-xs text-gray-500 font-medium mb-1">Placed</h3>
+          <h3 className="text-xs text-gray-500 font-medium mb-1">{t("roster.placed")}</h3>
           <ul className="space-y-1 mb-4">
             {placed.map((c) => (
               <li
@@ -72,7 +74,7 @@ export default function RosterPanel({
                   onClick={() => toggleHidden(c.id)}
                   className="mr-1 text-xs w-5"
                   title={
-                    hiddenIds.has(c.id) ? "Show on grid" : "Hide from grid"
+                    hiddenIds.has(c.id) ? t("roster.showOnGrid") : t("roster.hideFromGrid")
                   }
                 >
                   {hiddenIds.has(c.id) ? <EyeOff size={14} /> : <Eye size={14} />}

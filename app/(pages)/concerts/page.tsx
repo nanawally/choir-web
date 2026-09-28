@@ -237,14 +237,14 @@ export default function ConcertsPage() {
                   <button
                     onClick={() => handleDuplicate(c.id)}
                     className="px-1.5 py-0.5 bg-white/90 border border-gray-300 rounded text-xs shadow-sm"
-                    title="Duplicate"
+                    title={t("common.duplicate")}
                   >
                     {t("common.copy")}
                   </button>
                   <button
                     onClick={() => handleDelete(c.id)}
                     className="px-1.5 py-0.5 bg-red-500 text-white rounded text-xs shadow-sm"
-                    title="Delete"
+                    title={t("common.delete")}
                   >
                     X
                   </button>

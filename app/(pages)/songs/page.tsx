@@ -75,7 +75,7 @@ export default function SongsPage() {
               setFilterExpandedCol(null);
             }}
             className="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50"
-            title="Filter"
+            title={t("common.filter")}
           >
             <EllipsisVertical size={16} />
           </button>
@@ -92,7 +92,7 @@ export default function SongsPage() {
                       }
                       className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 flex items-center justify-between"
                     >
-                      <span>{fc.label}</span>
+                      <span>{t(fc.labelKey)}</span>
                       <span className="text-gray-400 text-xs">
                         {filterExpandedCol === fc.key ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                       </span>
@@ -154,7 +154,7 @@ export default function SongsPage() {
           <button
             onClick={handleDownloadCsv}
             className="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50"
-            title="Download CSV"
+            title={t("common.downloadCsv")}
           >
             <Download size={16} />
           </button>
@@ -162,7 +162,7 @@ export default function SongsPage() {
             <button
               onClick={() => setColumnPickerOpen(!columnPickerOpen)}
               className="px-2 py-1.5 border border-gray-300 rounded text-sm hover:bg-gray-50"
-              title="Column visibility"
+              title={t("common.columnVisibility")}
             >
               <Columns3 size={16} />
             </button>
@@ -178,7 +178,7 @@ export default function SongsPage() {
                       checked={visibleColumns.includes(c.key)}
                       onChange={() => toggleColumn(c.key)}
                     />
-                    {c.label}
+                    {t(c.labelKey)}
                   </label>
                 ))}
               </div>
@@ -243,7 +243,7 @@ export default function SongsPage() {
                   sortDir={sortKey === c.key ? sortDir : null}
                   onSort={() => cycleSort(c.key)}
                 >
-                  {c.label}
+                  {t(c.labelKey)}
                 </Th>
               ))}
               <Th compact />
@@ -258,7 +258,7 @@ export default function SongsPage() {
               >
                 {columns.map((c) => (
                   <Td key={c.key}>
-                    {c.render ? c.render(s) : (s[c.key] as string | number | null) ?? ""}
+                    {c.render ? c.render(s, t) : (s[c.key] as string | number | null) ?? ""}
                   </Td>
                 ))}
                 <Td compact>
@@ -269,7 +269,7 @@ export default function SongsPage() {
                     }}
                     className="text-red-400 hover:text-red-600 text-xs"
                   >
-                    Delete
+                    {t("common.delete")}
                   </button>
                 </Td>
               </Tr>
@@ -305,15 +305,16 @@ function BooleanDetail({
   flag: boolean | null;
   details: string | null;
 }) {
+  const { t } = useTranslation();
   if (flag == null) return <DetailCell label={label} value="—" />;
-  if (!flag) return <DetailCell label={label} value="No" />;
+  if (!flag) return <DetailCell label={label} value={t("common.no")} />;
   const items = details
     ? details.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
   return (
     <div>
       <span className="block text-xs text-gray-500 mb-0.5">{label}</span>
-      <span className="text-sm">Yes</span>
+      <span className="text-sm">{t("common.yes")}</span>
       {items.length > 0 && (
         <ul className="mt-1 ml-4 list-disc text-sm text-gray-700">
           {items.map((item, i) => (
@@ -481,7 +482,7 @@ function SongModal({
                 setEditing(true);
               }}
               className="text-gray-400 hover:text-gray-600"
-              title="Edit"
+              title={t("common.edit")}
             >
               <SquarePen size={16} />
             </button>
@@ -519,7 +520,7 @@ function SongModal({
                   onClick={() => setShowAllConcerts(!showAllConcerts)}
                   className="text-xs text-blue-500 hover:underline mt-1"
                 >
-                  {showAllConcerts ? "Show less" : `Show ${concerts.length - 3} more`}
+                  {showAllConcerts ? t("common.showLess") : `${concerts.length - 3} ${t("common.showMore")}`}
                 </button>
               )}
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "../lib/LanguageContext";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export default function PdfPreview({ url, onClick }: Props) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number | undefined>(undefined);
 
@@ -33,13 +35,13 @@ export default function PdfPreview({ url, onClick }: Props) {
       ref={containerRef}
       className="border border-gray-200 rounded-lg overflow-hidden cursor-pointer"
       onClick={onClick}
-      title="Click to open full PDF"
+      title={t("common.clickToOpenPdf")}
     >
       <Document
         file={url}
         loading={
           <div className="h-48 flex items-center justify-center text-sm text-gray-400">
-            Loading...
+            {t("common.loading")}
           </div>
         }
       >

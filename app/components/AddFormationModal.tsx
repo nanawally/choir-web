@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { listBaseFormations } from "../lib/api";
+import { useTranslation } from "../lib/LanguageContext";
 
 type Formation = { id: string; name: string; sortOrder: number };
 type BaseFormation = { id: string; name: string };
@@ -25,6 +26,7 @@ export default function AddFormationModal({
   onReuse,
   onCopyBase,
 }: Props) {
+  const { t } = useTranslation();
   const [newName, setNewName] = useState("");
   const [baseFormations, setBaseFormations] = useState<BaseFormation[]>([]);
 
@@ -41,9 +43,9 @@ export default function AddFormationModal({
   return (
     <div className="fixed inset-0 bg-black/50 z-30 flex items-center justify-center">
       <div className="bg-white rounded-lg p-6 w-80 flex flex-col">
-        <h2 className="font-bold mb-4">Add Formation</h2>
+        <h2 className="font-bold mb-4">{t("formations.addFormation")}</h2>
 
-        <h3 className="text-sm font-medium mb-2">New empty formation</h3>
+        <h3 className="text-sm font-medium mb-2">{t("formations.newEmpty")}</h3>
         <div className="flex gap-1 mb-4">
           <input
             value={newName}
@@ -51,7 +53,7 @@ export default function AddFormationModal({
             onKeyDown={(e) =>
               e.key === "Enter" && newName.trim() && onCreateNew(newName.trim())
             }
-            placeholder="Formation name"
+            placeholder={t("formations.formationName")}
             className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
           />
           <button
@@ -60,14 +62,14 @@ export default function AddFormationModal({
             }}
             className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
           >
-            Create
+            {t("common.create")}
           </button>
         </div>
 
         {baseFormations.length > 0 && (
           <>
             <h3 className="text-sm font-medium mb-2">
-              Start from base formation
+              {t("formations.startFromBase")}
             </h3>
             <ul className="space-y-1 mb-4 max-h-40 overflow-y-auto">
               {baseFormations.map((f) => (
@@ -86,7 +88,7 @@ export default function AddFormationModal({
         {reusable.length > 0 && (
           <>
             <h3 className="text-sm font-medium mb-2">
-              Reuse from this concert
+              {t("formations.reuseFromConcert")}
             </h3>
             <ul className="space-y-1 mb-4 max-h-40 overflow-y-auto">
               {reusable.map((f) => (
@@ -107,7 +109,7 @@ export default function AddFormationModal({
             onClick={onClose}
             className="px-3 py-1 border rounded text-sm"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
         </div>
       </div>

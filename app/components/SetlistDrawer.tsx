@@ -17,6 +17,7 @@ import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifi
 import { CSS } from "@dnd-kit/utilities";
 import { addSongToConcert, removeSongFromConcert, reorderConcertSongs } from "../lib/api";
 import { GripVertical, ArrowLeft, ArrowRight } from "lucide-react";
+import { useTranslation } from "../lib/LanguageContext";
 
 type Formation = { id: string; name: string };
 type ConcertSong = { id: string; name: string; sortOrder: number };
@@ -142,6 +143,7 @@ export default function SetlistDrawer({
   onSelectFormation,
   onReorderFormations,
 }: Props) {
+  const { t } = useTranslation();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
@@ -207,7 +209,7 @@ export default function SetlistDrawer({
             onSongsChange([...concertSongs, added]);
           }}
         >
-          Add
+          {t("common.add")}
         </button>
       </div>
       <div className="mt-3" />

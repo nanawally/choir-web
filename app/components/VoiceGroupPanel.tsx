@@ -16,6 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
+import { useTranslation } from "../lib/LanguageContext";
 import { sortVoiceGroups } from "../lib/voiceGroupSort";
 import {
   createVoiceGroup,
@@ -82,6 +83,7 @@ function SortablePartItem({
   onHighlight: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: part.id });
 
@@ -128,13 +130,13 @@ function SortablePartItem({
               onClick={onSave}
               className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
             >
-              Save
+              {t("common.save")}
             </button>
             <button
               onClick={onCancelEdit}
               className="px-2 py-0.5 border border-gray-300 rounded text-xs"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
           </div>
         </div>
@@ -163,7 +165,7 @@ function SortablePartItem({
                 e.stopPropagation();
                 onStartEdit();
               }}
-              title="Double-click to edit"
+              title={t("common.doubleClickToEdit")}
             >
               {part.name}
             </span>
@@ -191,6 +193,7 @@ export default function VoiceGroupPanel({
   highlightPartId,
   onHighlightPart,
 }: Props) {
+  const { t } = useTranslation();
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [showAddPart, setShowAddPart] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
@@ -337,7 +340,7 @@ export default function VoiceGroupPanel({
             onClick={handleCreateGroup}
             className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
           >
-            Add
+            {t("common.add")}
           </button>
         </div>
       ) : (
@@ -345,7 +348,7 @@ export default function VoiceGroupPanel({
           onClick={() => setShowAddGroup(true)}
           className="text-sm text-blue-500 hover:underline mb-4"
         >
-          + Add group
+          {t("voiceGroups.addGroup")}
         </button>
       )}
 
@@ -357,7 +360,7 @@ export default function VoiceGroupPanel({
               onClick={handleDeleteGroup}
               className="text-red-400 hover:text-red-600 text-xs"
             >
-              Delete group
+              {t("voiceGroups.deleteGroup")}
             </button>
           </div>
 
@@ -435,7 +438,7 @@ export default function VoiceGroupPanel({
                   onClick={handleAddPart}
                   className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
                 >
-                  Add
+                  {t("common.add")}
                 </button>
               </div>
             </div>
@@ -444,7 +447,7 @@ export default function VoiceGroupPanel({
               onClick={() => setShowAddPart(true)}
               className="text-sm text-blue-500 hover:underline"
             >
-              + Add part
+              {t("voiceGroups.addPart")}
             </button>
           )}
         </>

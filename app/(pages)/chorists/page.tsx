@@ -63,7 +63,7 @@ export default function RosterPage() {
                   setFilterExpandedGroup(null);
                 }}
                 className="px-2 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
-                title="Filter"
+                title={t("common.filter")}
               >
                 <EllipsisVertical size={16} />
               </button>
@@ -111,7 +111,7 @@ export default function RosterPage() {
             <button
               onClick={handleDownloadCsv}
               className="px-2 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50"
-              title="Download CSV"
+              title={t("common.downloadCsv")}
             >
               <Download size={16} />
             </button>
@@ -181,7 +181,7 @@ export default function RosterPage() {
                           {fourPartPart?.name ?? "—"}
                         </span>
                         {chorist.isSectionLeader && (
-                          <span title="Section leader"><Star size={14} className="text-yellow-500 fill-yellow-500" /></span>
+                          <span title={t("chorists.sectionLeaderTooltip")}><Star size={14} className="text-yellow-500 fill-yellow-500" /></span>
                         )}
                       </div>
                     </Td>
@@ -199,7 +199,7 @@ export default function RosterPage() {
                     <button
                       onClick={() => setModal({ mode: "edit", chorist })}
                       className="text-gray-400 hover:text-gray-600"
-                      title="Edit chorist"
+                      title={t("chorists.editTitle")}
                     >
                       <SquarePen size={16} />
                     </button>
