@@ -4,6 +4,7 @@ import {
   createSong,
   updateSong,
   deleteSong,
+  uploadSheetMusic,
   type Song,
 } from "../lib/api";
 import { useTableSort } from "../lib/useTableSort";
@@ -209,17 +210,22 @@ export function useSongs() {
     });
   }
 
-  async function handleCreate(fields: Omit<Song, "id" | "hasSheetMusicFile">) {
+  async function handleCreate(fields: Omit<Song, "id" | "hasSheetMusicFile">, file?: File) {
     if (!fields.name.trim()) return;
     const song = await createSong(fields.name.trim());
     if (song) {
       const merged = { ...song, ...fields };
       const { id: _id, ...updateFields } = merged;
-      if (await updateSong(song.id, updateFields)) {
-        setSongs([...songs, { ...song, ...fields }]);
-      } else {
-        setSongs([...songs, song]);
+      const updated = await updateSong(song.id, updateFields);
+      let hasSheetMusicFile = false;
+      if (file) {
+        const result = await uploadSheetMusic(song.id, file);
+        if (result) hasSheetMusicFile = true;
       }
+      const finalSong = updated
+        ? { ...song, ...fields, hasSheetMusicFile }
+        : { ...song, hasSheetMusicFile };
+      setSongs([...songs, finalSong]);
       setShowAdd(false);
     }
   }

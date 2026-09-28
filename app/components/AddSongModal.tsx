@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Song } from "../lib/api";
 import { SongFormFields } from "./SongFormFields";
+import { Upload, X } from "lucide-react";
 
 const EMPTY_SONG: Song = {
   id: "",
@@ -27,18 +28,23 @@ export default function AddSongModal({
   onCreate,
 }: {
   onClose: () => void;
-  onCreate: (fields: Omit<Song, "id" | "hasSheetMusicFile">) => void;
+  onCreate: (fields: Omit<Song, "id" | "hasSheetMusicFile">, file?: File) => void;
 }) {
   const [form, setForm] = useState<Song>({ ...EMPTY_SONG });
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function set<K extends keyof Song>(key: K, value: Song[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!form.name.trim()) return;
+    setSaving(true);
     const { id, hasSheetMusicFile, ...fields } = form;
-    onCreate(fields);
+    await onCreate(fields, file ?? undefined);
+    setSaving(false);
   }
 
   return (
@@ -52,15 +58,50 @@ export default function AddSongModal({
       >
         <h2 className="text-lg font-bold mb-4">Add Song</h2>
         <SongFormFields form={form} set={set} />
+
+        <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
+          <span className="block text-xs font-medium text-gray-500 mb-2">Sheet music PDF</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) setFile(f);
+            }}
+          />
+          {file ? (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-700">{file.name}</span>
+              <button
+                onClick={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800"
+            >
+              <Upload size={16} />
+              Choose PDF
+            </button>
+          )}
+        </div>
+
         <div className="flex justify-end gap-2 mt-6">
           <button onClick={onClose} className="px-4 py-1.5 border border-gray-300 rounded text-sm">
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-1.5 bg-blue-500 text-white rounded text-sm"
+            disabled={saving}
+            className="px-4 py-1.5 bg-blue-500 text-white rounded text-sm disabled:opacity-50"
           >
-            Create
+            {saving ? "Creating..." : "Create"}
           </button>
         </div>
       </div>
