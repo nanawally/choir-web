@@ -195,7 +195,7 @@ export function useConcertEditor(concertId: string) {
     if (data) {
       setActiveFormationId(formationId);
       setPlacements(
-        data.placements.map((p: any) => ({
+        data.placements.map((p: { choristId: string; gridX: number; gridY: number }) => ({
           choristId: p.choristId,
           gridX: p.gridX,
           gridY: p.gridY,

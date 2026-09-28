@@ -105,6 +105,8 @@ const translations = {
     sv: "Solistnamn (kommaseparerade)",
   },
   "songs.year": { en: "Year", sv: "År" },
+  "songs.yearFrom": { en: "From", sv: "Från" },
+  "songs.yearTo": { en: "To", sv: "Till" },
   "songs.sheetMusic": { en: "Sheet music", sv: "Noter" },
   "songs.sheetMusicTitle": { en: "Sheet Music", sv: "Noter" },
   "songs.available": { en: "Available", sv: "Tillgänglig" },

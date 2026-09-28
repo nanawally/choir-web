@@ -159,7 +159,7 @@ export default function FormationBar({
       const detail = await loadFormation(result.id);
       if (detail) {
         onLoad(
-          detail.placements.map((p: any) => ({
+          detail.placements.map((p: { choristId: string; gridX: number; gridY: number }) => ({
             choristId: p.choristId,
             gridX: p.gridX,
             gridY: p.gridY,

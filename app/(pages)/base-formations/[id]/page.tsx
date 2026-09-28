@@ -73,11 +73,11 @@ export default function BaseFormationEditor({
   }, []);
 
   useEffect(() => {
-    loadFormation(id).then((data: any) => {
+    loadFormation(id).then((data: { name: string; placements: { choristId: string; gridX: number; gridY: number }[]; rowSizes: string } | null) => {
       if (data) {
         setFormationName(data.name);
         setPlacements(
-          data.placements.map((p: any) => ({
+          data.placements.map((p) => ({
             choristId: p.choristId,
             gridX: p.gridX,
             gridY: p.gridY,

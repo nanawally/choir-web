@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   listConcerts,
   createConcert,
@@ -154,12 +155,13 @@ export default function ConcertsPage() {
             >
               {/* Image area */}
               <Link href={`/concerts/${c.id}`}>
-                <div className="aspect-[4/3] bg-gray-100 flex items-center justify-center">
+                <div className="relative aspect-4/3 bg-gray-100 flex items-center justify-center">
                   {c.imageUrl ? (
-                    <img
+                    <Image
                       src={c.imageUrl}
                       alt={c.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   ) : (
                     <ClefTreble size={40} className="text-gray-300" />

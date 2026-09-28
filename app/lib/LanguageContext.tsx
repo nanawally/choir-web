@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useCallback } from "react";
 import { type Language, type TranslationKey, translate } from "./translations";
 
 type LanguageContextType = {
@@ -17,14 +17,17 @@ const LanguageContext = createContext<LanguageContextType>({
 
 const STORAGE_KEY = "melisma-language";
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Language>("sv");
-
-  useEffect(() => {
+function getInitialLang(): Language {
+  try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "en" || saved === "sv") setLangState(saved);
-  }, []);
+    if (saved === "en" || saved === "sv") return saved;
+  } catch { /* SSR or localStorage unavailable */ }
+  return "sv";
+}
 
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [lang, setLangState] = useState<Language>(getInitialLang);
+  
   function setLang(l: Language) {
     setLangState(l);
     localStorage.setItem(STORAGE_KEY, l);

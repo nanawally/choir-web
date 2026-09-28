@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createChorist,
   updateChorist,
@@ -41,24 +41,10 @@ export default function ChoristModal({
   onSaved,
 }: ChoristModalProps) {
   const { t } = useTranslation();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [sectionLeader, setSectionLeader] = useState(false);
-  const [parts, setParts] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (mode === "edit" && chorist) {
-      setFirstName(chorist.firstName);
-      setLastName(chorist.lastName);
-      setSectionLeader(chorist.isSectionLeader);
-      setParts(currentParts);
-    } else {
-      setFirstName("");
-      setLastName("");
-      setSectionLeader(false);
-      setParts({});
-    }
-  }, [mode, chorist, currentParts]);
+  const [firstName, setFirstName] = useState(mode === "edit" && chorist ? chorist.firstName : "");
+  const [lastName, setLastName] = useState(mode === "edit" && chorist ? chorist.lastName : "");
+  const [sectionLeader, setSectionLeader] = useState(mode === "edit" && chorist ? chorist.isSectionLeader : false);
+  const [parts, setParts] = useState<Record<string, string>>(mode === "edit" ? currentParts : {});
 
   async function handleSave() {
     if (!firstName.trim()) return;

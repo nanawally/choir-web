@@ -69,7 +69,7 @@ export default function BaseFormationsPage() {
           </span>
           <button
             onClick={() => setShowAdd(true)}
-            className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium flex-shrink-0 ml-4"
+            className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium shrink-0 ml-4"
           >
             {t("baseFormations.newFormation")}
           </button>

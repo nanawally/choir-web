@@ -211,13 +211,14 @@ export default function ConcertEditor({
           />
         </div>
       )}
-      <RosterModal
-        open={editor.showRosterModal}
-        onClose={() => editor.setShowRosterModal(false)}
-        chorists={editor.chorists}
-        rosterIds={editor.rosterIds}
-        onSave={editor.handleSaveRoster}
-      />
+      {editor.showRosterModal && (
+        <RosterModal
+          onClose={() => editor.setShowRosterModal(false)}
+          chorists={editor.chorists}
+          rosterIds={editor.rosterIds}
+          onSave={editor.handleSaveRoster}
+        />
+      )}
     </div>
   );
 }

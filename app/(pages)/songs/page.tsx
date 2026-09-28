@@ -11,6 +11,7 @@ import AddSongModal from "../../components/AddSongModal";
 import { SongFormFields } from "../../components/SongFormFields";
 import { useSongs, ALL_COLUMNS, FILTER_COLUMNS } from "../../hooks/useSongs";
 import { EllipsisVertical, ChevronDown, ChevronRight, Download, X, SquarePen, Columns3, Upload, FileText, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { useTranslation } from "../../lib/LanguageContext";
 
 export default function SongsPage() {
@@ -27,6 +28,8 @@ export default function SongsPage() {
     editingSong,
     setEditingSong,
     filters,
+    yearRange,
+    setYearRange,
     filterMenuOpen,
     setFilterMenuOpen,
     filterExpandedCol,
@@ -80,7 +83,7 @@ export default function SongsPage() {
             <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-56">
               {FILTER_COLUMNS.map((fc) => {
                 const options = filterOptions[fc.key] || [];
-                if (options.length === 0) return null;
+                if (fc.type !== "range" && options.length === 0) return null;
                 return (
                   <div key={fc.key}>
                     <button
@@ -95,21 +98,45 @@ export default function SongsPage() {
                       </span>
                     </button>
                     {filterExpandedCol === fc.key && (
-                      <div className="pl-3 pb-1 max-h-48 overflow-y-auto">
-                        {options.map((val) => (
-                          <label
-                            key={val}
-                            className="flex items-center gap-2 px-2 py-1 text-sm hover:bg-gray-50 cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isFilterActive(fc.key, val)}
-                              onChange={() => toggleFilter(fc, val)}
-                            />
-                            {val}
-                          </label>
-                        ))}
-                      </div>
+                      fc.type === "range" ? (
+                        <div className="px-3 pb-2 flex items-center gap-2">
+                          <input
+                            type="number"
+                            placeholder={t("songs.yearFrom")}
+                            value={yearRange.from ?? ""}
+                            onChange={(e) =>
+                              setYearRange((r) => ({ ...r, from: e.target.value ? parseInt(e.target.value) : null }))
+                            }
+                            className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                          />
+                          <span className="text-gray-400 text-sm">–</span>
+                          <input
+                            type="number"
+                            placeholder={t("songs.yearTo")}
+                            value={yearRange.to ?? ""}
+                            onChange={(e) =>
+                              setYearRange((r) => ({ ...r, to: e.target.value ? parseInt(e.target.value) : null }))
+                            }
+                            className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                          />
+                        </div>
+                      ) : (
+                        <div className="pl-3 pb-1 max-h-48 overflow-y-auto">
+                          {options.map((val) => (
+                            <label
+                              key={val}
+                              className="flex items-center gap-2 px-2 py-1 text-sm hover:bg-gray-50 cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isFilterActive(fc.key, val)}
+                                onChange={() => toggleFilter(fc, val)}
+                              />
+                              {val}
+                            </label>
+                          ))}
+                        </div>
+                      )
                     )}
                   </div>
                 );
@@ -161,8 +188,19 @@ export default function SongsPage() {
       </div>
 
       {/* Filter tags */}
-      {filters.length > 0 && (
+      {(filters.length > 0 || yearRange.from != null || yearRange.to != null) && (
         <div className="mx-auto w-full max-w-6xl flex items-center gap-2 mb-3 flex-wrap">
+          {yearRange.from != null || yearRange.to != null ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
+              {t("songs.year")}: {yearRange.from ?? "…"}–{yearRange.to ?? "…"}
+              <button
+                onClick={() => setYearRange({ from: null, to: null })}
+                className="hover:text-blue-600"
+              >
+                <X size={12} />
+              </button>
+            </span>
+          ) : null}
           {filters.map((f) => (
             <span
               key={`${f.column}-${f.value}`}
@@ -320,18 +358,17 @@ function SongModal({
   }, [song.id]);
 
   useEffect(() => {
-    if (!current.hasSheetMusicFile) {
-      setPdfUrl(null);
-      return;
-    }
+    if (!current.hasSheetMusicFile) return;
+    let revoked = false;
     const url = getSheetMusicUrl(current.id);
     const token = getToken();
     fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((res) => res.ok ? res.blob() : null)
       .then((blob) => {
-        if (blob) setPdfUrl(URL.createObjectURL(blob));
+        if (blob && !revoked) setPdfUrl(URL.createObjectURL(blob));
       });
     return () => {
+      revoked = true;
       setPdfUrl((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
     };
   }, [current.id, current.hasSheetMusicFile]);
@@ -431,10 +468,11 @@ function SongModal({
           </div>
           <div className="flex items-start gap-2">
             {current.hasSheetMusicFile && (
-              <img
+              <Image
                 src="/musical-score-icon.png"
                 alt="Sheet music available"
-                className="w-10 h-10"
+                width={40}
+                height={40}
               />
             )}
             <button

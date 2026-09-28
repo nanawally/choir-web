@@ -33,7 +33,7 @@ export default function AddFormationModal({
       listBaseFormations().then(setBaseFormations);
     }
   }, [open]);
-
+  
   if (!open) return null;
 
   const reusable = formations.filter((f) => !songFormationIds.has(f.id));

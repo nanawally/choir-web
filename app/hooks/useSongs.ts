@@ -58,14 +58,15 @@ const DEFAULT_VISIBLE = ["name", "composer", "arranger", "year", "collectionName
 const STORAGE_KEY = "songs-visible-columns";
 
 export type ActiveFilter = { column: string; columnLabel: string; value: string };
+export type YearRange = { from: number | null; to: number | null };
 
-export const FILTER_COLUMNS: { key: keyof Song; label: string; type: "text" | "bool" }[] = [
+export const FILTER_COLUMNS: { key: keyof Song; label: string; type: "text" | "bool" | "range" }[] = [
   { key: "composer", label: "Composer", type: "text" },
   { key: "arranger", label: "Arranger", type: "text" },
   { key: "delning", label: "Delning", type: "text" },
   { key: "languages", label: "Languages", type: "text" },
   { key: "accompanied", label: "Accompanied", type: "bool" },
-  { key: "year", label: "Year", type: "text" },
+  { key: "year", label: "Year", type: "range" },
   { key: "collectionName", label: "Collection", type: "text" },
   { key: "hasSoloists", label: "Soloists", type: "bool" },
   { key: "hasSheetMusicFile", label: "Sheet music", type: "bool" },
@@ -76,11 +77,21 @@ export function useSongs() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_VISIBLE);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as string[];
+        if (Array.isArray(parsed) && parsed.includes("name")) return parsed;
+      }
+    } catch { /* ignore */ }
+    return DEFAULT_VISIBLE;
+  });
   const [columnPickerOpen, setColumnPickerOpen] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [editingSong, setEditingSong] = useState<Song | null>(null);
   const [filters, setFilters] = useState<ActiveFilter[]>([]);
+  const [yearRange, setYearRange] = useState<YearRange>({ from: null, to: null });
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filterExpandedCol, setFilterExpandedCol] = useState<string | null>(null);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -92,13 +103,6 @@ export function useSongs() {
 
   useEffect(() => {
     listSongs().then(setSongs).finally(() => setLoading(false));
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as string[];
-        if (Array.isArray(parsed) && parsed.includes("name")) setVisibleColumns(parsed);
-      }
-    } catch { /* ignore */ }
   }, []);
 
   useEffect(() => {
@@ -155,9 +159,18 @@ export function useSongs() {
 
   function clearFilters() {
     setFilters([]);
+    setYearRange({ from: null, to: null });
   }
 
-  function matchesFilters(song: Song): boolean {
+  const matchesFilters = useCallback((song: Song): boolean => {
+    // Check year range
+    if (yearRange.from != null || yearRange.to != null) {
+      const y = song.year;
+      if (y == null) return false;
+      if (yearRange.from != null && y < yearRange.from) return false;
+      if (yearRange.to != null && y > yearRange.to) return false;
+    }
+
     if (filters.length === 0) return true;
     const byColumn = new Map<string, string[]>();
     for (const f of filters) {
@@ -181,7 +194,7 @@ export function useSongs() {
       }
     }
     return true;
-  }
+  }, [filters, yearRange]);
 
   const searched = useMemo(() => {
     const q = search.toLowerCase();
@@ -196,8 +209,8 @@ export function useSongs() {
           s.collectionName?.toLowerCase().includes(q)
         );
       });
-  }, [songs, search, filters]);
-
+  }, [songs, search, matchesFilters]);
+  
   const { sorted: filtered, sortKey, sortDir, cycleSort } = useTableSort(searched, defaultSort);
 
   const columns = ALL_COLUMNS.filter((c) => visibleColumns.includes(c.key));
@@ -278,6 +291,8 @@ export function useSongs() {
     editingSong,
     setEditingSong,
     filters,
+    yearRange,
+    setYearRange,
     filterMenuOpen,
     setFilterMenuOpen,
     filterExpandedCol,
