@@ -47,10 +47,10 @@ export const ALL_COLUMNS: ColumnDef[] = [
     },
   },
   {
-    key: "hasSheetMusic",
+    key: "hasSheetMusicFile",
     label: "Sheet music",
     width: "100px",
-    render: (s) => (s.hasSheetMusic ? "Yes" : "No"),
+    render: (s) => (s.hasSheetMusicFile ? "Yes" : "No"),
   },
 ];
 
@@ -68,7 +68,7 @@ export const FILTER_COLUMNS: { key: keyof Song; label: string; type: "text" | "b
   { key: "year", label: "Year", type: "text" },
   { key: "collectionName", label: "Collection", type: "text" },
   { key: "hasSoloists", label: "Soloists", type: "bool" },
-  { key: "hasSheetMusic", label: "Sheet music", type: "bool" },
+  { key: "hasSheetMusicFile", label: "Sheet music", type: "bool" },
 ];
 
 export function useSongs() {

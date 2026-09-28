@@ -456,7 +456,7 @@ function SongModal({
           <DetailCell label={t("songs.languages")} value={current.languages ?? "—"} />
           <DetailCell label={t("songs.length")} value={current.length ?? "—"} />
           <DetailCell label={t("songs.year")} value={current.year?.toString() ?? "—"} />
-          <DetailCell label={t("songs.sheetMusic")} value={current.hasSheetMusic ? "Yes" : "No"} />
+          <DetailCell label={t("songs.sheetMusic")} value={current.hasSheetMusicFile ? t("common.yes") : t("common.no")} />
           <DetailCell label={t("songs.collection")} value={current.collectionName ?? "—"} />
           <BooleanDetail
             label={t("songs.accompanied")}

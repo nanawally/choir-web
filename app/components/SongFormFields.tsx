@@ -111,26 +111,14 @@ export function SongFormFields({
           </Field>
         )}
       </div>
-      <div className="flex items-center gap-4">
-        <Field label={t("songs.year")}>
-          <input
-            type="number"
-            value={form.year ?? ""}
-            onChange={(e) => set("year", e.target.value ? parseInt(e.target.value) : null)}
-            className="w-24 border border-gray-300 rounded px-2 py-1 text-sm"
-          />
-        </Field>
-        <Field label={t("songs.sheetMusic")}>
-          <label className="flex items-center gap-1 text-sm">
-            <input
-              type="checkbox"
-              checked={form.hasSheetMusic}
-              onChange={(e) => set("hasSheetMusic", e.target.checked)}
-            />
-            {t("songs.available")}
-          </label>
-        </Field>
-      </div>
+      <Field label={t("songs.year")}>
+        <input
+          type="number"
+          value={form.year ?? ""}
+          onChange={(e) => set("year", e.target.value ? parseInt(e.target.value) : null)}
+          className="w-24 border border-gray-300 rounded px-2 py-1 text-sm"
+        />
+      </Field>
       <Field label={t("songs.collection")}>
         <input
           value={form.collectionName ?? ""}
