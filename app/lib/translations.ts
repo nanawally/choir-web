@@ -166,8 +166,8 @@ const translations = {
   "chorists.firstName": { en: "First name", sv: "Förnamn" },
   "chorists.lastName": { en: "Last name", sv: "Efternamn" },
   "chorists.sectionLeader": {
-    en: "Section leader (stämledare)",
-    sv: "Stämledare",
+    en: "Section leader (stämfiskal)",
+    sv: "Stämfiskal",
   },
   "chorists.archived": { en: "Archived Chorists", sv: "Arkiverade korister" },
   "chorists.noChorists": { en: "No chorists yet.", sv: "Inga korister ännu." },
@@ -187,7 +187,7 @@ const translations = {
   },
   "chorists.sectionLeaderTooltip": {
     en: "Section leader",
-    sv: "Stämledare",
+    sv: "Stämfiskal",
   },
 
   // Voice Groups
@@ -302,7 +302,7 @@ const translations = {
   "formations.arc": { en: "Arc", sv: "Båge" },
   "formations.grid": { en: "Grid", sv: "Rutnät" },
   "formations.title": { en: "Formation", sv: "Uppställning" },
-
+  
   // Roster
   "roster.title": { en: "Concert Roster", sv: "Konsertkorister" },
   "roster.editRoster": { en: "Edit Roster", sv: "Redigera korister" },
