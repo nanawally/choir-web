@@ -147,8 +147,8 @@ const translations = {
   "concerts.newConcert": { en: "+ New concert", sv: "+ Ny konsert" },
   "concerts.noConcerts": { en: "No concerts yet.", sv: "Inga konserter ännu." },
   "concerts.confirmDelete": {
-    en: "Delete this concert and all its formations?",
-    sv: "Ta bort konserten och alla dess uppställningar?",
+    en: "Delete {name} and all its formations?",
+    sv: "Ta bort {name} och alla dess uppställningar?",
   },
   "concerts.nameForCopy": { en: "Name for the copy:", sv: "Namn för kopian:" },
   "concerts.concertName": { en: "Concert name...", sv: "Konsertnamn..." },
@@ -182,8 +182,8 @@ const translations = {
   "chorists.archive": { en: "Archive", sv: "Arkivera" },
   "chorists.unarchive": { en: "Unarchive", sv: "Avarkivera" },
   "chorists.confirmArchive": {
-    en: "Archive this chorist?",
-    sv: "Arkivera denna korist?",
+    en: "Archive {name}?",
+    sv: "Arkivera {name}?",
   },
   "chorists.sectionLeaderTooltip": {
     en: "Section leader",
@@ -210,6 +210,10 @@ const translations = {
     en: "Delete group",
     sv: "Ta bort stämdelning",
   },
+  "voiceGroups.confirmDeleteGroup": {
+    en: "Delete {name}?",
+    sv: "Ta bort {name}?",
+  },
 
   // Base Formations
   "baseFormations.title": { en: "Base Formations", sv: "Grunduppställningar" },
@@ -230,8 +234,8 @@ const translations = {
     sv: "Inga grunduppställningar ännu.",
   },
   "baseFormations.confirmDelete": {
-    en: "Delete this base formation and all its placements?",
-    sv: "Ta bort grunduppställningen och alla dess placeringar?",
+    en: "Delete {name} and all its placements?",
+    sv: "Ta bort {name} och alla dess placeringar?",
   },
   "baseFormations.backToBaseFormations": {
     en: "Back to base formations",
@@ -274,8 +278,8 @@ const translations = {
     sv: "Lägg till ny uppställning",
   },
   "formations.confirmDelete": {
-    en: "Delete this formation?",
-    sv: "Ta bort denna uppställning?",
+    en: "Delete {name}?",
+    sv: "Ta bort {name}?",
   },
   "formations.arcRows": {
     en: "Arc rows (empty = rectangular grid)",

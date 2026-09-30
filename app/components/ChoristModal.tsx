@@ -99,7 +99,7 @@ export default function ChoristModal({
   }
 
   async function handleArchive() {
-    if (!chorist || !window.confirm(t("chorists.confirmArchive"))) return;
+    if (!chorist || !window.confirm(t("chorists.confirmArchive").replace("{name}", `${chorist.firstName} ${chorist.lastName}`))) return;
     await archiveChorist(chorist.id);
     onSaved();
   }

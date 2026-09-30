@@ -77,7 +77,8 @@ export default function ConcertsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm(t("concerts.confirmDelete"))) return;
+    const concert = concerts.find((c) => c.id === id);
+    if (!window.confirm(t("concerts.confirmDelete").replace("{name}", concert?.name ?? ""))) return;
     if (await deleteConcert(id)) {
       setConcerts(concerts.filter((c) => c.id !== id));
     }

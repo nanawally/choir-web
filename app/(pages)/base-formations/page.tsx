@@ -51,7 +51,8 @@ export default function BaseFormationsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm(t("baseFormations.confirmDelete"))) return;
+    const formation = formations.find((f) => f.id === id);
+    if (!window.confirm(t("baseFormations.confirmDelete").replace("{name}", formation?.name ?? ""))) return;
     if (await deleteFormation(id)) {
       setFormations(formations.filter((f) => f.id !== id));
     }
@@ -113,7 +114,7 @@ export default function BaseFormationsPage() {
           )}
 
           <div className="space-y-2">
-            {formations.map((f) => (
+            {[...formations].sort((a, b) => a.name.localeCompare(b.name)).map((f) => (
               <div
                 key={f.id}
                 className="border border-border rounded-lg px-4 py-3 flex items-center justify-between hover:bg-hover-bg"

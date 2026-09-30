@@ -232,7 +232,8 @@ export default function VoiceGroupPanel({
 
   async function handleDeleteGroup() {
     if (!activeGroupId) return;
-    if (!window.confirm("Delete this voice group?")) return;
+    const group = voiceGroups.find((g) => g.id === activeGroupId);
+    if (!window.confirm(t("voiceGroups.confirmDeleteGroup").replace("{name}", group?.name ?? ""))) return;
     if (await deleteVoiceGroup(activeGroupId)) {
       setVoiceGroups(voiceGroups.filter((g) => g.id !== activeGroupId));
       onSelectGroup(null);

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowBigLeft, UsersRound, UserRoundGroup } from "lucide-react";
 import { shortName } from "../../../lib/choristName";
 import { useTranslation } from "../../../lib/LanguageContext";
+import { sortChoristsByVoicePart } from "../../../lib/voiceGroupSort";
 import {
   apiFetch,
   getAssignments,
@@ -54,6 +55,10 @@ export default function BaseFormationEditor({
     }[]
   >([]);
 
+  const [fourPartAssignments, setFourPartAssignments] = useState<
+    { choristId: string; voicePartId: string }[]
+  >([]);
+
   // Panels
   const [showChorists, setShowChorists] = useState(false);
   const [showVoiceGroups, setShowVoiceGroups] = useState(false);
@@ -71,7 +76,13 @@ export default function BaseFormationEditor({
   }, []);
 
   useEffect(() => {
-    listVoiceGroups().then(setVoiceGroups);
+    listVoiceGroups().then((groups) => {
+      setVoiceGroups(groups);
+      const fourPart = groups.find(
+        (g: { name: string }) => g.name.includes("4-part") || g.name.includes("4-stäm"),
+      );
+      if (fourPart) getAssignments(fourPart.id).then(setFourPartAssignments);
+    });
   }, []);
 
   useEffect(() => {
@@ -214,6 +225,11 @@ export default function BaseFormationEditor({
     setPlacements([...notOnRow, ...valid, ...clamped]);
   }
 
+  const fourPartGroup = voiceGroups.find(
+    (g) => g.name.includes("4-part") || g.name.includes("4-stäm"),
+  );
+  const sortedChorists = sortChoristsByVoicePart(chorists, fourPartGroup, fourPartAssignments);
+
   const leftOpen = showChorists;
   const rightOpen = showVoiceGroups;
 
@@ -224,7 +240,7 @@ export default function BaseFormationEditor({
         <div className="absolute top-0 left-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-10">
           <h2 className="font-bold mb-3">{t("baseFormations.chorists")}</h2>
           <div className="space-y-1">
-            {chorists
+            {sortedChorists
               .filter((c) => !placedIds.has(c.id))
               .map((c) => (
                 <div
@@ -247,7 +263,7 @@ export default function BaseFormationEditor({
               <h3 className="text-xs font-medium text-muted mt-4 mb-1">
                 {t("baseFormations.placed")}
               </h3>
-              {chorists
+              {sortedChorists
                 .filter((c) => placedIds.has(c.id))
                 .map((c) => (
                   <div key={c.id} className="text-sm py-0.5 px-2 text-subtle">

@@ -15,6 +15,7 @@ import {
   setConcertChorists,
   setSongFormations,
 } from "../lib/api";
+import { sortChoristsByVoicePart } from "../lib/voiceGroupSort";
 
 const CELL_SIZE = 50;
 const WIDTH = 800;
@@ -68,6 +69,9 @@ export function useConcertEditor(concertId: string) {
   const [rowSizes, setRowSizes] = useState<number[]>([]);
   const [activeFormationId, setActiveFormationId] = useState<string | null>(null);
   const [formations, setFormations] = useState<Formation[]>([]);
+  const [fourPartAssignments, setFourPartAssignments] = useState<
+    { choristId: string; voicePartId: string }[]
+  >([]);
 
   useEffect(() => {
     apiFetch("/chorists")
@@ -91,6 +95,16 @@ export function useConcertEditor(concertId: string) {
       getAssignments(activeGroupId).then(setAssignments);
     }
   }, [activeGroupId]);
+
+  // Fetch 4-part assignments for roster sorting
+  useEffect(() => {
+    const fourPart = voiceGroups.find(
+      (g) => g.name.includes("4-part") || g.name.includes("4-stäm"),
+    );
+    if (fourPart) {
+      getAssignments(fourPart.id).then(setFourPartAssignments);
+    }
+  }, [voiceGroups]);
 
   useEffect(() => {
     listConcertSongs(concertId).then(setConcertSongs);
@@ -131,7 +145,12 @@ export function useConcertEditor(concertId: string) {
   }
 
   const placedIds = new Set(placements.map((p) => p.choristId));
-  const rosterChorists = chorists.filter((c) => rosterIds.has(c.id));
+
+  const fourPartGroup = voiceGroups.find(
+    (g) => g.name.includes("4-part") || g.name.includes("4-stäm"),
+  );
+  const sortedChorists = sortChoristsByVoicePart(chorists, fourPartGroup, fourPartAssignments);
+  const rosterChorists = sortedChorists.filter((c) => rosterIds.has(c.id));
 
   // Build a lookup: for each song, its formation objects (with names, in order)
   function getFormationsForSong(songId: string) {
@@ -333,6 +352,7 @@ export function useConcertEditor(concertId: string) {
     // State values
     concertName,
     chorists,
+    sortedChorists,
     placements,
     selectedIds,
     activeGroupId,

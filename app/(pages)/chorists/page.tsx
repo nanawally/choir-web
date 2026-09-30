@@ -196,8 +196,13 @@ export default function RosterPage() {
                   ? getPartForChorist(chorist.id, fourPartGroup)
                   : null;
 
+                const fourPartIndex = fourPartGroup
+                  ? fourPartGroup.parts.findIndex((p) => p.id === fourPartPart?.id)
+                  : -1;
+                const isAltRow = fourPartIndex % 2 === 1;
+
                 return (
-                  <Tr key={chorist.id}>
+                  <Tr key={chorist.id} className={isAltRow ? "bg-surface-alt" : ""}>
                     {fourPartGroup && (
                       <Td compact>
                         <div className="flex items-center gap-1">

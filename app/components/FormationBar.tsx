@@ -125,7 +125,8 @@ export default function FormationBar({
 
   async function handleDeleteFormation() {
     if (!activeFormationId) return;
-    if (!window.confirm(t("formations.confirmDelete"))) return;
+    const formation = formations.find((f) => f.id === activeFormationId);
+    if (!window.confirm(t("formations.confirmDelete").replace("{name}", formation?.name ?? ""))) return;
     if (await deleteFormation(activeFormationId)) {
       onFormationsChange(formations.filter((f) => f.id !== activeFormationId));
       onActiveFormationIdChange(null);

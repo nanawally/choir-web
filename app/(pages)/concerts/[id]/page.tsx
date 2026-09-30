@@ -270,7 +270,7 @@ export default function ConcertEditor({
       {editor.showRosterModal && (
         <RosterModal
           onClose={() => editor.setShowRosterModal(false)}
-          chorists={editor.chorists}
+          chorists={editor.sortedChorists}
           rosterIds={editor.rosterIds}
           onSave={editor.handleSaveRoster}
         />

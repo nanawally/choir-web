@@ -169,9 +169,7 @@ export function useChorists() {
         const bIdx = getPartSortIndex(b.id, group);
         if (aIdx !== bIdx) return aIdx - bIdx;
       }
-      const aName = `${a.lastName} ${a.firstName}`;
-      const bName = `${b.lastName} ${b.firstName}`;
-      return aName.localeCompare(bName);
+      return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
     });
 
   const sortedFilterGroups = sortVoiceGroups(voiceGroups);
