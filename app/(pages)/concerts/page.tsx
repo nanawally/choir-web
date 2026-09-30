@@ -14,7 +14,12 @@ import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
 import { ClefTreble } from "lucide-react";
 
-type Concert = { id: string; name: string; date: string | null; imageUrl: string | null };
+type Concert = {
+  id: string;
+  name: string;
+  date: string | null;
+  imageUrl: string | null;
+};
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-");
@@ -33,7 +38,9 @@ export default function ConcertsPage() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    listConcerts().then(setConcerts).finally(() => setLoading(false));
+    listConcerts()
+      .then(setConcerts)
+      .finally(() => setLoading(false));
   }, []);
 
   // Sort by date descending (latest first), nulls last
@@ -92,174 +99,176 @@ export default function ConcertsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col py-8 px-4 md:px-8">
-      <h1 className="text-4xl font-bold mb-6 text-center">{t("concerts.title")}</h1>
+      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8">
+        <h1 className="text-4xl font-bold mb-6 text-center">
+          {t("concerts.title")}
+        </h1>
 
-      <div className="mx-auto w-full max-w-4xl">
-        <div className="flex justify-end mb-6">
-          <button
-            onClick={() => setShowAdd(true)}
-            className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
-          >
-            {t("concerts.newConcert")}
-          </button>
-        </div>
+        <div className="mx-auto w-full max-w-4xl">
+          <div className="flex justify-end mb-6">
+            <button
+              onClick={() => setShowAdd(true)}
+              className="px-3 py-2 btn-primary text-sm font-medium"
+            >
+              {t("concerts.newConcert")}
+            </button>
+          </div>
 
-        {showAdd && (
-          <div className="flex items-center gap-2 mb-6 p-3 border border-gray-200 rounded-lg bg-gray-50">
-            <input
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreate();
-                if (e.key === "Escape") {
+          {showAdd && (
+            <div className="flex items-center gap-2 mb-6 p-3 border border-border rounded-lg bg-hover-bg">
+              <input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreate();
+                  if (e.key === "Escape") {
+                    setShowAdd(false);
+                    setNewName("");
+                    setNewDate("");
+                  }
+                }}
+                placeholder={t("concerts.concertName")}
+                className="border border-border rounded px-2 py-1 text-sm flex-1"
+                autoFocus
+              />
+              <input
+                type="date"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+                className="border border-border rounded px-2 py-1 text-sm"
+              />
+              <button
+                onClick={handleCreate}
+                className="px-3 py-1 btn-primary text-sm"
+              >
+                {t("common.create")}
+              </button>
+              <button
+                onClick={() => {
                   setShowAdd(false);
                   setNewName("");
                   setNewDate("");
-                }
-              }}
-              placeholder={t("concerts.concertName")}
-              className="border border-gray-300 rounded px-2 py-1 text-sm flex-1"
-              autoFocus
-            />
-            <input
-              type="date"
-              value={newDate}
-              onChange={(e) => setNewDate(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
-            />
-            <button
-              onClick={handleCreate}
-              className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
-            >
-              {t("common.create")}
-            </button>
-            <button
-              onClick={() => {
-                setShowAdd(false);
-                setNewName("");
-                setNewDate("");
-              }}
-              className="px-3 py-1 border border-gray-300 rounded text-sm"
-            >
-              {t("common.cancel")}
-            </button>
-          </div>
-        )}
+                }}
+                className="px-3 py-1 border border-border rounded text-sm"
+              >
+                {t("common.cancel")}
+              </button>
+            </div>
+          )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sorted.map((c) => (
-            <div
-              key={c.id}
-              className="border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow group relative"
-            >
-              {/* Image area */}
-              <Link href={`/concerts/${c.id}`}>
-                <div className="relative aspect-4/3 bg-gray-100 flex items-center justify-center">
-                  {c.imageUrl ? (
-                    <Image
-                      src={c.imageUrl}
-                      alt={c.name}
-                      fill
-                      className="object-cover"
-                    />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sorted.map((c) => (
+              <div
+                key={c.id}
+                className="border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group relative"
+              >
+                {/* Image area */}
+                <Link href={`/concerts/${c.id}`}>
+                  <div className="relative aspect-4/3 bg-surface-alt flex items-center justify-center">
+                    {c.imageUrl ? (
+                      <Image
+                        src={c.imageUrl}
+                        alt={c.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <ClefTreble size={40} className="text-subtle" />
+                    )}
+                  </div>
+                </Link>
+
+                {/* Info area */}
+                <div className="p-3">
+                  {editingId === c.id ? (
+                    <div className="flex flex-col gap-1">
+                      <input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleUpdate(c.id);
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                        className="border border-border rounded px-2 py-0.5 text-sm font-semibold"
+                        autoFocus
+                      />
+                      <input
+                        type="date"
+                        value={editDate}
+                        onChange={(e) => setEditDate(e.target.value)}
+                        className="border border-border rounded px-2 py-0.5 text-sm"
+                      />
+                      <div className="flex gap-1 mt-1">
+                        <button
+                          onClick={() => handleUpdate(c.id)}
+                          className="px-2 py-0.5 btn-primary text-xs"
+                        >
+                          {t("common.save")}
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="px-2 py-0.5 border border-border rounded text-xs"
+                        >
+                          {t("common.cancel")}
+                        </button>
+                      </div>
+                    </div>
                   ) : (
-                    <ClefTreble size={40} className="text-gray-300" />
+                    <>
+                      <Link href={`/concerts/${c.id}`}>
+                        <h2 className="font-semibold text-sm hover:text-link text-center">
+                          {c.name}
+                        </h2>
+                      </Link>
+                      {c.date && (
+                        <p className="text-xs text-subtle mt-0.5 text-center">
+                          {formatDate(c.date)}
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
-              </Link>
 
-              {/* Info area */}
-              <div className="p-3">
-                {editingId === c.id ? (
-                  <div className="flex flex-col gap-1">
-                    <input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleUpdate(c.id);
-                        if (e.key === "Escape") setEditingId(null);
+                {/* Action buttons — visible on hover */}
+                {editingId !== c.id && (
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => {
+                        setEditingId(c.id);
+                        setEditName(c.name);
+                        setEditDate(c.date || "");
                       }}
-                      className="border border-gray-300 rounded px-2 py-0.5 text-sm font-semibold"
-                      autoFocus
-                    />
-                    <input
-                      type="date"
-                      value={editDate}
-                      onChange={(e) => setEditDate(e.target.value)}
-                      className="border border-gray-300 rounded px-2 py-0.5 text-sm"
-                    />
-                    <div className="flex gap-1 mt-1">
-                      <button
-                        onClick={() => handleUpdate(c.id)}
-                        className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
-                      >
-                        {t("common.save")}
-                      </button>
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="px-2 py-0.5 border border-gray-300 rounded text-xs"
-                      >
-                        {t("common.cancel")}
-                      </button>
-                    </div>
+                      className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
+                      title={t("common.edit")}
+                    >
+                      {t("common.edit")}
+                    </button>
+                    <button
+                      onClick={() => handleDuplicate(c.id)}
+                      className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
+                      title={t("common.duplicate")}
+                    >
+                      {t("common.copy")}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(c.id)}
+                      className="px-1.5 py-0.5 btn-danger text-xs shadow-sm"
+                      title={t("common.delete")}
+                    >
+                      X
+                    </button>
                   </div>
-                ) : (
-                  <>
-                    <Link href={`/concerts/${c.id}`}>
-                      <h2 className="font-semibold text-sm hover:text-blue-600 text-center">
-                        {c.name}
-                      </h2>
-                    </Link>
-                    {c.date && (
-                      <p className="text-xs text-gray-400 mt-0.5 text-center">
-                        {formatDate(c.date)}
-                      </p>
-                    )}
-                  </>
                 )}
               </div>
+            ))}
+          </div>
 
-              {/* Action buttons — visible on hover */}
-              {editingId !== c.id && (
-                <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => {
-                      setEditingId(c.id);
-                      setEditName(c.name);
-                      setEditDate(c.date || "");
-                    }}
-                    className="px-1.5 py-0.5 bg-white/90 border border-gray-300 rounded text-xs shadow-sm"
-                    title={t("common.edit")}
-                  >
-                    {t("common.edit")}
-                  </button>
-                  <button
-                    onClick={() => handleDuplicate(c.id)}
-                    className="px-1.5 py-0.5 bg-white/90 border border-gray-300 rounded text-xs shadow-sm"
-                    title={t("common.duplicate")}
-                  >
-                    {t("common.copy")}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(c.id)}
-                    className="px-1.5 py-0.5 bg-red-500 text-white rounded text-xs shadow-sm"
-                    title={t("common.delete")}
-                  >
-                    X
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
+          {!loading && concerts.length === 0 && !showAdd && (
+            <p className="text-subtle text-sm text-center mt-8">
+              {t("concerts.noConcerts")}
+            </p>
+          )}
         </div>
-
-        {!loading && concerts.length === 0 && !showAdd && (
-          <p className="text-gray-400 text-sm text-center mt-8">
-            {t("concerts.noConcerts")}
-          </p>
-        )}
-      </div>
       </div>
     </div>
   );

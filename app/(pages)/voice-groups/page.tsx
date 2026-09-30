@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { GripVertical, EllipsisVertical, ChevronUp, ChevronRight } from "lucide-react";
+import {
+  GripVertical,
+  EllipsisVertical,
+  ChevronUp,
+  ChevronRight,
+} from "lucide-react";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
 import {
@@ -64,13 +69,13 @@ function SortablePartRow({
     <li
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 h-8 px-2 border-b border-gray-100"
+      className="flex items-center gap-2 h-8 px-2 border-b border-border"
     >
       <span
         {...attributes}
         {...listeners}
         style={{ touchAction: "none" }}
-        className="cursor-grab active:cursor-grabbing text-gray-400 select-none"
+        className="cursor-grab active:cursor-grabbing text-subtle select-none"
       >
         <GripVertical size={14} />
       </span>
@@ -83,19 +88,19 @@ function SortablePartRow({
               if (e.key === "Enter") save();
               if (e.key === "Escape") setEditing(false);
             }}
-            className="border border-gray-300 rounded px-2 py-0.5 text-sm w-20"
+            className="border border-border rounded px-2 py-0.5 text-sm w-20"
             autoFocus
           />
           <input
             type="color"
             value={color}
             onChange={(e) => setColor(e.target.value)}
-            className="w-6 h-6 border border-gray-300 rounded cursor-pointer p-0"
+            className="w-6 h-6 border border-border rounded cursor-pointer p-0"
           />
           <select
             value={shape}
             onChange={(e) => setShape(e.target.value)}
-            className="border border-gray-300 rounded px-1 py-0.5 text-xs"
+            className="border border-border rounded px-1 py-0.5 text-xs"
           >
             {SHAPES.map((s) => (
               <option key={s} value={s}>
@@ -103,15 +108,12 @@ function SortablePartRow({
               </option>
             ))}
           </select>
-          <button
-            onClick={save}
-            className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
-          >
+          <button onClick={save} className="px-2 py-0.5 btn-primary text-xs">
             {t("common.save")}
           </button>
           <button
             onClick={() => setEditing(false)}
-            className="px-2 py-0.5 border border-gray-300 rounded text-xs"
+            className="px-2 py-0.5 border border-border rounded text-xs"
           >
             {t("common.cancel")}
           </button>
@@ -123,7 +125,7 @@ function SortablePartRow({
             style={{ backgroundColor: part.color }}
           />
           <span
-            className="text-sm font-medium cursor-pointer hover:text-blue-600"
+            className="text-sm font-medium cursor-pointer hover:text-link"
             onDoubleClick={() => {
               setName(part.name);
               setColor(part.color);
@@ -134,11 +136,11 @@ function SortablePartRow({
           >
             {part.name}
           </span>
-          <span className="text-xs text-gray-400">{part.shape}</span>
+          <span className="text-xs text-subtle">{part.shape}</span>
           <div className="ml-auto">
             <button
               onClick={onDelete}
-              className="text-red-400 hover:text-red-600 text-xs"
+              className="text-danger hover:text-danger-hover text-xs"
             >
               {t("common.delete")}
             </button>
@@ -187,7 +189,12 @@ function VoiceGroupCard({
   onSetRenamingGroupId: (id: string | null) => void;
   onSetRenameValue: (v: string) => void;
   onAddPart: (groupId: string) => void;
-  onUpdatePart: (partId: string, name: string, color: string, shape: string) => void;
+  onUpdatePart: (
+    partId: string,
+    name: string,
+    color: string,
+    shape: string,
+  ) => void;
   onDeletePart: (partId: string) => void;
   onPartDragEnd: (groupId: string, event: DragEndEvent) => void;
   onRenameGroup: (id: string) => void;
@@ -199,14 +206,13 @@ function VoiceGroupCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const isRenaming = renamingGroupId === group.id;
   const hasMore = group.parts.length > VISIBLE_ROWS;
-  const visibleParts = expanded || !hasMore
-    ? group.parts
-    : group.parts.slice(0, VISIBLE_ROWS - 1);
+  const visibleParts =
+    expanded || !hasMore ? group.parts : group.parts.slice(0, VISIBLE_ROWS - 1);
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden flex flex-col">
+    <div className="border border-border rounded-lg overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-gray-50">
+      <div className="flex items-center justify-between px-3 py-2 bg-hover-bg">
         <div className="flex items-center gap-2">
           {isRenaming ? (
             <input
@@ -216,19 +222,22 @@ function VoiceGroupCard({
                 if (e.key === "Enter") onRenameGroup(group.id);
                 if (e.key === "Escape") onSetRenamingGroupId(null);
               }}
-              className="border border-gray-300 rounded px-2 py-0.5 text-sm w-24"
+              className="border border-border rounded px-2 py-0.5 text-sm w-24"
               autoFocus
             />
           ) : (
             <span className="font-medium text-sm">{group.name}</span>
           )}
-          <span className="text-xs text-gray-400">
-            {group.parts.length} {group.parts.length !== 1 ? t("voiceGroups.partsCount") : t("voiceGroups.partCount")}
+          <span className="text-xs text-subtle">
+            {group.parts.length}{" "}
+            {group.parts.length !== 1
+              ? t("voiceGroups.partsCount")
+              : t("voiceGroups.partCount")}
           </span>
         </div>
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="text-gray-400 hover:text-gray-600 text-sm px-1"
+          className="text-subtle hover:text-muted text-sm px-1"
           title={t("common.options")}
         >
           <EllipsisVertical size={16} />
@@ -237,8 +246,8 @@ function VoiceGroupCard({
 
       {/* Collapsible menu */}
       {menuOpen && (
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border-t border-gray-100">
-          <label className="flex items-center gap-1 text-xs text-gray-500">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-hover-bg border-t border-border">
+          <label className="flex items-center gap-1 text-xs text-muted">
             <input
               type="checkbox"
               checked={group.isStandard}
@@ -251,13 +260,13 @@ function VoiceGroupCard({
               onSetRenamingGroupId(group.id);
               onSetRenameValue(group.name);
             }}
-            className="text-gray-400 hover:text-gray-600 text-xs"
+            className="text-subtle hover:text-muted text-xs"
           >
             {t("common.rename")}
           </button>
           <button
             onClick={() => onDeleteGroup(group.id)}
-            className="text-red-400 hover:text-red-600 text-xs"
+            className="text-danger hover:text-danger-hover text-xs"
           >
             {t("common.delete")}
           </button>
@@ -295,9 +304,11 @@ function VoiceGroupCard({
         {hasMore && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 h-8 px-2 border-b border-gray-100 w-full"
+            className="flex items-center gap-2 text-sm text-muted hover:text-foreground h-8 px-2 border-b border-border w-full"
           >
-            <span>{expanded ? <ChevronUp size={14} /> : <ChevronRight size={14} />}</span>
+            <span>
+              {expanded ? <ChevronUp size={14} /> : <ChevronRight size={14} />}
+            </span>
             {expanded ? t("common.showLess") : t("common.showMore")}
           </button>
         )}
@@ -308,7 +319,12 @@ function VoiceGroupCard({
             const usedRows = hasMore ? VISIBLE_ROWS : group.parts.length;
             const emptyRows = VISIBLE_ROWS - usedRows;
             return Array.from({ length: emptyRows }, (_, i) => (
-              <div key={`empty-${i}`} className="h-8 px-2 border-b border-transparent">&nbsp;</div>
+              <div
+                key={`empty-${i}`}
+                className="h-8 px-2 border-b border-transparent"
+              >
+                &nbsp;
+              </div>
             ));
           })()}
 
@@ -323,19 +339,19 @@ function VoiceGroupCard({
                 if (e.key === "Escape") onSetAddingPartGroupId(null);
               }}
               placeholder={t("voiceGroups.partName")}
-              className="border border-gray-300 rounded px-2 py-0.5 text-sm w-20"
+              className="border border-border rounded px-2 py-0.5 text-sm w-20"
               autoFocus
             />
             <input
               type="color"
               value={newPartColor}
               onChange={(e) => onSetNewPartColor(e.target.value)}
-              className="w-6 h-6 border border-gray-300 rounded cursor-pointer p-0"
+              className="w-6 h-6 border border-border rounded cursor-pointer p-0"
             />
             <select
               value={newPartShape}
               onChange={(e) => onSetNewPartShape(e.target.value)}
-              className="border border-gray-300 rounded px-1 py-0.5 text-xs"
+              className="border border-border rounded px-1 py-0.5 text-xs"
             >
               {SHAPES.map((s) => (
                 <option key={s} value={s}>
@@ -345,7 +361,7 @@ function VoiceGroupCard({
             </select>
             <button
               onClick={() => onAddPart(group.id)}
-              className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
+              className="px-2 py-0.5 btn-primary text-xs"
             >
               {t("common.add")}
             </button>
@@ -356,7 +372,7 @@ function VoiceGroupCard({
               onSetAddingPartGroupId(group.id);
               onSetNewPartName("");
             }}
-            className="text-sm text-blue-500 hover:underline py-1.5 px-2"
+            className="text-sm text-link hover:underline py-1.5 px-2"
           >
             {t("voiceGroups.addPart")}
           </button>
@@ -430,100 +446,104 @@ export default function VoiceGroupsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col py-8 px-4 md:px-8">
-      <h1 className="text-4xl font-bold mb-2 text-center">{t("voiceGroups.title")}</h1>
-      <p className="text-sm text-gray-500 text-center mb-6">
-        {t("voiceGroups.description")}
-      </p>
+      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8">
+        <h1 className="text-4xl font-bold mb-2 text-center">
+          {t("voiceGroups.title")}
+        </h1>
+        <p className="text-sm text-muted text-center mb-6">
+          {t("voiceGroups.description")}
+        </p>
 
-      <div className="flex justify-center mb-6">
-        <button
-          onClick={() => setShowAddGroup(true)}
-          className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
-        >
-          {t("voiceGroups.addGroup")}
-        </button>
-      </div>
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={() => setShowAddGroup(true)}
+            className="px-3 py-2 btn-primary text-sm font-medium"
+          >
+            {t("voiceGroups.addGroup")}
+          </button>
+        </div>
 
-      {showAddGroup && (
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
-            <input
-              value={newGroupName}
-              onChange={(e) => setNewGroupName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreateGroup();
-                if (e.key === "Escape") {
+        {showAddGroup && (
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="flex items-center gap-2 p-3 border border-border rounded-lg bg-hover-bg">
+              <input
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleCreateGroup();
+                  if (e.key === "Escape") {
+                    setShowAddGroup(false);
+                    setNewGroupName("");
+                  }
+                }}
+                placeholder={t("voiceGroups.groupName")}
+                className="border border-border rounded px-2 py-1 text-sm"
+                autoFocus
+              />
+              <label className="flex items-center gap-1 text-sm text-muted">
+                <input
+                  type="checkbox"
+                  checked={newGroupStandard}
+                  onChange={(e) => setNewGroupStandard(e.target.checked)}
+                />
+                {t("common.standard")}
+              </label>
+              <button
+                onClick={handleCreateGroup}
+                className="px-3 py-1 btn-primary text-sm"
+              >
+                {t("common.create")}
+              </button>
+              <button
+                onClick={() => {
                   setShowAddGroup(false);
                   setNewGroupName("");
-                }
-              }}
-              placeholder={t("voiceGroups.groupName")}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
-              autoFocus
-            />
-            <label className="flex items-center gap-1 text-sm text-gray-600">
-              <input
-                type="checkbox"
-                checked={newGroupStandard}
-                onChange={(e) => setNewGroupStandard(e.target.checked)}
-              />
+                }}
+                className="px-3 py-1 border border-border rounded text-sm"
+              >
+                {t("common.cancel")}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {standardGroups.length > 0 && (
+          <>
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3 text-center">
               {t("common.standard")}
-            </label>
-            <button
-              onClick={handleCreateGroup}
-              className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
-            >
-              {t("common.create")}
-            </button>
-            <button
-              onClick={() => {
-                setShowAddGroup(false);
-                setNewGroupName("");
-              }}
-              className="px-3 py-1 border border-gray-300 rounded text-sm"
-            >
-              {t("common.cancel")}
-            </button>
-          </div>
-        </div>
-      )}
+            </h2>
+            <div className="flex flex-wrap gap-4 justify-center mb-8">
+              {standardGroups.map((g) => (
+                <div key={g.id} className="w-64">
+                  <VoiceGroupCard group={g} {...cardProps} />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
-      {standardGroups.length > 0 && (
-        <>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">
-            {t("common.standard")}
-          </h2>
-          <div className="flex flex-wrap gap-4 justify-center mb-8">
-            {standardGroups.map((g) => (
-              <div key={g.id} className="w-64">
-                <VoiceGroupCard group={g} {...cardProps} />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+        {otherGroups.length > 0 && (
+          <>
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3 text-center">
+              {t("common.other")}
+            </h2>
+            <div className="flex flex-wrap gap-4 justify-center">
+              {otherGroups.map((g) => (
+                <div key={g.id} className="w-64">
+                  <VoiceGroupCard group={g} {...cardProps} />
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
-      {otherGroups.length > 0 && (
-        <>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 text-center">
-            {t("common.other")}
-          </h2>
-          <div className="flex flex-wrap gap-4 justify-center">
-            {otherGroups.map((g) => (
-              <div key={g.id} className="w-64">
-                <VoiceGroupCard group={g} {...cardProps} />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {!loading && standardGroups.length === 0 && otherGroups.length === 0 && (
-        <p className="text-gray-400 text-sm text-center mt-8">
-          {t("voiceGroups.noGroups")}
-        </p>
-      )}
+        {!loading &&
+          standardGroups.length === 0 &&
+          otherGroups.length === 0 && (
+            <p className="text-subtle text-sm text-center mt-8">
+              {t("voiceGroups.noGroups")}
+            </p>
+          )}
       </div>
     </div>
   );

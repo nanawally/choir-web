@@ -120,7 +120,14 @@ export default function GridCanvas({
 
     rowSizes.forEach((rowSize, gridY) => {
       for (let gridX = 0; gridX < rowSize; gridX++) {
-        const pos = arcPosition(gridX, gridY, rowSize, centerX, centerY, rowSpacing);
+        const pos = arcPosition(
+          gridX,
+          gridY,
+          rowSize,
+          centerX,
+          centerY,
+          rowSpacing,
+        );
         const dist = Math.hypot(pixelX - pos.x, pixelY - pos.y);
         if (dist < minDist) {
           minDist = dist;
@@ -186,7 +193,14 @@ export default function GridCanvas({
       );
       // Draw dots at each valid position
       for (let gridX = 0; gridX < rowSize; gridX++) {
-        const pos = arcPosition(gridX, gridY, rowSize, centerX, centerY, rowSpacing);
+        const pos = arcPosition(
+          gridX,
+          gridY,
+          rowSize,
+          centerX,
+          centerY,
+          rowSpacing,
+        );
         gridLines.push(
           <Rect
             key={`dot-${gridY}-${gridX}`}
@@ -228,7 +242,7 @@ export default function GridCanvas({
     <div className="w-full h-full relative">
       <button
         onClick={handleDownload}
-        className="absolute top-1 right-14 z-10 px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+        className="absolute top-1 right-14 z-10 px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded text-sm"
       >
         {t("common.downloadPng")}
       </button>
@@ -288,7 +302,13 @@ export default function GridCanvas({
       >
         <Layer listening={false} scaleX={scale} scaleY={scale}>
           {/* White background so exported PNGs aren't transparent (invisible in dark mode) */}
-          <Rect x={0} y={0} width={virtualWidth} height={virtualHeight} fill="white" />
+          <Rect
+            x={0}
+            y={0}
+            width={virtualWidth}
+            height={virtualHeight}
+            fill="white"
+          />
           {gridLines}
         </Layer>
         <Layer scaleX={scale} scaleY={scale}>

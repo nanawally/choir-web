@@ -35,14 +35,14 @@ export default function AddFormationModal({
       listBaseFormations().then(setBaseFormations);
     }
   }, [open]);
-  
+
   if (!open) return null;
 
   const reusable = formations.filter((f) => !songFormationIds.has(f.id));
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-30 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-80 flex flex-col">
+    <div className="fixed inset-0 bg-overlay z-30 flex items-center justify-center">
+      <div className="bg-surface rounded-lg p-6 w-80 flex flex-col">
         <h2 className="font-bold mb-4">{t("formations.addFormation")}</h2>
 
         <h3 className="text-sm font-medium mb-2">{t("formations.newEmpty")}</h3>
@@ -54,13 +54,13 @@ export default function AddFormationModal({
               e.key === "Enter" && newName.trim() && onCreateNew(newName.trim())
             }
             placeholder={t("formations.formationName")}
-            className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
+            className="flex-1 border border-border rounded px-2 py-1 text-sm"
           />
           <button
             onClick={() => {
               if (newName.trim()) onCreateNew(newName.trim());
             }}
-            className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+            className="px-3 py-1 btn-primary text-sm"
           >
             {t("common.create")}
           </button>
@@ -76,7 +76,7 @@ export default function AddFormationModal({
                 <li
                   key={f.id}
                   onClick={() => onCopyBase(f.id)}
-                  className="text-sm py-1 px-2 rounded hover:bg-gray-100 cursor-pointer"
+                  className="text-sm py-1 px-2 rounded hover:bg-surface-alt cursor-pointer"
                 >
                   {f.name}
                 </li>
@@ -95,7 +95,7 @@ export default function AddFormationModal({
                 <li
                   key={f.id}
                   onClick={() => onReuse(f.id)}
-                  className="text-sm py-1 px-2 rounded hover:bg-gray-100 cursor-pointer"
+                  className="text-sm py-1 px-2 rounded hover:bg-surface-alt cursor-pointer"
                 >
                   {f.name}
                 </li>

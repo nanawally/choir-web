@@ -33,14 +33,14 @@ export default function PdfPreview({ url, onClick }: Props) {
   return (
     <div
       ref={containerRef}
-      className="border border-gray-200 rounded-lg overflow-hidden cursor-pointer"
+      className="border border-border rounded-lg overflow-hidden cursor-pointer"
       onClick={onClick}
       title={t("common.clickToOpenPdf")}
     >
       <Document
         file={url}
         loading={
-          <div className="h-48 flex items-center justify-center text-sm text-gray-400">
+          <div className="h-48 flex items-center justify-center text-sm text-subtle">
             {t("common.loading")}
           </div>
         }

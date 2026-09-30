@@ -29,7 +29,10 @@ export default function AddSongModal({
   onCreate,
 }: {
   onClose: () => void;
-  onCreate: (fields: Omit<Song, "id" | "hasSheetMusicFile">, file?: File) => void;
+  onCreate: (
+    fields: Omit<Song, "id" | "hasSheetMusicFile">,
+    file?: File,
+  ) => void;
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<Song>({ ...EMPTY_SONG });
@@ -51,18 +54,20 @@ export default function AddSongModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-overlay flex items-center justify-center z-50"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6"
+        className="bg-surface rounded-xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold mb-4">{t("songs.addSongTitle")}</h2>
         <SongFormFields form={form} set={set} />
 
-        <div className="mt-4 pt-4 border-t border-dashed border-gray-300">
-          <span className="block text-xs font-medium text-gray-500 mb-2">{t("songs.sheetMusicPdf")}</span>
+        <div className="mt-4 pt-4 border-t border-dashed border-border">
+          <span className="block text-xs font-medium text-muted mb-2">
+            {t("songs.sheetMusicPdf")}
+          </span>
           <input
             ref={fileInputRef}
             type="file"
@@ -75,10 +80,13 @@ export default function AddSongModal({
           />
           {file ? (
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-gray-700">{file.name}</span>
+              <span className="text-foreground">{file.name}</span>
               <button
-                onClick={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={() => {
+                  setFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="text-subtle hover:text-muted"
               >
                 <X size={14} />
               </button>
@@ -86,7 +94,7 @@ export default function AddSongModal({
           ) : (
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-800"
+              className="flex items-center gap-1.5 text-sm text-muted hover:text-foreground"
             >
               <Upload size={16} />
               {t("songs.choosePdf")}
@@ -95,13 +103,16 @@ export default function AddSongModal({
         </div>
 
         <div className="flex justify-end gap-2 mt-6">
-          <button onClick={onClose} className="px-4 py-1.5 border border-gray-300 rounded text-sm">
+          <button
+            onClick={onClose}
+            className="px-4 py-1.5 border border-border rounded text-sm"
+          >
             {t("common.cancel")}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-1.5 bg-blue-500 text-white rounded text-sm disabled:opacity-50"
+            className="px-4 py-1.5 btn-primary text-sm"
           >
             {saving ? t("common.creating") : t("common.create")}
           </button>

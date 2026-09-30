@@ -1,26 +1,144 @@
 @import "tailwindcss";
 
+/*
+ * COLOR GLOSSARY
+ *
+ * Core:
+ *   background       Page background
+ *   foreground        Default text color
+ *   primary           Action buttons, active nav, links
+ *   primary-hover     Hover state for primary buttons
+ *   danger            Delete buttons, error text
+ *   danger-hover      Hover state for danger elements
+ *
+ * Surfaces:
+ *   surface           Cards, modals, dropdowns, inputs
+ *   surface-alt       Sidebar, table headers, hover backgrounds
+ *   hover-bg          Hover state for rows, cards, secondary buttons
+ *   overlay           Modal/drawer backdrops
+ *
+ * Borders & text:
+ *   border            Default borders (inputs, cards, tables)
+ *   border-strong     Emphasized borders (dashed separators)
+ *   text-muted        Secondary text (subtitles, labels, placeholders)
+ *   text-subtle       Very muted text (tertiary info, icons)
+ *   link              Clickable text
+ *
+ * Status:
+ *   success           Green accents (chorist placed, positive state)
+ *   primary-light     Light blue highlights (filter tags, active states)
+ *   primary-light-text Text on primary-light backgrounds
+ */
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+
+  --surface: #ffffff;
+  --surface-alt: #f3f4f6;
+  --hover-bg: #f9fafb;
+  --border: #d1d5db;
+  --border-strong: #9ca3af;
+  --text-muted: #6b7280;
+  --text-subtle: #9ca3af;
+  --link: #3b82f6;
+  --overlay: rgba(0, 0, 0, 0.3);
+
+  --success: #22c55e;
+  --primary-light: #dbeafe;
+  --primary-light-text: #1e40af;
+}
+
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --danger: #ef4444;
+  --danger-hover: #f87171;
+
+  --surface: #1f2937;
+  --surface-alt: #374151;
+  --hover-bg: #1f2937;
+  --border: #4b5563;
+  --border-strong: #6b7280;
+  --text-muted: #9ca3af;
+  --text-subtle: #6b7280;
+  --link: #60a5fa;
+  --overlay: rgba(0, 0, 0, 0.5);
+
+  --success: #22c55e;
+  --primary-light: rgba(59, 130, 246, 0.2);
+  --primary-light-text: #93c5fd;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-hover-bg: var(--hover-bg);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-link: var(--link);
+  --color-overlay: var(--overlay);
+
+  --color-success: var(--success);
+  --color-primary-light: var(--primary-light);
+  --color-primary-light-text: var(--primary-light-text);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--primary);
+}
+
+/* Button variants — color + rounded + disabled; sizing stays in Tailwind */
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border-radius: 0.25rem;
+}
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+  border-radius: 0.25rem;
+}
+.btn-danger:hover {
+  background: var(--danger-hover);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+  border-radius: 0.25rem;
+}
+.btn-success:disabled {
+  opacity: 0.5;
 }

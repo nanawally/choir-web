@@ -34,7 +34,7 @@ export default function LoginPage() {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder={t("login.username")}
-          className="border border-gray-300 rounded px-3 py-2 text-sm"
+          className="border border-border rounded px-3 py-2 text-sm"
           autoFocus
         />
         <input
@@ -42,15 +42,17 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder={t("login.password")}
-          className="border border-gray-300 rounded px-3 py-2 text-sm"
+          className="border border-border rounded px-3 py-2 text-sm"
         />
         {error && (
-          <p className="text-red-500 text-sm text-center">{t("login.invalidCredentials")}</p>
+          <p className="text-danger text-sm text-center">
+            {t("login.invalidCredentials")}
+          </p>
         )}
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-blue-500 text-white rounded text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 btn-primary text-sm font-medium"
         >
           {loading ? t("login.loggingIn") : t("login.logIn")}
         </button>

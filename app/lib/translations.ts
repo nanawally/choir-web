@@ -333,6 +333,10 @@ const translations = {
   "settings.language": { en: "Language", sv: "Språk" },
   "settings.english": { en: "English", sv: "Engelska" },
   "settings.swedish": { en: "Svenska", sv: "Svenska" },
+  "settings.theme": { en: "Theme", sv: "Tema" },
+  "settings.themeSystem": { en: "System", sv: "System" },
+  "settings.themeLight": { en: "Light", sv: "Ljust" },
+  "settings.themeDark": { en: "Dark", sv: "Mörkt" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

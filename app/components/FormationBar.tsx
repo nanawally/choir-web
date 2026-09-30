@@ -161,11 +161,13 @@ export default function FormationBar({
       const detail = await loadFormation(result.id);
       if (detail) {
         onLoad(
-          detail.placements.map((p: { choristId: string; gridX: number; gridY: number }) => ({
-            choristId: p.choristId,
-            gridX: p.gridX,
-            gridY: p.gridY,
-          })),
+          detail.placements.map(
+            (p: { choristId: string; gridX: number; gridY: number }) => ({
+              choristId: p.choristId,
+              gridX: p.gridX,
+              gridY: p.gridY,
+            }),
+          ),
           detail.hiddenChoristIds || [],
           JSON.parse(detail.rowSizes || "[]"),
         );
@@ -189,7 +191,8 @@ export default function FormationBar({
       return;
     }
     const choice = window.prompt(
-      t("formations.copyToWhichConcert") + "\n" +
+      t("formations.copyToWhichConcert") +
+        "\n" +
         otherConcerts
           .map((c: Concert, i: number) => `${i + 1}. ${c.name}`)
           .join("\n") +
@@ -223,7 +226,7 @@ export default function FormationBar({
       {/* Add new formation button — always visible */}
       <button
         onClick={() => setShowAddModal(true)}
-        className="px-3 py-1.5 bg-blue-500 text-white rounded text-sm w-fit"
+        className="px-3 py-1.5 btn-primary text-sm w-fit"
       >
         {t("formations.addNewFormation")}
       </button>
@@ -242,12 +245,12 @@ export default function FormationBar({
                 if (e.key === "Enter") handleRename();
                 if (e.key === "Escape") setEditingName(false);
               }}
-              className="text-sm font-medium text-gray-700 mt-1 border-b border-gray-400 outline-none w-full"
+              className="text-sm font-medium text-foreground mt-1 border-b border-border-strong outline-none w-full"
               autoFocus
             />
           ) : (
             <p
-              className="text-sm font-medium text-gray-700 mt-1 cursor-pointer hover:underline"
+              className="text-sm font-medium text-foreground mt-1 cursor-pointer hover:underline"
               onClick={() => {
                 setNameInput(formationName || "");
                 setEditingName(true);
@@ -262,7 +265,7 @@ export default function FormationBar({
           <select
             value={isArcMode ? "arc" : "grid"}
             onChange={(e) => handleSetArcMode(e.target.value === "arc")}
-            className="mt-1 border border-gray-300 rounded px-2 py-1.5 text-sm w-fit"
+            className="mt-1 border border-border rounded px-2 py-1.5 text-sm w-fit"
           >
             <option value="arc">{t("formations.arc")}</option>
             <option value="grid">{t("formations.grid")}</option>
@@ -271,7 +274,7 @@ export default function FormationBar({
           {/* Arc row configuration — only visible in arc mode */}
           {isArcMode && (
             <div className="mt-1">
-              <h4 className="text-xs font-medium mb-1 text-gray-500">
+              <h4 className="text-xs font-medium mb-1 text-muted">
                 {t("formations.arcRows")}
               </h4>
               {rowSizes.map((size, i) => (
@@ -288,7 +291,7 @@ export default function FormationBar({
                       onClampPlacements(i, next[i]);
                       updateRowSizes(activeFormationId, next);
                     }}
-                    className="border border-gray-300 rounded px-1 py-0.5 text-sm w-16"
+                    className="border border-border rounded px-1 py-0.5 text-sm w-16"
                   />
                   <button
                     onClick={() => {
@@ -296,7 +299,7 @@ export default function FormationBar({
                       onRowSizesChange(next);
                       updateRowSizes(activeFormationId, next);
                     }}
-                    className="text-red-400 hover:text-red-600 text-xs"
+                    className="text-danger hover:text-danger-hover text-xs"
                   >
                     X
                   </button>
@@ -308,7 +311,7 @@ export default function FormationBar({
                   onRowSizesChange(next);
                   updateRowSizes(activeFormationId, next);
                 }}
-                className="text-xs text-blue-500 hover:underline"
+                className="text-xs text-link hover:underline"
               >
                 {t("formations.addRow")}
               </button>
@@ -318,7 +321,7 @@ export default function FormationBar({
       )}
 
       {/* Spacer before voice groups (rendered by parent) */}
-      <div className="mt-2 border-t border-gray-200" />
+      <div className="mt-2 border-t border-border" />
 
       {/* Save / action buttons — only when a formation is selected */}
       {activeFormationId && (
@@ -326,26 +329,26 @@ export default function FormationBar({
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-3 py-1.5 bg-green-500 text-white rounded text-sm w-fit font-medium disabled:opacity-50"
+            className="px-3 py-1.5 btn-success text-sm w-fit font-medium"
           >
             {saving ? t("common.saving") : t("formations.saveFormation")}
           </button>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={handleDuplicateFormation}
-              className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+              className="px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded text-sm"
             >
               {t("common.duplicate")}
             </button>
             <button
               onClick={handleCopyToConcert}
-              className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+              className="px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded text-sm"
             >
               {t("formations.copyTo")}
             </button>
             <button
               onClick={handleDeleteFormation}
-              className="px-2 py-1 bg-red-500 text-white rounded text-sm"
+              className="px-2 py-1 btn-danger text-sm"
             >
               {t("common.delete")}
             </button>

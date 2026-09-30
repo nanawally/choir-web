@@ -23,7 +23,6 @@ export default function RosterPanel({
   onToggleHidden,
   onEditRoster,
 }: Props) {
-
   const { t } = useTranslation();
   const unplaced = chorists.filter((c) => !placedIds.has(c.id));
   const placed = chorists.filter((c) => placedIds.has(c.id));
@@ -43,27 +42,35 @@ export default function RosterPanel({
       <h2 className="font-bold mb-3">Chorists</h2>
       <button
         onClick={() => onEditRoster()}
-        className="m-4 px-3 py-1 bg-blue-500 text-white rounded text-sm"
+        className="m-4 px-3 py-1 btn-primary text-sm"
       >
         {t("roster.editRoster")}
       </button>
 
-      <h3 className="text-xs text-gray-500 font-medium mb-1">{t("roster.unplaced")}</h3>
-      <ul className="space-y-1 mb-4">
-        {unplaced.map((c) => (
-          <li
-            key={c.id}
-            className="text-sm py-0.5 px-2 rounded hover:bg-gray-100 cursor-pointer"
-            onClick={() => onPlace(c.id)}
-          >
-            {shortName(c, chorists)}
-          </li>
-        ))}
-      </ul>
+      {unplaced.length > 0 && (
+        <>
+          <h3 className="text-xs text-muted font-medium mb-1">
+            {t("roster.unplaced")}
+          </h3>
+          <ul className="space-y-1 mb-4">
+            {unplaced.map((c) => (
+              <li
+                key={c.id}
+                className="text-sm py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer"
+                onClick={() => onPlace(c.id)}
+              >
+                {shortName(c, chorists)}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       {placed.length > 0 && (
         <>
-          <h3 className="text-xs text-gray-500 font-medium mb-1">{t("roster.placed")}</h3>
+          <h3 className="text-xs text-muted font-medium mb-1">
+            {t("roster.placed")}
+          </h3>
           <ul className="space-y-1 mb-4">
             {placed.map((c) => (
               <li
@@ -74,12 +81,20 @@ export default function RosterPanel({
                   onClick={() => toggleHidden(c.id)}
                   className="mr-1 text-xs w-5"
                   title={
-                    hiddenIds.has(c.id) ? t("roster.showOnGrid") : t("roster.hideFromGrid")
+                    hiddenIds.has(c.id)
+                      ? t("roster.showOnGrid")
+                      : t("roster.hideFromGrid")
                   }
                 >
-                  {hiddenIds.has(c.id) ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {hiddenIds.has(c.id) ? (
+                    <EyeOff size={14} />
+                  ) : (
+                    <Eye size={14} />
+                  )}
                 </button>
-                <span className="flex-1 truncate">{shortName(c, chorists)}</span>
+                <span className="flex-1 truncate">
+                  {shortName(c, chorists)}
+                </span>
               </li>
             ))}
           </ul>

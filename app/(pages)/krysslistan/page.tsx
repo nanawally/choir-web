@@ -10,8 +10,10 @@ export default function KrysslistanPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col py-8 px-4 md:px-8">
-        <h1 className="text-4xl font-bold mb-6 text-center">{t("krysslistan.title")}</h1>
+      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8">
+        <h1 className="text-4xl font-bold mb-6 text-center">
+          {t("krysslistan.title")}
+        </h1>
         {SHEET_ID ? (
           <iframe
             src={`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?embedded=true`}
@@ -19,7 +21,7 @@ export default function KrysslistanPage() {
             style={{ minHeight: "70vh" }}
           />
         ) : (
-          <p className="text-gray-400 text-sm text-center">
+          <p className="text-subtle text-sm text-center">
             {t("krysslistan.noSheet")}
           </p>
         )}

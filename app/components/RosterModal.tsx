@@ -20,10 +20,12 @@ export default function RosterModal({
   onSave,
 }: Props) {
   const { t } = useTranslation();
-  const [localIds, setLocalIds] = useState<Set<string>>(
-    () => rosterIds.size > 0 ? new Set(rosterIds) : new Set(chorists.map((c) => c.id)),
+  const [localIds, setLocalIds] = useState<Set<string>>(() =>
+    rosterIds.size > 0
+      ? new Set(rosterIds)
+      : new Set(chorists.map((c) => c.id)),
   );
-  
+
   function toggle(choristId: string) {
     const next = new Set(localIds);
     if (next.has(choristId)) {
@@ -35,8 +37,8 @@ export default function RosterModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-30 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-80 max-h-[80vh] flex flex-col">
+    <div className="fixed inset-0 bg-overlay z-30 flex items-center justify-center">
+      <div className="bg-surface rounded-lg p-6 w-80 max-h-[80vh] flex flex-col">
         <h2 className="font-bold mb-4">{t("roster.title")}</h2>
         <ul className="space-y-1 overflow-y-auto flex-1 mb-4">
           {chorists.map((c) => (
@@ -64,7 +66,7 @@ export default function RosterModal({
               onSave(localIds);
               onClose();
             }}
-            className="px-3 py-1 bg-blue-500 text-white rounded text-sm"
+            className="px-3 py-1 btn-primary text-sm"
           >
             {t("common.save")}
           </button>

@@ -20,7 +20,12 @@ type Chorist = {
 };
 
 type VoicePart = { id: string; name: string; color: string; shape: string };
-type VoiceGroup = { id: string; name: string; isStandard: boolean; parts: VoicePart[] };
+type VoiceGroup = {
+  id: string;
+  name: string;
+  isStandard: boolean;
+  parts: VoicePart[];
+};
 
 type ChoristModalProps = {
   mode: "add" | "edit";
@@ -41,16 +46,28 @@ export default function ChoristModal({
   onSaved,
 }: ChoristModalProps) {
   const { t } = useTranslation();
-  const [firstName, setFirstName] = useState(mode === "edit" && chorist ? chorist.firstName : "");
-  const [lastName, setLastName] = useState(mode === "edit" && chorist ? chorist.lastName : "");
-  const [sectionLeader, setSectionLeader] = useState(mode === "edit" && chorist ? chorist.isSectionLeader : false);
-  const [parts, setParts] = useState<Record<string, string>>(mode === "edit" ? currentParts : {});
+  const [firstName, setFirstName] = useState(
+    mode === "edit" && chorist ? chorist.firstName : "",
+  );
+  const [lastName, setLastName] = useState(
+    mode === "edit" && chorist ? chorist.lastName : "",
+  );
+  const [sectionLeader, setSectionLeader] = useState(
+    mode === "edit" && chorist ? chorist.isSectionLeader : false,
+  );
+  const [parts, setParts] = useState<Record<string, string>>(
+    mode === "edit" ? currentParts : {},
+  );
 
   async function handleSave() {
     if (!firstName.trim()) return;
 
     if (mode === "add") {
-      const created = await createChorist(firstName.trim(), lastName.trim(), sectionLeader);
+      const created = await createChorist(
+        firstName.trim(),
+        lastName.trim(),
+        sectionLeader,
+      );
       if (!created) return;
       for (const group of voiceGroups) {
         const partId = parts[group.id];
@@ -59,7 +76,12 @@ export default function ChoristModal({
         }
       }
     } else if (chorist) {
-      await updateChorist(chorist.id, firstName.trim(), lastName.trim(), sectionLeader);
+      await updateChorist(
+        chorist.id,
+        firstName.trim(),
+        lastName.trim(),
+        sectionLeader,
+      );
       for (const group of voiceGroups) {
         const newPartId = parts[group.id] ?? "";
         const oldPartId = currentParts[group.id] ?? "";
@@ -83,25 +105,29 @@ export default function ChoristModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50">
+      <div className="bg-surface rounded-lg shadow-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4">
           {mode === "add" ? t("chorists.addTitle") : t("chorists.editTitle")}
         </h2>
 
-        <label className="block text-sm font-medium mb-1">{t("chorists.firstName")}</label>
+        <label className="block text-sm font-medium mb-1">
+          {t("chorists.firstName")}
+        </label>
         <input
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 text-sm w-full mb-3"
+          className="border border-border rounded px-3 py-2 text-sm w-full mb-3"
           autoFocus
         />
 
-        <label className="block text-sm font-medium mb-1">{t("chorists.lastName")}</label>
+        <label className="block text-sm font-medium mb-1">
+          {t("chorists.lastName")}
+        </label>
         <input
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-2 text-sm w-full mb-4"
+          className="border border-border rounded px-3 py-2 text-sm w-full mb-4"
         />
 
         <label className="flex items-center gap-2 text-sm mb-4">
@@ -124,7 +150,7 @@ export default function ChoristModal({
                 onChange={(e) =>
                   setParts((prev) => ({ ...prev, [group.id]: e.target.value }))
                 }
-                className="border border-gray-300 rounded px-3 py-2 text-sm w-full bg-white"
+                className="border border-border rounded px-3 py-2 text-sm w-full bg-surface"
               >
                 <option value="">{t("common.unassigned")}</option>
                 {group.parts.map((p) => (
@@ -142,7 +168,7 @@ export default function ChoristModal({
             {mode === "edit" && (
               <button
                 onClick={handleArchive}
-                className="text-sm text-red-500 hover:text-red-700"
+                className="text-sm text-danger hover:text-danger-hover"
               >
                 {t("chorists.archive")}
               </button>
@@ -151,13 +177,13 @@ export default function ChoristModal({
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+              className="px-3 py-2 text-sm text-muted hover:text-foreground"
             >
               {t("common.cancel")}
             </button>
             <button
               onClick={handleSave}
-              className="px-3 py-2 bg-blue-500 text-white rounded text-sm font-medium"
+              className="px-3 py-2 btn-primary text-sm font-medium"
             >
               {mode === "add" ? t("common.add") : t("common.save")}
             </button>

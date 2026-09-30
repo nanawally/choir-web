@@ -7,9 +7,16 @@ import RosterPanel from "../../../components/RosterPanel";
 import RosterModal from "@/app/components/RosterModal";
 import FormationBar from "../../../components/FormationBar";
 import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
-import SetlistDrawer, { SetlistNavButtons } from "@/app/components/SetlistDrawer";
+import SetlistDrawer, {
+  SetlistNavButtons,
+} from "@/app/components/SetlistDrawer";
 import Link from "next/link";
-import { ArrowBigLeft, SquareMenu, UsersRound, UserRoundGroup } from "lucide-react";
+import {
+  ArrowBigLeft,
+  SquareMenu,
+  UsersRound,
+  UserRoundGroup,
+} from "lucide-react";
 import { useTranslation } from "../../../lib/LanguageContext";
 
 const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
@@ -58,7 +65,7 @@ export default function ConcertEditor({
   }, [updateCanvasWidth]);
 
   const canvasHeight = windowSize.height;
-  
+
   // Scale factor: how much to shrink the virtual space to fit
   const scale = canvasWidth / windowSize.width;
 
@@ -67,49 +74,52 @@ export default function ConcertEditor({
       {/* Left drawers */}
       {(editor.showSetlist || editor.showChorists) && (
         <>
-        {/* Mobile backdrop */}
-        {!isDesktop && (
-          <div
-            className="absolute inset-0 bg-black/30 z-10"
-            onClick={() => { editor.setShowSetlist(false); editor.setShowChorists(false); }}
-          />
-        )}
-        <div className="absolute top-0 left-0 w-72 h-full bg-white shadow-lg flex flex-col z-20">
-          <div className="flex-1 overflow-y-auto p-4">
+          {/* Mobile backdrop */}
+          {!isDesktop && (
+            <div
+              className="absolute inset-0 bg-overlay z-10"
+              onClick={() => {
+                editor.setShowSetlist(false);
+                editor.setShowChorists(false);
+              }}
+            />
+          )}
+          <div className="absolute top-0 left-0 w-72 h-full bg-surface shadow-lg flex flex-col z-20">
+            <div className="flex-1 overflow-y-auto p-4">
+              {editor.showSetlist && (
+                <SetlistDrawer
+                  concertId={id}
+                  concertSongs={editor.concertSongs}
+                  activeConcertSongId={editor.activeConcertSongId}
+                  catalogSongs={editor.catalogSongs}
+                  onSelectSong={editor.handleSelectConcertSong}
+                  onSongsChange={editor.setConcertSongs}
+                  getFormationsForSong={editor.getFormationsForSong}
+                  activeFormationId={editor.activeFormationId}
+                  onSelectFormation={editor.handleSelectFormation}
+                  onReorderFormations={editor.handleReorderFormations}
+                />
+              )}
+              {editor.showChorists && (
+                <RosterPanel
+                  chorists={editor.rosterChorists}
+                  placedIds={editor.placedIds}
+                  onPlace={editor.handlePlace}
+                  hiddenIds={editor.hiddenIds}
+                  onToggleHidden={editor.handleToggleHidden}
+                  onEditRoster={() => editor.setShowRosterModal(true)}
+                />
+              )}
+            </div>
             {editor.showSetlist && (
-              <SetlistDrawer
-                concertId={id}
-                concertSongs={editor.concertSongs}
-                activeConcertSongId={editor.activeConcertSongId}
-                catalogSongs={editor.catalogSongs}
-                onSelectSong={editor.handleSelectConcertSong}
-                onSongsChange={editor.setConcertSongs}
-                getFormationsForSong={editor.getFormationsForSong}
-                activeFormationId={editor.activeFormationId}
-                onSelectFormation={editor.handleSelectFormation}
-                onReorderFormations={editor.handleReorderFormations}
-              />
-            )}
-            {editor.showChorists && (
-              <RosterPanel
-                chorists={editor.rosterChorists}
-                placedIds={editor.placedIds}
-                onPlace={editor.handlePlace}
-                hiddenIds={editor.hiddenIds}
-                onToggleHidden={editor.handleToggleHidden}
-                onEditRoster={() => editor.setShowRosterModal(true)}
+              <SetlistNavButtons
+                onPrev={editor.handlePrevFormation}
+                onNext={editor.handleNextFormation}
+                hasPrev={editor.hasPrevFormation}
+                hasNext={editor.hasNextFormation}
               />
             )}
           </div>
-          {editor.showSetlist && (
-            <SetlistNavButtons
-              onPrev={editor.handlePrevFormation}
-              onNext={editor.handleNextFormation}
-              hasPrev={editor.hasPrevFormation}
-              hasNext={editor.hasNextFormation}
-            />
-          )}
-        </div>
         </>
       )}
 
@@ -127,13 +137,13 @@ export default function ConcertEditor({
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
           <Link
             href="/concerts"
-            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100 text-center text-sm"
+            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt text-center text-sm"
             title={t("concerts.backToConcerts")}
           >
             <ArrowBigLeft size={20} />
           </Link>
           <button
-            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
+            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
             onClick={() => {
               editor.setShowSetlist(!editor.showSetlist);
               editor.setShowChorists(false);
@@ -142,7 +152,7 @@ export default function ConcertEditor({
             <SquareMenu size={20} />
           </button>
           <button
-            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
+            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
             onClick={() => {
               editor.setShowChorists(!editor.showChorists);
               editor.setShowSetlist(false);
@@ -153,10 +163,13 @@ export default function ConcertEditor({
         </div>
 
         {/* Canvas container — fills remaining space */}
-        <div ref={canvasContainerRef} className="flex-1 min-w-0 overflow-hidden relative">
+        <div
+          ref={canvasContainerRef}
+          className="flex-1 min-w-0 overflow-hidden relative"
+        >
           {/* Concert name — centered above the grid */}
           {editor.concertName && (
-            <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10 text-sm font-medium text-gray-500">
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10 text-sm font-medium text-muted">
               {editor.concertName}
             </div>
           )}
@@ -185,7 +198,7 @@ export default function ConcertEditor({
         {/* Right toggle button — sits beside the canvas, not on top */}
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
           <button
-            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
+            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
             onClick={() => editor.setShowFormations(!editor.showFormations)}
           >
             <UserRoundGroup size={20} />
@@ -196,46 +209,50 @@ export default function ConcertEditor({
       {/* Right drawer */}
       {editor.showFormations && (
         <>
-        {!isDesktop && (
-          <div
-            className="absolute inset-0 bg-black/30 z-10"
-            onClick={() => editor.setShowFormations(false)}
-          />
-        )}
-        <div className="absolute top-0 right-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-20">
-          <FormationBar
-            concertId={id}
-            placements={editor.placements}
-            onLoad={editor.handleLoad}
-            onFormationNameChange={editor.setFormationName}
-            songFormationIds={editor.songFormationIds}
-            activeConcertSongId={editor.activeConcertSongId}
-            onSongFormationsChange={editor.updateSongFormationIds}
-            rowSizes={editor.rowSizes}
-            onRowSizesChange={editor.setRowSizes}
-            onClampPlacements={editor.handleClampPlacements}
-            activeFormationId={editor.activeFormationId}
-            onActiveFormationIdChange={editor.setActiveFormationId}
-            formationName={editor.formationName}
-            formations={editor.formations}
-            onFormationsChange={editor.setFormations}
-          />
-          <VoiceGroupPanel
-            activeGroupId={editor.activeGroupId}
-            onSelectGroup={editor.handleSelectGroup}
-            voiceGroups={editor.voiceGroups}
-            setVoiceGroups={editor.setVoiceGroups}
-            highlightPartId={editor.highlightPartId}
-            onHighlightPart={editor.setHighlightPartId}
-          />
-        </div>
+          {!isDesktop && (
+            <div
+              className="absolute inset-0 bg-overlay z-10"
+              onClick={() => editor.setShowFormations(false)}
+            />
+          )}
+          <div className="absolute top-0 right-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-20">
+            <FormationBar
+              concertId={id}
+              placements={editor.placements}
+              onLoad={editor.handleLoad}
+              onFormationNameChange={editor.setFormationName}
+              songFormationIds={editor.songFormationIds}
+              activeConcertSongId={editor.activeConcertSongId}
+              onSongFormationsChange={editor.updateSongFormationIds}
+              rowSizes={editor.rowSizes}
+              onRowSizesChange={editor.setRowSizes}
+              onClampPlacements={editor.handleClampPlacements}
+              activeFormationId={editor.activeFormationId}
+              onActiveFormationIdChange={editor.setActiveFormationId}
+              formationName={editor.formationName}
+              formations={editor.formations}
+              onFormationsChange={editor.setFormations}
+            />
+            <VoiceGroupPanel
+              activeGroupId={editor.activeGroupId}
+              onSelectGroup={editor.handleSelectGroup}
+              voiceGroups={editor.voiceGroups}
+              setVoiceGroups={editor.setVoiceGroups}
+              highlightPartId={editor.highlightPartId}
+              onHighlightPart={editor.setHighlightPartId}
+            />
+          </div>
         </>
       )}
       {/* Bottom navigation bar — visible when a formation is selected and setlist drawer is closed */}
       {!editor.showSetlist && editor.activeFormationId && (
-        <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center gap-4 py-2 bg-white/90 border-t border-gray-200">
-          <span className="text-sm font-medium text-gray-700">
-            {editor.concertSongs.find((s) => s.id === editor.activeConcertSongId)?.name}
+        <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center gap-4 py-2 bg-surface/90 border-t border-border">
+          <span className="text-sm font-medium text-foreground">
+            {
+              editor.concertSongs.find(
+                (s) => s.id === editor.activeConcertSongId,
+              )?.name
+            }
           </span>
           <SetlistNavButtons
             onPrev={editor.handlePrevFormation}
@@ -244,7 +261,7 @@ export default function ConcertEditor({
             hasNext={editor.hasNextFormation}
             className="flex gap-2"
           />
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-foreground">
             {editor.formationName}
           </span>
         </div>

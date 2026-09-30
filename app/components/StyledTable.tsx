@@ -10,7 +10,7 @@ type StyledTableProps = {
 export function Table({ children, className = "" }: StyledTableProps) {
   return (
     <table
-      className={`w-full border-collapse text-sm border border-gray-200 rounded ${className}`}
+      className={`w-full border-collapse text-sm border border-border rounded ${className}`}
     >
       {children}
     </table>
@@ -22,7 +22,7 @@ export function Thead({ children }: { children: React.ReactNode }) {
 }
 
 export function TheadRow({ children }: { children: React.ReactNode }) {
-  return <tr className="border-b border-gray-300">{children}</tr>;
+  return <tr className="border-b border-border">{children}</tr>;
 }
 
 type ThProps = {
@@ -34,18 +34,31 @@ type ThProps = {
   onSort?: () => void;
 };
 
-export function Th({ children, className = "", compact, style, sortDir, onSort }: ThProps) {
+export function Th({
+  children,
+  className = "",
+  compact,
+  style,
+  sortDir,
+  onSort,
+}: ThProps) {
   return (
     <th
-      className={`py-2 px-3 font-semibold border-r border-gray-200 last:border-r-0 ${compact ? "w-0 whitespace-nowrap" : "text-left"} ${onSort ? "cursor-pointer select-none" : ""} ${className}`}
+      className={`py-2 px-3 font-semibold border-r border-border last:border-r-0 ${compact ? "w-0 whitespace-nowrap" : "text-left"} ${onSort ? "cursor-pointer select-none" : ""} ${className}`}
       style={style}
       onClick={onSort}
     >
       <span className="flex items-center gap-1">
         {children}
         {onSort && (
-          <span className="text-gray-400 text-xs">
-            {sortDir === "asc" ? <ChevronUp size={14} /> : sortDir === "desc" ? <ChevronDown size={14} /> : <ChevronsUpDown size={14} />}
+          <span className="text-subtle text-xs">
+            {sortDir === "asc" ? (
+              <ChevronUp size={14} />
+            ) : sortDir === "desc" ? (
+              <ChevronDown size={14} />
+            ) : (
+              <ChevronsUpDown size={14} />
+            )}
           </span>
         )}
       </span>
@@ -66,7 +79,7 @@ type TrProps = {
 export function Tr({ children, onClick, className = "" }: TrProps) {
   return (
     <tr
-      className={`border-b border-gray-100 hover:bg-gray-50 ${className}`}
+      className={`border-b border-border hover:bg-hover-bg ${className}`}
       onClick={onClick}
     >
       {children}
@@ -83,7 +96,7 @@ type TdProps = {
 export function Td({ children, className = "", compact }: TdProps) {
   return (
     <td
-      className={`py-2 px-3 border-r border-gray-200 last:border-r-0 ${compact ? "w-0 whitespace-nowrap" : ""} ${className}`}
+      className={`py-2 px-3 border-r border-border last:border-r-0 ${compact ? "w-0 whitespace-nowrap" : ""} ${className}`}
     >
       {children}
     </td>

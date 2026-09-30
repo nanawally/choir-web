@@ -75,19 +75,27 @@ export default function BaseFormationEditor({
   }, []);
 
   useEffect(() => {
-    loadFormation(id).then((data: { name: string; placements: { choristId: string; gridX: number; gridY: number }[]; rowSizes: string } | null) => {
-      if (data) {
-        setFormationName(data.name);
-        setPlacements(
-          data.placements.map((p) => ({
-            choristId: p.choristId,
-            gridX: p.gridX,
-            gridY: p.gridY,
-          })),
-        );
-        setRowSizes(JSON.parse(data.rowSizes || "[]"));
-      }
-    });
+    loadFormation(id).then(
+      (
+        data: {
+          name: string;
+          placements: { choristId: string; gridX: number; gridY: number }[];
+          rowSizes: string;
+        } | null,
+      ) => {
+        if (data) {
+          setFormationName(data.name);
+          setPlacements(
+            data.placements.map((p) => ({
+              choristId: p.choristId,
+              gridX: p.gridX,
+              gridY: p.gridY,
+            })),
+          );
+          setRowSizes(JSON.parse(data.rowSizes || "[]"));
+        }
+      },
+    );
   }, [id]);
 
   useEffect(() => {
@@ -213,7 +221,7 @@ export default function BaseFormationEditor({
     <div className="relative h-screen overflow-hidden">
       {/* Left drawer — chorist list */}
       {showChorists && (
-        <div className="absolute top-0 left-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-10">
+        <div className="absolute top-0 left-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-10">
           <h2 className="font-bold mb-3">{t("baseFormations.chorists")}</h2>
           <div className="space-y-1">
             {chorists
@@ -221,29 +229,28 @@ export default function BaseFormationEditor({
               .map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-surface-alt cursor-pointer"
                   onClick={() => handlePlace(c.id)}
                 >
                   <span>{shortName(c, chorists)}</span>
-                  <span className="text-gray-400 text-xs">+</span>
+                  <span className="text-subtle text-xs">+</span>
                 </div>
               ))}
           </div>
           {chorists.filter((c) => !placedIds.has(c.id)).length === 0 && (
-            <p className="text-gray-400 text-sm mt-2">{t("baseFormations.allPlaced")}</p>
+            <p className="text-subtle text-sm mt-2">
+              {t("baseFormations.allPlaced")}
+            </p>
           )}
           {chorists.filter((c) => placedIds.has(c.id)).length > 0 && (
             <>
-              <h3 className="text-xs font-medium text-gray-500 mt-4 mb-1">
+              <h3 className="text-xs font-medium text-muted mt-4 mb-1">
                 {t("baseFormations.placed")}
               </h3>
               {chorists
                 .filter((c) => placedIds.has(c.id))
                 .map((c) => (
-                  <div
-                    key={c.id}
-                    className="text-sm py-0.5 px-2 text-gray-400"
-                  >
+                  <div key={c.id} className="text-sm py-0.5 px-2 text-subtle">
                     {shortName(c, chorists)}
                   </div>
                 ))}
@@ -266,13 +273,13 @@ export default function BaseFormationEditor({
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
           <Link
             href="/base-formations"
-            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100 text-center text-sm"
+            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt text-center text-sm"
             title={t("baseFormations.backToBaseFormations")}
           >
             <ArrowBigLeft size={20} />
           </Link>
           <button
-            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
+            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
             onClick={() => setShowChorists(!showChorists)}
           >
             <UsersRound size={20} />
@@ -286,7 +293,7 @@ export default function BaseFormationEditor({
         >
           {/* Formation name */}
           {formationName && (
-            <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10 text-sm font-medium text-gray-500">
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10 text-sm font-medium text-muted">
               {editingName ? (
                 <input
                   value={nameInput}
@@ -296,7 +303,7 @@ export default function BaseFormationEditor({
                     if (e.key === "Enter") handleRename();
                     if (e.key === "Escape") setEditingName(false);
                   }}
-                  className="border-b border-gray-400 outline-none bg-transparent text-center"
+                  className="border-b border-border-strong outline-none bg-transparent text-center"
                   autoFocus
                 />
               ) : (
@@ -338,7 +345,7 @@ export default function BaseFormationEditor({
         {/* Right toggle button */}
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
           <button
-            className="bg-white rounded-lg shadow p-2 hover:bg-gray-100"
+            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
             onClick={() => setShowVoiceGroups(!showVoiceGroups)}
           >
             <UserRoundGroup size={20} />
@@ -348,16 +355,16 @@ export default function BaseFormationEditor({
 
       {/* Right drawer — voice groups + controls */}
       {showVoiceGroups && (
-        <div className="absolute top-0 right-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-10">
+        <div className="absolute top-0 right-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-10">
           {/* Formation controls */}
-          <div className="flex flex-col gap-2 p-2 border-b border-gray-200 mb-4">
+          <div className="flex flex-col gap-2 p-2 border-b border-border mb-4">
             <h2 className="font-bold mb-1">{t("formations.title")}</h2>
 
             {/* Layout mode */}
             <select
               value={isArcMode ? "arc" : "grid"}
               onChange={(e) => handleSetArcMode(e.target.value === "arc")}
-              className="border border-gray-300 rounded px-2 py-1.5 text-sm w-fit"
+              className="border border-border rounded px-2 py-1.5 text-sm w-fit"
             >
               <option value="arc">{t("formations.arc")}</option>
               <option value="grid">{t("formations.grid")}</option>
@@ -366,7 +373,7 @@ export default function BaseFormationEditor({
             {/* Arc rows */}
             {isArcMode && (
               <div className="mt-1">
-                <h4 className="text-xs font-medium mb-1 text-gray-500">
+                <h4 className="text-xs font-medium mb-1 text-muted">
                   {t("formations.arcRowsShort")}
                 </h4>
                 {rowSizes.map((size, i) => (
@@ -375,9 +382,7 @@ export default function BaseFormationEditor({
                     <input
                       type="number"
                       value={size}
-                      min={
-                        placements.filter((p) => p.gridY === i).length || 1
-                      }
+                      min={placements.filter((p) => p.gridY === i).length || 1}
                       onChange={(e) => {
                         const next = [...rowSizes];
                         next[i] = parseInt(e.target.value) || 1;
@@ -385,7 +390,7 @@ export default function BaseFormationEditor({
                         handleClampPlacements(i, next[i]);
                         updateRowSizes(id, next);
                       }}
-                      className="border border-gray-300 rounded px-1 py-0.5 text-sm w-16"
+                      className="border border-border rounded px-1 py-0.5 text-sm w-16"
                     />
                     <button
                       onClick={() => {
@@ -393,7 +398,7 @@ export default function BaseFormationEditor({
                         setRowSizes(next);
                         updateRowSizes(id, next);
                       }}
-                      className="text-red-400 hover:text-red-600 text-xs"
+                      className="text-danger hover:text-danger-hover text-xs"
                     >
                       X
                     </button>
@@ -405,7 +410,7 @@ export default function BaseFormationEditor({
                     setRowSizes(next);
                     updateRowSizes(id, next);
                   }}
-                  className="text-xs text-blue-500 hover:underline"
+                  className="text-xs text-link hover:underline"
                 >
                   {t("formations.addRow")}
                 </button>
@@ -415,7 +420,7 @@ export default function BaseFormationEditor({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-3 py-1.5 bg-green-500 text-white rounded text-sm w-fit font-medium disabled:opacity-50"
+              className="px-3 py-1.5 btn-success text-sm w-fit font-medium"
             >
               {saving ? t("common.saving") : t("formations.saveFormation")}
             </button>

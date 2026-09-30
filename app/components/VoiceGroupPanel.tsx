@@ -14,7 +14,10 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
+import {
+  restrictToVerticalAxis,
+  restrictToParentElement,
+} from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { useTranslation } from "../lib/LanguageContext";
 import { sortVoiceGroups } from "../lib/voiceGroupSort";
@@ -28,7 +31,12 @@ import {
 } from "../lib/api";
 
 type VoicePart = { id: string; name: string; color: string; shape: string };
-type VoiceGroup = { id: string; name: string; isStandard: boolean; parts: VoicePart[] };
+type VoiceGroup = {
+  id: string;
+  name: string;
+  isStandard: boolean;
+  parts: VoicePart[];
+};
 
 type Props = {
   activeGroupId: string | null;
@@ -95,7 +103,7 @@ function SortablePartItem({
   return (
     <li ref={setNodeRef} style={style}>
       {isEditing ? (
-        <div className="flex flex-col gap-1 border border-gray-300 rounded p-1.5 bg-gray-50">
+        <div className="flex flex-col gap-1 border border-border rounded p-1.5 bg-hover-bg">
           <input
             value={editingPartName}
             onChange={(e) => onEditNameChange(e.target.value)}
@@ -103,7 +111,7 @@ function SortablePartItem({
               if (e.key === "Enter") onSave();
               if (e.key === "Escape") onCancelEdit();
             }}
-            className="border border-gray-300 rounded px-1 py-0.5 text-sm"
+            className="border border-border rounded px-1 py-0.5 text-sm"
             autoFocus
           />
           <div className="flex gap-1 items-center">
@@ -111,12 +119,12 @@ function SortablePartItem({
               type="color"
               value={editingPartColor}
               onChange={(e) => onEditColorChange(e.target.value)}
-              className="w-8 h-8 border border-gray-300 rounded cursor-pointer p-0"
+              className="w-8 h-8 border border-border rounded cursor-pointer p-0"
             />
             <select
               value={editingPartShape}
               onChange={(e) => onEditShapeChange(e.target.value)}
-              className="flex-1 border border-gray-300 rounded px-1 py-0.5 text-sm"
+              className="flex-1 border border-border rounded px-1 py-0.5 text-sm"
             >
               {SHAPES.map((s) => (
                 <option key={s} value={s}>
@@ -128,13 +136,13 @@ function SortablePartItem({
           <div className="flex gap-1">
             <button
               onClick={onSave}
-              className="px-2 py-0.5 bg-blue-500 text-white rounded text-xs"
+              className="px-2 py-0.5 btn-primary text-xs"
             >
               {t("common.save")}
             </button>
             <button
               onClick={onCancelEdit}
-              className="px-2 py-0.5 border border-gray-300 rounded text-xs"
+              className="px-2 py-0.5 border border-border rounded text-xs"
             >
               {t("common.cancel")}
             </button>
@@ -142,7 +150,7 @@ function SortablePartItem({
         </div>
       ) : (
         <div
-          className={`flex items-center justify-between text-sm py-0.5 cursor-pointer rounded px-1 ${isHighlighted ? "bg-gray-200" : "hover:bg-gray-100"}`}
+          className={`flex items-center justify-between text-sm py-0.5 cursor-pointer rounded px-1 ${isHighlighted ? "bg-surface-alt" : "hover:bg-surface-alt"}`}
           onClick={onHighlight}
         >
           <span className="flex items-center gap-1">
@@ -151,7 +159,7 @@ function SortablePartItem({
               {...attributes}
               {...listeners}
               style={{ touchAction: "none" }}
-              className="cursor-grab active:cursor-grabbing select-none text-gray-400"
+              className="cursor-grab active:cursor-grabbing select-none text-subtle"
               onClick={(e) => e.stopPropagation()}
             >
               <GripVertical size={14} />
@@ -175,7 +183,7 @@ function SortablePartItem({
               e.stopPropagation();
               onDelete();
             }}
-            className="text-red-400 hover:text-red-600 text-xs"
+            className="text-danger hover:text-danger-hover text-xs"
           >
             X
           </button>
@@ -248,7 +256,8 @@ export default function VoiceGroupPanel({
       setNewPartName("");
       setShowAddPart(false);
       // Auto-advance color for next part
-      const nextIdx = (DEFAULT_COLORS.indexOf(newPartColor) + 1) % DEFAULT_COLORS.length;
+      const nextIdx =
+        (DEFAULT_COLORS.indexOf(newPartColor) + 1) % DEFAULT_COLORS.length;
       setNewPartColor(DEFAULT_COLORS[nextIdx]);
     }
   }
@@ -259,13 +268,20 @@ export default function VoiceGroupPanel({
       setEditingPartId(null);
       return;
     }
-    if (await updateVoicePart(partId, trimmed, editingPartColor, editingPartShape)) {
+    if (
+      await updateVoicePart(partId, trimmed, editingPartColor, editingPartShape)
+    ) {
       setVoiceGroups(
         voiceGroups.map((g) => ({
           ...g,
           parts: g.parts.map((p) =>
             p.id === partId
-              ? { ...p, name: trimmed, color: editingPartColor, shape: editingPartShape }
+              ? {
+                  ...p,
+                  name: trimmed,
+                  color: editingPartColor,
+                  shape: editingPartShape,
+                }
               : p,
           ),
         })),
@@ -303,7 +319,10 @@ export default function VoiceGroupPanel({
         g.id === activeGroupId ? { ...g, parts: reordered } : g,
       ),
     );
-    reorderVoiceParts(activeGroupId!, reordered.map((p) => p.id));
+    reorderVoiceParts(
+      activeGroupId!,
+      reordered.map((p) => p.id),
+    );
   }
 
   return (
@@ -313,7 +332,7 @@ export default function VoiceGroupPanel({
       <select
         value={activeGroupId || ""}
         onChange={(e) => onSelectGroup(e.target.value || null)}
-        className="w-full border border-gray-300 rounded px-2 py-1 text-sm mb-2"
+        className="w-full border border-border rounded px-2 py-1 text-sm mb-2"
       >
         <option value="">No voice group</option>
         {sortVoiceGroups(voiceGroups).map((g) => (
@@ -330,15 +349,18 @@ export default function VoiceGroupPanel({
             onChange={(e) => setNewGroupName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleCreateGroup();
-              if (e.key === "Escape") { setShowAddGroup(false); setNewGroupName(""); }
+              if (e.key === "Escape") {
+                setShowAddGroup(false);
+                setNewGroupName("");
+              }
             }}
             placeholder="New group..."
-            className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
+            className="flex-1 border border-border rounded px-2 py-1 text-sm"
             autoFocus
           />
           <button
             onClick={handleCreateGroup}
-            className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
+            className="px-2 py-1 btn-primary text-sm"
           >
             {t("common.add")}
           </button>
@@ -346,7 +368,7 @@ export default function VoiceGroupPanel({
       ) : (
         <button
           onClick={() => setShowAddGroup(true)}
-          className="text-sm text-blue-500 hover:underline mb-4"
+          className="text-sm text-link hover:underline mb-4"
         >
           {t("voiceGroups.addGroup")}
         </button>
@@ -355,10 +377,10 @@ export default function VoiceGroupPanel({
       {activeGroup && (
         <>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs text-gray-500 font-medium">Parts</h3>
+            <h3 className="text-xs text-muted font-medium">Parts</h3>
             <button
               onClick={handleDeleteGroup}
-              className="text-red-400 hover:text-red-600 text-xs"
+              className="text-danger hover:text-danger-hover text-xs"
             >
               {t("voiceGroups.deleteGroup")}
             </button>
@@ -395,7 +417,9 @@ export default function VoiceGroupPanel({
                       setEditingPartColor(p.color);
                       setEditingPartShape(p.shape);
                     }}
-                    onHighlight={() => onHighlightPart(highlightPartId === p.id ? null : p.id)}
+                    onHighlight={() =>
+                      onHighlightPart(highlightPartId === p.id ? null : p.id)
+                    }
                     onDelete={() => handleDeletePart(p.id)}
                   />
                 ))}
@@ -410,10 +434,13 @@ export default function VoiceGroupPanel({
                 onChange={(e) => setNewPartName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleAddPart();
-                  if (e.key === "Escape") { setShowAddPart(false); setNewPartName(""); }
+                  if (e.key === "Escape") {
+                    setShowAddPart(false);
+                    setNewPartName("");
+                  }
                 }}
                 placeholder="Part name..."
-                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                className="border border-border rounded px-2 py-1 text-sm"
                 autoFocus
               />
               <div className="flex gap-1 items-center">
@@ -421,12 +448,12 @@ export default function VoiceGroupPanel({
                   type="color"
                   value={newPartColor}
                   onChange={(e) => setNewPartColor(e.target.value)}
-                  className="w-8 h-8 border border-gray-300 rounded cursor-pointer p-0"
+                  className="w-8 h-8 border border-border rounded cursor-pointer p-0"
                 />
                 <select
                   value={newPartShape}
                   onChange={(e) => setNewPartShape(e.target.value)}
-                  className="flex-1 border border-gray-300 rounded px-1 py-1 text-sm"
+                  className="flex-1 border border-border rounded px-1 py-1 text-sm"
                 >
                   {SHAPES.map((s) => (
                     <option key={s} value={s}>
@@ -436,7 +463,7 @@ export default function VoiceGroupPanel({
                 </select>
                 <button
                   onClick={handleAddPart}
-                  className="px-2 py-1 bg-blue-500 text-white rounded text-sm"
+                  className="px-2 py-1 btn-primary text-sm"
                 >
                   {t("common.add")}
                 </button>
@@ -445,7 +472,7 @@ export default function VoiceGroupPanel({
           ) : (
             <button
               onClick={() => setShowAddPart(true)}
-              className="text-sm text-blue-500 hover:underline"
+              className="text-sm text-link hover:underline"
             >
               {t("voiceGroups.addPart")}
             </button>

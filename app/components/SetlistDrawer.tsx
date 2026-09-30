@@ -13,9 +13,16 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
+import {
+  restrictToVerticalAxis,
+  restrictToParentElement,
+} from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
-import { addSongToConcert, removeSongFromConcert, reorderConcertSongs } from "../lib/api";
+import {
+  addSongToConcert,
+  removeSongFromConcert,
+  reorderConcertSongs,
+} from "../lib/api";
 import { GripVertical, ArrowLeft, ArrowRight } from "lucide-react";
 import { useTranslation } from "../lib/LanguageContext";
 
@@ -58,14 +65,16 @@ function SortableFormation({
       ref={setNodeRef}
       style={style}
       className={`flex items-center gap-1 text-xs py-0.5 px-1 rounded ${
-        isActive ? "bg-blue-200 font-semibold" : "bg-gray-100 text-gray-600"
+        isActive
+          ? "bg-primary-light font-semibold"
+          : "bg-surface-alt text-muted"
       }`}
     >
       <span
         {...attributes}
         {...listeners}
         style={{ touchAction: "none" }}
-        className="cursor-grab active:cursor-grabbing select-none text-gray-400"
+        className="cursor-grab active:cursor-grabbing select-none text-subtle"
       >
         <GripVertical size={14} />
       </span>
@@ -101,7 +110,7 @@ function SortableSongItem({
   return (
     <li ref={setNodeRef} style={style}>
       <div
-        className={`flex items-center justify-between text-sm py-0.5 px-2 rounded cursor-pointer ${isActive ? "bg-blue-100 font-semibold" : "hover:bg-gray-100"}`}
+        className={`flex items-center justify-between text-sm py-0.5 px-2 rounded cursor-pointer ${isActive ? "bg-primary-light font-semibold" : "hover:bg-surface-alt"}`}
         onClick={onSelect}
       >
         <span className="flex items-center gap-1">
@@ -109,7 +118,7 @@ function SortableSongItem({
             {...attributes}
             {...listeners}
             style={{ touchAction: "none" }}
-            className="cursor-grab active:cursor-grabbing select-none text-gray-400"
+            className="cursor-grab active:cursor-grabbing select-none text-subtle"
             onClick={(e) => e.stopPropagation()}
           >
             <GripVertical size={14} />
@@ -117,7 +126,7 @@ function SortableSongItem({
           {song.name}
         </span>
         <button
-          className="ml-2 px-2 py-0.5 bg-red-500 text-white rounded text-sm"
+          className="ml-2 px-2 py-0.5 btn-danger text-sm"
           onClick={(e) => {
             e.stopPropagation();
             onRemove();
@@ -161,7 +170,10 @@ export default function SetlistDrawer({
       newOrder.splice(oldIndex, 1);
       newOrder.splice(newIndex, 0, formations[oldIndex]);
 
-      onReorderFormations(songId, newOrder.map((f) => f.id));
+      onReorderFormations(
+        songId,
+        newOrder.map((f) => f.id),
+      );
     };
   }
 
@@ -180,7 +192,10 @@ export default function SetlistDrawer({
     // Update sortOrder to match new positions
     const updated = reordered.map((s, i) => ({ ...s, sortOrder: i }));
     onSongsChange(updated);
-    reorderConcertSongs(concertId, updated.map((s) => s.id));
+    reorderConcertSongs(
+      concertId,
+      updated.map((s) => s.id),
+    );
   }
 
   return (
@@ -189,7 +204,7 @@ export default function SetlistDrawer({
       <div className="flex gap-1 mt-2">
         <select
           id="add-song-select"
-          className="flex-1 border border-gray-300 rounded px-1 py-0.5 text-sm"
+          className="flex-1 border border-border rounded px-1 py-0.5 text-sm"
         >
           {catalogSongs.map((s) => (
             <option key={s.id} value={s.id}>
@@ -198,7 +213,7 @@ export default function SetlistDrawer({
           ))}
         </select>
         <button
-          className="px-2 py-0.5 bg-blue-500 text-white rounded text-sm"
+          className="px-2 py-0.5 btn-primary text-sm"
           onClick={async () => {
             const select = document.getElementById(
               "add-song-select",
@@ -242,7 +257,10 @@ export default function SetlistDrawer({
                       sensors={sensors}
                       collisionDetection={closestCenter}
                       onDragEnd={handleFormationDragEnd(s.id, songFormations)}
-                      modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+                      modifiers={[
+                        restrictToVerticalAxis,
+                        restrictToParentElement,
+                      ]}
                     >
                       <SortableContext
                         items={songFormations.map((f) => f.id)}
@@ -255,7 +273,8 @@ export default function SetlistDrawer({
                               formation={f}
                               isActive={activeFormationId === f.id}
                               onClick={() => {
-                                if (activeConcertSongId !== s.id) onSelectSong(s.id);
+                                if (activeConcertSongId !== s.id)
+                                  onSelectSong(s.id);
                                 onSelectFormation(f.id);
                               }}
                             />
@@ -288,18 +307,22 @@ export function SetlistNavButtons({
   className?: string;
 }) {
   return (
-    <div className={className ?? "flex justify-center gap-2 py-2 border-t border-gray-200"}>
+    <div
+      className={
+        className ?? "flex justify-center gap-2 py-2 border-t border-border"
+      }
+    >
       <button
         onClick={onPrev}
         disabled={!hasPrev}
-        className="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-1 bg-surface border border-border rounded text-sm hover:bg-hover-bg disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ArrowLeft size={16} />
       </button>
       <button
         onClick={onNext}
         disabled={!hasNext}
-        className="px-3 py-1 bg-white border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-1 bg-surface border border-border rounded text-sm hover:bg-hover-bg disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ArrowRight size={16} />
       </button>
