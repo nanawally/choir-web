@@ -430,7 +430,7 @@ export default function VoiceGroupsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col py-8 px-8">
+      <div className="flex-1 flex flex-col py-8 px-4 md:px-8">
       <h1 className="text-4xl font-bold mb-2 text-center">{t("voiceGroups.title")}</h1>
       <p className="text-sm text-gray-500 text-center mb-6">
         {t("voiceGroups.description")}

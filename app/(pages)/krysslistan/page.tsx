@@ -10,7 +10,7 @@ export default function KrysslistanPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col py-8 px-8">
+      <div className="flex-1 flex flex-col py-8 px-4 md:px-8">
         <h1 className="text-4xl font-bold mb-6 text-center">{t("krysslistan.title")}</h1>
         {SHEET_ID ? (
           <iframe

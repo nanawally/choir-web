@@ -92,7 +92,7 @@ export default function ConcertsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col py-8 px-8">
+      <div className="flex-1 flex flex-col py-8 px-4 md:px-8">
       <h1 className="text-4xl font-bold mb-6 text-center">{t("concerts.title")}</h1>
 
       <div className="mx-auto w-full max-w-4xl">
@@ -147,7 +147,7 @@ export default function ConcertsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sorted.map((c) => (
             <div
               key={c.id}

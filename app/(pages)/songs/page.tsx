@@ -57,7 +57,7 @@ export default function SongsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col py-8 px-8">
+      <div className="flex-1 flex flex-col py-8 px-4 md:px-8">
       <h1 className="text-4xl font-bold mb-6 text-center">{t("songs.title")}</h1>
 
       {/* Toolbar */}
