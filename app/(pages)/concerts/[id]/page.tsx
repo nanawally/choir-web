@@ -27,6 +27,7 @@ export default function ConcertEditor({
 
   // Track full window size (the "virtual" coordinate space)
   const [windowSize, setWindowSize] = useState({ width: 1600, height: 734 });
+  const isDesktop = windowSize.width >= 768; // md breakpoint
 
   useEffect(() => {
     function onResize() {
@@ -65,7 +66,15 @@ export default function ConcertEditor({
     <div className="relative h-screen overflow-hidden">
       {/* Left drawers */}
       {(editor.showSetlist || editor.showChorists) && (
-        <div className="absolute top-0 left-0 w-72 h-full bg-white shadow-lg flex flex-col z-10">
+        <>
+        {/* Mobile backdrop */}
+        {!isDesktop && (
+          <div
+            className="absolute inset-0 bg-black/30 z-10"
+            onClick={() => { editor.setShowSetlist(false); editor.setShowChorists(false); }}
+          />
+        )}
+        <div className="absolute top-0 left-0 w-72 h-full bg-white shadow-lg flex flex-col z-20">
           <div className="flex-1 overflow-y-auto p-4">
             {editor.showSetlist && (
               <SetlistDrawer
@@ -101,16 +110,17 @@ export default function ConcertEditor({
             />
           )}
         </div>
+        </>
       )}
 
-      {/* Grid area — offset by open drawers, uses flex so button strips take natural width */}
+      {/* Grid area — offset by open drawers on desktop, full-width on mobile */}
       <div
         className="absolute overflow-hidden flex"
         style={{
           top: 0,
           bottom: 0,
-          left: leftOpen ? DRAWER_WIDTH : 0,
-          right: rightOpen ? DRAWER_WIDTH : 0,
+          left: isDesktop && leftOpen ? DRAWER_WIDTH : 0,
+          right: isDesktop && rightOpen ? DRAWER_WIDTH : 0,
         }}
       >
         {/* Left toggle buttons — sits beside the canvas, not on top */}
@@ -185,7 +195,14 @@ export default function ConcertEditor({
 
       {/* Right drawer */}
       {editor.showFormations && (
-        <div className="absolute top-0 right-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-10">
+        <>
+        {!isDesktop && (
+          <div
+            className="absolute inset-0 bg-black/30 z-10"
+            onClick={() => editor.setShowFormations(false)}
+          />
+        )}
+        <div className="absolute top-0 right-0 w-72 h-full bg-white shadow-lg p-4 overflow-y-auto z-20">
           <FormationBar
             concertId={id}
             placements={editor.placements}
@@ -212,7 +229,27 @@ export default function ConcertEditor({
             onHighlightPart={editor.setHighlightPartId}
           />
         </div>
+        </>
       )}
+      {/* Bottom navigation bar — visible when a formation is selected and setlist drawer is closed */}
+      {!editor.showSetlist && editor.activeFormationId && (
+        <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-center gap-4 py-2 bg-white/90 border-t border-gray-200">
+          <span className="text-sm font-medium text-gray-700">
+            {editor.concertSongs.find((s) => s.id === editor.activeConcertSongId)?.name}
+          </span>
+          <SetlistNavButtons
+            onPrev={editor.handlePrevFormation}
+            onNext={editor.handleNextFormation}
+            hasPrev={editor.hasPrevFormation}
+            hasNext={editor.hasNextFormation}
+            className="flex gap-2"
+          />
+          <span className="text-sm text-gray-700">
+            {editor.formationName}
+          </span>
+        </div>
+      )}
+
       {editor.showRosterModal && (
         <RosterModal
           onClose={() => editor.setShowRosterModal(false)}

@@ -279,14 +279,16 @@ export function SetlistNavButtons({
   onNext,
   hasPrev,
   hasNext,
+  className,
 }: {
   onPrev: () => void;
   onNext: () => void;
   hasPrev: boolean;
   hasNext: boolean;
+  className?: string;
 }) {
   return (
-    <div className="flex justify-center gap-2 py-2 border-t border-gray-200">
+    <div className={className ?? "flex justify-center gap-2 py-2 border-t border-gray-200"}>
       <button
         onClick={onPrev}
         disabled={!hasPrev}
