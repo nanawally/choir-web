@@ -58,8 +58,6 @@ export default function Home() {
             <h2 className="text-lg font-semibold">{t("nav.baseFormations")}</h2>
             <p className="text-sm text-gray-500">{t("home.manageBaseFormations")}</p>
           </Link>
-        </div>
-        <div className="flex flex-col mt-4 md:flex-row gap-4">
           <Link
             href="/krysslistan"
             className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 flex-1 text-center"
