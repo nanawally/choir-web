@@ -5,19 +5,23 @@ type Props = {
   shape: string;
   selected: boolean;
   opacity?: number;
+  shapeScale?: number;
 };
 
-export default function ChoristShape({ color, shape, selected, opacity = 1 }: Props) {
+export default function ChoristShape({ color, shape, selected, opacity = 1, shapeScale = 1 }: Props) {
   const stroke = selected ? "blue" : undefined;
   const strokeWidth = selected ? 2 : 0;
 
+  const s = shapeScale;
+
   if (shape === "square") {
+    const size = 36 * s;
     return (
       <Rect
-        width={36}
-        height={36}
-        offsetX={18}
-        offsetY={18}
+        width={size}
+        height={size}
+        offsetX={size / 2}
+        offsetY={size / 2}
         fill={color}
         stroke={stroke}
         strokeWidth={strokeWidth}
@@ -30,7 +34,7 @@ export default function ChoristShape({ color, shape, selected, opacity = 1 }: Pr
     return (
       <RegularPolygon
         sides={3}
-        radius={22}
+        radius={22 * s}
         fill={color}
         stroke={stroke}
         strokeWidth={strokeWidth}
@@ -40,13 +44,13 @@ export default function ChoristShape({ color, shape, selected, opacity = 1 }: Pr
   }
 
   if (shape === "diamond") {
-    // A square rotated 45 degrees
+    const size = 30 * s;
     return (
       <Rect
-        width={30}
-        height={30}
-        offsetX={15}
-        offsetY={15}
+        width={size}
+        height={size}
+        offsetX={size / 2}
+        offsetY={size / 2}
         rotation={45}
         fill={color}
         stroke={stroke}
@@ -57,18 +61,17 @@ export default function ChoristShape({ color, shape, selected, opacity = 1 }: Pr
   }
 
   if (shape === "cross") {
-    // Plus/cross shape drawn as a closed 12-point polygon
-    const a = 7;  // half-width of each arm
-    const b = 18; // half-length of each arm
+    const a = 7 * s;
+    const b = 18 * s;
     return (
       <Line
         points={[
-          -a, -b,  a, -b,  // top of vertical arm
-           a,  -a,  b, -a,  // top-right corner into right arm
-           b,   a,  a,  a,  // right arm down
-           a,   b, -a,  b,  // bottom of vertical arm
-          -a,   a, -b,  a,  // bottom-left corner into left arm
-          -b,  -a, -a, -a,  // left arm up
+          -a, -b,  a, -b,
+           a,  -a,  b, -a,
+           b,   a,  a,  a,
+           a,   b, -a,  b,
+          -a,   a, -b,  a,
+          -b,  -a, -a, -a,
         ]}
         closed
         fill={color}
@@ -80,15 +83,12 @@ export default function ChoristShape({ color, shape, selected, opacity = 1 }: Pr
   }
 
   if (shape === "star") {
-    // 5-point star as a closed line shape
-    const r = 20;
-    const inner = 9;
+    const r = 20 * s;
+    const inner = 9 * s;
     const points: number[] = [];
     for (let i = 0; i < 5; i++) {
-      // Outer point
       const outerAngle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
       points.push(r * Math.cos(outerAngle), r * Math.sin(outerAngle));
-      // Inner point
       const innerAngle = outerAngle + Math.PI / 5;
       points.push(inner * Math.cos(innerAngle), inner * Math.sin(innerAngle));
     }
@@ -107,7 +107,7 @@ export default function ChoristShape({ color, shape, selected, opacity = 1 }: Pr
   // Default: circle
   return (
     <Circle
-      radius={20}
+      radius={20 * s}
       fill={color}
       stroke={stroke}
       strokeWidth={strokeWidth}

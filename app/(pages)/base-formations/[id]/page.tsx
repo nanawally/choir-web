@@ -155,14 +155,28 @@ export default function BaseFormationEditor({
 
   function handlePlace(choristId: string) {
     const occupied = new Set(placements.map((p) => `${p.gridX},${p.gridY}`));
-    for (let gridY = 1; gridY < HEIGHT / CELL_SIZE; gridY++) {
-      for (let gridX = 1; gridX < WIDTH / CELL_SIZE; gridX++) {
-        if (!occupied.has(`${gridX},${gridY}`)) {
-          setPlacements([...placements, { choristId, gridX, gridY }]);
-          return;
+    if (rowSizes.length > 0) {
+      // Arc mode: only valid arc spots
+      for (let gridY = 0; gridY < rowSizes.length; gridY++) {
+        for (let gridX = 0; gridX < rowSizes[gridY]; gridX++) {
+          if (!occupied.has(`${gridX},${gridY}`)) {
+            setPlacements([...placements, { choristId, gridX, gridY }]);
+            return;
+          }
+        }
+      }
+    } else {
+      // Rectangular grid
+      for (let gridY = 1; gridY < HEIGHT / CELL_SIZE; gridY++) {
+        for (let gridX = 1; gridX < WIDTH / CELL_SIZE; gridX++) {
+          if (!occupied.has(`${gridX},${gridY}`)) {
+            setPlacements([...placements, { choristId, gridX, gridY }]);
+            return;
+          }
         }
       }
     }
+    // No empty spot — chorist stays unplaced
   }
 
   function handleRemove(choristId: string) {

@@ -95,6 +95,10 @@ export default function GridCanvas({
   } | null>(null);
   const didMarquee = useRef(false);
 
+  // Shrink shapes on small screens so they don't overlap
+  const isMobile = canvasWidth < 768;
+  const shapeScale = isMobile ? 0.65 : 1;
+
   // Center of the virtual coordinate space (for arc rendering)
   const centerX = virtualWidth / 2;
   const centerY = virtualHeight - 20;
@@ -339,10 +343,20 @@ export default function GridCanvas({
                   }}
                   onDragEnd={(e) => {
                     const node = e.target;
+                    const occupied = new Set(
+                      placements
+                        .filter((pl) => pl.choristId !== p.choristId)
+                        .map((pl) => `${pl.gridX},${pl.gridY}`),
+                    );
+                    const origPos = toPixel(p.gridX, p.gridY);
 
                     if (rowSizes.length > 0) {
                       const snapped = snapToArc(node.x(), node.y());
-                      if (!snapped) return;
+                      if (!snapped || occupied.has(`${snapped.gridX},${snapped.gridY}`)) {
+                        // Snap back to original position
+                        node.position(origPos);
+                        return;
+                      }
                       node.position({ x: snapped.x, y: snapped.y });
                       setPlacements(
                         placements.map((pl) =>
@@ -358,18 +372,35 @@ export default function GridCanvas({
                     } else {
                       const newX = snapToGrid(node.x());
                       const newY = snapToGrid(node.y());
-                      node.position({ x: newX, y: newY });
+                      const newGridX = Math.round(newX / CELL_SIZE);
+                      const newGridY = Math.round(newY / CELL_SIZE);
 
                       if (
                         dragStart &&
                         selectedIds.has(p.choristId) &&
                         selectedIds.size > 1
                       ) {
-                        const origPos = toPixel(p.gridX, p.gridY);
                         const dx = newX - origPos.x;
                         const dy = newY - origPos.y;
                         const gridDx = Math.round(dx / CELL_SIZE);
                         const gridDy = Math.round(dy / CELL_SIZE);
+                        // Check all moved positions for collisions with non-selected chorists
+                        const nonSelected = placements.filter(
+                          (pl) => !selectedIds.has(pl.choristId),
+                        );
+                        const nonSelectedSet = new Set(
+                          nonSelected.map((pl) => `${pl.gridX},${pl.gridY}`),
+                        );
+                        const hasCollision = placements
+                          .filter((pl) => selectedIds.has(pl.choristId))
+                          .some((pl) =>
+                            nonSelectedSet.has(`${pl.gridX + gridDx},${pl.gridY + gridDy}`),
+                          );
+                        if (hasCollision) {
+                          node.position(origPos);
+                          return;
+                        }
+                        node.position({ x: newX, y: newY });
                         setPlacements(
                           placements.map((pl) =>
                             selectedIds.has(pl.choristId)
@@ -382,13 +413,18 @@ export default function GridCanvas({
                           ),
                         );
                       } else {
+                        if (occupied.has(`${newGridX},${newGridY}`)) {
+                          node.position(origPos);
+                          return;
+                        }
+                        node.position({ x: newX, y: newY });
                         setPlacements(
                           placements.map((pl) =>
                             pl.choristId === p.choristId
                               ? {
                                   ...pl,
-                                  gridX: Math.round(newX / CELL_SIZE),
-                                  gridY: Math.round(newY / CELL_SIZE),
+                                  gridX: newGridX,
+                                  gridY: newGridY,
                                 }
                               : pl,
                           ),
@@ -420,16 +456,17 @@ export default function GridCanvas({
                     shape={shape}
                     selected={selectedIds.has(p.choristId)}
                     opacity={opacity}
+                    shapeScale={shapeScale}
                   />
                   <Text
                     text={shortName(chorist, chorists)}
-                    fontSize={11}
+                    fontSize={11 * shapeScale}
                     fill="#333"
                     opacity={opacity}
-                    y={22}
+                    y={22 * shapeScale}
                     align="center"
-                    offsetX={25}
-                    width={50}
+                    offsetX={25 * shapeScale}
+                    width={50 * shapeScale}
                   />
                 </Group>
               );
