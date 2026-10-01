@@ -159,11 +159,11 @@ export default function EditSetlistModal({
 
   return (
     <div
-      className="fixed inset-0 bg-overlay z-50 flex items-center justify-center"
+      className="fixed inset-0 bg-overlay z-50 flex items-center justify-center overflow-y-auto p-4"
       onClick={onClose}
     >
       <div
-        className="bg-surface rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col"
+        className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] max-w-3xl max-h-[calc(100vh-2rem)] flex flex-col my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
@@ -176,9 +176,9 @@ export default function EditSetlistModal({
           </button>
         </div>
 
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-col md:flex-row flex-1 min-h-0">
           {/* Left: Song catalog */}
-          <div className="flex-1 border-r border-border flex flex-col min-w-0">
+          <div className="flex-1 border-b md:border-b-0 md:border-r border-border flex flex-col min-w-0">
             <div className="p-3 border-b border-border">
               <h3 className="text-xs font-medium text-muted mb-1.5">
                 {t("concerts.songCatalog")}

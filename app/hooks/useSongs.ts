@@ -80,16 +80,21 @@ export function useSongs() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_VISIBLE);
+  const didRestoreColumns = useRef(false);
+  useEffect(() => {
+    if (didRestoreColumns.current) return;
+    didRestoreColumns.current = true;
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as string[];
-        if (Array.isArray(parsed) && parsed.includes("name")) return parsed;
+        if (Array.isArray(parsed) && parsed.includes("name")) {
+          setVisibleColumns(parsed);
+        }
       }
     } catch { /* ignore */ }
-    return DEFAULT_VISIBLE;
-  });
+  }, []);
   const [columnPickerOpen, setColumnPickerOpen] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [editingSong, setEditingSong] = useState<Song | null>(null);

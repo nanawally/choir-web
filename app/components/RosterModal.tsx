@@ -38,7 +38,7 @@ export default function RosterModal({
 
   return (
     <div className="fixed inset-0 bg-overlay z-30 flex items-center justify-center">
-      <div className="bg-surface rounded-lg p-6 w-80 max-h-[80vh] flex flex-col">
+      <div className="bg-surface rounded-lg p-6 w-80 max-w-[calc(100%-2rem)] max-h-[80vh] flex flex-col">
         <h2 className="font-bold mb-4">{t("roster.title")}</h2>
         <ul className="space-y-1 overflow-y-auto flex-1 mb-4">
           {chorists.map((c) => (

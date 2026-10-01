@@ -106,7 +106,7 @@ export default function ChoristModal({
 
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50">
-      <div className="bg-surface rounded-lg shadow-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+      <div className="bg-surface rounded-lg shadow-lg p-6 w-96 max-w-[calc(100%-2rem)] max-h-[80vh] overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4">
           {mode === "add" ? t("chorists.addTitle") : t("chorists.editTitle")}
         </h2>
