@@ -10,6 +10,7 @@ import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
 import SetlistDrawer, {
   SetlistNavButtons,
 } from "@/app/components/SetlistDrawer";
+import EditSetlistModal from "@/app/components/EditSetlistModal";
 import Link from "next/link";
 import {
   ArrowBigLeft,
@@ -88,12 +89,10 @@ export default function ConcertEditor({
             <div className="flex-1 overflow-y-auto p-4">
               {editor.showSetlist && (
                 <SetlistDrawer
-                  concertId={id}
                   concertSongs={editor.concertSongs}
                   activeConcertSongId={editor.activeConcertSongId}
-                  catalogSongs={editor.catalogSongs}
                   onSelectSong={editor.handleSelectConcertSong}
-                  onSongsChange={editor.setConcertSongs}
+                  onEditSetlist={() => editor.setShowEditSetlist(true)}
                   getFormationsForSong={editor.getFormationsForSong}
                   activeFormationId={editor.activeFormationId}
                   onSelectFormation={editor.handleSelectFormation}
@@ -273,6 +272,16 @@ export default function ConcertEditor({
           chorists={editor.sortedChorists}
           rosterIds={editor.rosterIds}
           onSave={editor.handleSaveRoster}
+        />
+      )}
+
+      {editor.showEditSetlist && (
+        <EditSetlistModal
+          concertId={id}
+          catalogSongs={editor.catalogSongs}
+          concertSongs={editor.concertSongs}
+          onSongsChange={editor.setConcertSongs}
+          onClose={() => editor.setShowEditSetlist(false)}
         />
       )}
     </div>

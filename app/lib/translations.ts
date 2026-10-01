@@ -49,6 +49,7 @@ const translations = {
   // Common
   "common.save": { en: "Save", sv: "Spara" },
   "common.cancel": { en: "Cancel", sv: "Avbryt" },
+  "common.close": { en: "Close", sv: "Stäng" },
   "common.create": { en: "Create", sv: "Skapa" },
   "common.delete": { en: "Delete", sv: "Ta bort" },
   "common.edit": { en: "Edit", sv: "Redigera" },
@@ -155,6 +156,13 @@ const translations = {
   "concerts.backToConcerts": {
     en: "Back to concerts",
     sv: "Tillbaka till konserter",
+  },
+  "concerts.editSetlist": { en: "Edit Setlist", sv: "Redigera konsertrepertoar" },
+  "concerts.songCatalog": { en: "Song Catalog", sv: "Styckebibliotek" },
+  "concerts.setlist": { en: "Setlist", sv: "Konsertrepertoar" },
+  "concerts.setlistEmpty": {
+    en: "Click a song on the left to add it.",
+    sv: "Klicka på ett stycke till vänster för att lägga till.",
   },
 
   // Chorists

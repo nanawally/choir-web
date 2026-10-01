@@ -3,12 +3,38 @@
 import type { Song } from "../lib/api";
 import { useTranslation } from "../lib/LanguageContext";
 
+export type Suggestions = {
+  composer: string[];
+  arranger: string[];
+  delning: string[];
+  languages: string[];
+  instrument: string[];
+  collectionName: string[];
+};
+
+export function extractSuggestions(songs: Song[]): Suggestions {
+  function unique(field: keyof Song): string[] {
+    const values = songs.map((s) => s[field]).filter((v): v is string => typeof v === "string" && v.length > 0);
+    return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+  }
+  return {
+    composer: unique("composer"),
+    arranger: unique("arranger"),
+    delning: unique("delning"),
+    languages: unique("languages"),
+    instrument: unique("instrument"),
+    collectionName: unique("collectionName"),
+  };
+}
+
 export function SongFormFields({
   form,
   set,
+  suggestions,
 }: {
   form: Song;
   set: <K extends keyof Song>(key: K, value: Song[K]) => void;
+  suggestions?: Suggestions;
 }) {
   const { t } = useTranslation();
   return (
@@ -26,6 +52,7 @@ export function SongFormFields({
           value={form.composer ?? ""}
           onChange={(e) => set("composer", e.target.value || null)}
           className="w-full border border-border rounded px-2 py-1 text-sm"
+          list={suggestions ? "dl-composer" : undefined}
         />
       </Field>
       <Field label={t("songs.arranger")}>
@@ -33,6 +60,7 @@ export function SongFormFields({
           value={form.arranger ?? ""}
           onChange={(e) => set("arranger", e.target.value || null)}
           className="w-full border border-border rounded px-2 py-1 text-sm"
+          list={suggestions ? "dl-arranger" : undefined}
         />
       </Field>
       <Field label={t("songs.delning")}>
@@ -40,6 +68,7 @@ export function SongFormFields({
           value={form.delning ?? ""}
           onChange={(e) => set("delning", e.target.value || null)}
           className="w-full border border-border rounded px-2 py-1 text-sm"
+          list={suggestions ? "dl-delning" : undefined}
         />
       </Field>
       <Field label={t("songs.languagesHint")}>
@@ -47,6 +76,7 @@ export function SongFormFields({
           value={form.languages ?? ""}
           onChange={(e) => set("languages", e.target.value || null)}
           className="w-full border border-border rounded px-2 py-1 text-sm"
+          list={suggestions ? "dl-languages" : undefined}
         />
       </Field>
       <Field label={t("songs.lengthHint")}>
@@ -82,6 +112,7 @@ export function SongFormFields({
               onChange={(e) => set("instrument", e.target.value || null)}
               className="border border-border rounded px-2 py-1 text-sm"
               placeholder="Piano"
+              list={suggestions ? "dl-instrument" : undefined}
             />
           </Field>
         )}
@@ -130,8 +161,20 @@ export function SongFormFields({
           value={form.collectionName ?? ""}
           onChange={(e) => set("collectionName", e.target.value || null)}
           className="w-full border border-border rounded px-2 py-1 text-sm"
+          list={suggestions ? "dl-collection" : undefined}
         />
       </Field>
+
+      {suggestions && (
+        <>
+          <datalist id="dl-composer">{suggestions.composer.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="dl-arranger">{suggestions.arranger.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="dl-delning">{suggestions.delning.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="dl-languages">{suggestions.languages.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="dl-instrument">{suggestions.instrument.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="dl-collection">{suggestions.collectionName.map((v) => <option key={v} value={v} />)}</datalist>
+        </>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { Song } from "../lib/api";
-import { SongFormFields } from "./SongFormFields";
+import { SongFormFields, type Suggestions } from "./SongFormFields";
 import { Upload, X } from "lucide-react";
 import { useTranslation } from "../lib/LanguageContext";
 
@@ -27,12 +27,14 @@ const EMPTY_SONG: Song = {
 export default function AddSongModal({
   onClose,
   onCreate,
+  suggestions,
 }: {
   onClose: () => void;
   onCreate: (
     fields: Omit<Song, "id" | "hasSheetMusicFile">,
     file?: File,
   ) => void;
+  suggestions?: Suggestions;
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<Song>({ ...EMPTY_SONG });
@@ -62,7 +64,7 @@ export default function AddSongModal({
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold mb-4">{t("songs.addSongTitle")}</h2>
-        <SongFormFields form={form} set={set} />
+        <SongFormFields form={form} set={set} suggestions={suggestions} />
 
         <div className="mt-4 pt-4 border-t border-dashed border-border">
           <span className="block text-xs font-medium text-muted mb-2">

@@ -25,7 +25,7 @@ import {
 } from "../../components/StyledTable";
 import NavSidebar from "../../components/NavSidebar";
 import AddSongModal from "../../components/AddSongModal";
-import { SongFormFields } from "../../components/SongFormFields";
+import { SongFormFields, extractSuggestions } from "../../components/SongFormFields";
 import { useSongs, ALL_COLUMNS, FILTER_COLUMNS } from "../../hooks/useSongs";
 import {
   EllipsisVertical,
@@ -81,6 +81,7 @@ export default function SongsPage() {
   } = useSongs();
 
   const { t } = useTranslation();
+  const suggestions = extractSuggestions(songs);
 
   return (
     <div className="flex min-h-screen">
@@ -279,6 +280,7 @@ export default function SongsPage() {
           <AddSongModal
             onClose={() => setShowAdd(false)}
             onCreate={handleCreate}
+            suggestions={suggestions}
           />
         )}
 
@@ -346,6 +348,7 @@ export default function SongsPage() {
             song={editingSong}
             onClose={() => setEditingSong(null)}
             onSave={handleSave}
+            suggestions={suggestions}
           />
         )}
       </div>
@@ -399,10 +402,12 @@ function SongModal({
   song,
   onClose,
   onSave,
+  suggestions,
 }: {
   song: Song;
   onClose: () => void;
   onSave: (updated: Song) => void;
+  suggestions: ReturnType<typeof extractSuggestions>;
 }) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
@@ -500,7 +505,7 @@ function SongModal({
           onClick={(e) => e.stopPropagation()}
         >
           <h2 className="text-lg font-bold mb-4">{t("songs.editSong")}</h2>
-          <SongFormFields form={form} set={set} />
+          <SongFormFields form={form} set={set} suggestions={suggestions} />
 
           <div className="flex justify-end gap-2 mt-6">
             <button

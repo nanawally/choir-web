@@ -55,10 +55,11 @@ export function useConcertEditor(concertId: string) {
     null,
   );
   const [catalogSongs, setCatalogSongs] = useState<
-    { id: string; name: string }[]
+    { id: string; name: string; composer: string | null }[]
   >([]);
   const [rosterIds, setRosterIds] = useState<Set<string>>(new Set());
   const [showRosterModal, setShowRosterModal] = useState(false);
+  const [showEditSetlist, setShowEditSetlist] = useState(false);
   const [songFormationIds, setSongFormationIds] = useState<Set<string>>(
     new Set(),
   );
@@ -383,6 +384,7 @@ export function useConcertEditor(concertId: string) {
     catalogSongs,
     rosterIds,
     showRosterModal,
+    showEditSetlist,
     songFormationIds,
     rowSizes,
     activeFormationId,
@@ -398,6 +400,7 @@ export function useConcertEditor(concertId: string) {
     setShowChorists,
     setShowFormations,
     setShowRosterModal,
+    setShowEditSetlist,
     setConcertSongs,
     updateSongFormationIds,
     setRowSizes,
