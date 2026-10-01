@@ -151,6 +151,15 @@ const translations = {
     en: "Delete {name} and all its formations?",
     sv: "Ta bort {name} och alla dess uppställningar?",
   },
+  "concerts.uploadImage": { en: "Upload image", sv: "Ladda upp bild" },
+  "concerts.confirmDeleteImage": {
+    en: "Delete the concert image?",
+    sv: "Ta bort konsertbilden?",
+  },
+  "concerts.invalidImageType": {
+    en: "Please select an image file (JPEG, PNG, or WebP).",
+    sv: "Välj en bildfil (JPEG, PNG eller WebP).",
+  },
   "concerts.nameForCopy": { en: "Name for the copy:", sv: "Namn för kopian:" },
   "concerts.concertName": { en: "Concert name...", sv: "Konsertnamn..." },
   "concerts.backToConcerts": {

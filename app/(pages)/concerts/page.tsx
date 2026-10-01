@@ -1,18 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import imageCompression from "browser-image-compression";
 import {
   listConcerts,
   createConcert,
   updateConcert,
   deleteConcert,
   duplicateConcert,
+  uploadConcertImage,
+  getConcertImageUrl,
+  deleteConcertImage,
+  getToken,
 } from "../../lib/api";
 import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
-import { ClefTreble } from "lucide-react";
+import { ClefTreble, Upload, Trash } from "lucide-react";
 
 type Concert = {
   id: string;
@@ -35,12 +39,34 @@ export default function ConcertsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editDate, setEditDate] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
 
   useEffect(() => {
     listConcerts()
-      .then(setConcerts)
-      .finally(() => setLoading(false));
+      .then(async (data: Concert[]) => {
+        setConcerts(data);
+        setLoading(false);
+        // Fetch images with auth and convert to blob URLs
+        const token = getToken();
+        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+        const withImages = await Promise.all(
+          data.map(async (c) => {
+            if (!c.imageUrl) return c;
+            try {
+              const res = await fetch(getConcertImageUrl(c.id), { headers });
+              if (!res.ok) return { ...c, imageUrl: null };
+              const blob = await res.blob();
+              return { ...c, imageUrl: URL.createObjectURL(blob) };
+            } catch {
+              return { ...c, imageUrl: null };
+            }
+          }),
+        );
+        setConcerts(withImages);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   // Sort by date descending (latest first), nulls last
@@ -93,7 +119,52 @@ export default function ConcertsPage() {
     if (!name) return;
     const concert = await duplicateConcert(id, name);
     if (concert) {
+      if (concert.imageUrl) {
+        const token = getToken();
+        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(getConcertImageUrl(concert.id), { headers });
+        const blob = res.ok ? await res.blob() : null;
+        concert.imageUrl = blob ? URL.createObjectURL(blob) : null;
+      }
       setConcerts([...concerts, concert]);
+    }
+  }
+
+  async function handleImageUpload(concertId: string, file: File) {
+    if (!file.type.startsWith("image/")) {
+      window.alert(t("concerts.invalidImageType"));
+      return;
+    }
+    setUploading(true);
+    const compressed = await imageCompression(file, {
+      maxWidthOrHeight: 1200,
+      maxSizeMB: 0.5,
+      useWebWorker: true,
+    });
+    const ok = await uploadConcertImage(concertId, compressed);
+    if (ok) {
+      const token = getToken();
+      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(getConcertImageUrl(concertId), { headers });
+      const blob = res.ok ? await res.blob() : null;
+      const blobUrl = blob ? URL.createObjectURL(blob) : null;
+      setConcerts(
+        concerts.map((c) =>
+          c.id === concertId ? { ...c, imageUrl: blobUrl } : c,
+        ),
+      );
+    }
+    setUploading(false);
+  }
+
+  async function handleImageDelete(concertId: string) {
+    if (!window.confirm(t("concerts.confirmDeleteImage"))) return;
+    if (await deleteConcertImage(concertId)) {
+      setConcerts(
+        concerts.map((c) =>
+          c.id === concertId ? { ...c, imageUrl: null } : c,
+        ),
+      );
     }
   }
 
@@ -167,11 +238,10 @@ export default function ConcertsPage() {
                 <Link href={`/concerts/${c.id}`}>
                   <div className="relative aspect-4/3 bg-surface-alt flex items-center justify-center">
                     {c.imageUrl ? (
-                      <Image
+                      <img
                         src={c.imageUrl}
                         alt={c.name}
-                        fill
-                        className="object-cover"
+                        className="absolute inset-0 w-full h-full object-cover"
                       />
                     ) : (
                       <ClefTreble size={40} className="text-subtle" />
@@ -199,19 +269,50 @@ export default function ConcertsPage() {
                         onChange={(e) => setEditDate(e.target.value)}
                         className="border border-border rounded px-2 py-0.5 text-sm"
                       />
-                      <div className="flex gap-1 mt-1">
-                        <button
-                          onClick={() => handleUpdate(c.id)}
-                          className="px-2 py-0.5 btn-primary text-xs"
-                        >
-                          {t("common.save")}
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="px-2 py-0.5 border border-border rounded text-xs"
-                        >
-                          {t("common.cancel")}
-                        </button>
+                      <div className="flex gap-1 mt-1 justify-between">
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleUpdate(c.id)}
+                            className="px-2 py-0.5 btn-primary text-xs"
+                          >
+                            {t("common.save")}
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="px-2 py-0.5 border border-border rounded text-xs"
+                          >
+                            {t("common.cancel")}
+                          </button>
+                        </div>
+                        <div className="flex gap-1">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageUpload(c.id, file);
+                              e.target.value = "";
+                            }}
+                          />
+                          <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={uploading}
+                            className="flex items-center gap-1 px-2 py-0.5 border border-border rounded text-xs hover:bg-hover-bg"
+                          >
+                            <Upload size={12} />
+                            {uploading ? t("common.uploading") : t("concerts.uploadImage")}
+                          </button>
+                          {c.imageUrl && (
+                            <button
+                              onClick={() => handleImageDelete(c.id)}
+                              className="flex items-center gap-1 px-2 py-0.5 btn-danger text-xs"
+                            >
+                              <Trash size={12} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ) : (

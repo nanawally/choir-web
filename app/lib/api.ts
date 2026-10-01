@@ -204,6 +204,27 @@ export async function duplicateConcert(id: string, name: string) {
   return res.ok ? res.json() : null;
 }
 
+export async function uploadConcertImage(concertId: string, file: File): Promise<boolean> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const token = getToken();
+  const res = await fetch(`${API_URL}/concerts/${concertId}/image`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  return res.ok;
+}
+
+export function getConcertImageUrl(concertId: string): string {
+  return `${API_URL}/concerts/${concertId}/image`;
+}
+
+export async function deleteConcertImage(concertId: string): Promise<boolean> {
+  const res = await apiFetch(`/concerts/${concertId}/image`, { method: "DELETE" });
+  return res.ok;
+}
+
 // ConcertSongs
 
 export async function listConcertSongs(concertId: string) {
