@@ -95,10 +95,6 @@ export default function GridCanvas({
   } | null>(null);
   const didMarquee = useRef(false);
 
-  // Shrink shapes on small screens so they don't overlap
-  const isMobile = canvasWidth < 768;
-  const shapeScale = isMobile ? 0.65 : 1;
-
   // Center of the virtual coordinate space (for arc rendering)
   const centerX = virtualWidth / 2;
   const centerY = virtualHeight - 20;
@@ -109,6 +105,24 @@ export default function GridCanvas({
   const maxRadiusV = centerY - ARC_PADDING; // vertical limit (full height minus padding)
   const rowSpacing = Math.min(maxRadiusH, maxRadiusV) / numRows;
 
+  // Shrink shapes when arc positions are close together
+  let shapeScale = 1;
+  if (rowSizes.length > 0) {
+    let minGap = Infinity;
+    rowSizes.forEach((rowSize, gy) => {
+      if (rowSize < 2) return;
+      for (let gx = 0; gx < rowSize - 1; gx++) {
+        const a = arcPosition(gx, gy, rowSize, centerX, centerY, rowSpacing);
+        const b = arcPosition(gx + 1, gy, rowSize, centerX, centerY, rowSpacing);
+        const gap = Math.hypot(b.x - a.x, b.y - a.y);
+        if (gap < minGap) minGap = gap;
+      }
+    });
+    if (minGap < 50) {
+      shapeScale = Math.max(0.4, minGap / 50);
+    }
+  }
+  
   // Convert physical pointer position to virtual coordinates
   function toVirtual(pos: { x: number; y: number }) {
     return { x: pos.x / scale, y: pos.y / scale };
