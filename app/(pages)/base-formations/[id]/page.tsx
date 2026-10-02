@@ -373,8 +373,7 @@ export default function BaseFormationEditor({
             canvasHeight={canvasHeight}
             scale={scale}
             virtualWidth={windowSize.width}
-            virtualHeight={windowSize.height}
-          />
+            virtualHeight={windowSize.height} activeFormationId={null}          />
         </div>
 
         {/* Right toggle button */}
