@@ -6,6 +6,7 @@ import { useTranslation } from "../lib/LanguageContext";
 export type Suggestions = {
   composer: string[];
   arranger: string[];
+  lyricist: string[];
   delning: string[];
   languages: string[];
   instrument: string[];
@@ -20,6 +21,7 @@ export function extractSuggestions(songs: Song[]): Suggestions {
   return {
     composer: unique("composer"),
     arranger: unique("arranger"),
+    lyricist: unique("lyricist"),
     delning: unique("delning"),
     languages: unique("languages"),
     instrument: unique("instrument"),
@@ -61,6 +63,14 @@ export function SongFormFields({
           onChange={(e) => set("arranger", e.target.value || null)}
           className="w-full border border-border rounded px-2 py-1 text-sm"
           list={suggestions ? "dl-arranger" : undefined}
+        />
+      </Field>
+      <Field label={t("songs.lyricist")}>
+        <input
+          value={form.lyricist ?? ""}
+          onChange={(e) => set("lyricist", e.target.value || null)}
+          className="w-full border border-border rounded px-2 py-1 text-sm"
+          list={suggestions ? "dl-lyricist" : undefined}
         />
       </Field>
       <Field label={t("songs.delning")}>
@@ -164,11 +174,20 @@ export function SongFormFields({
           list={suggestions ? "dl-collection" : undefined}
         />
       </Field>
+      <Field label={t("songs.lyrics")}>
+        <textarea
+          value={form.lyrics ?? ""}
+          onChange={(e) => set("lyrics", e.target.value || null)}
+          className="w-full border border-border rounded px-2 py-1 text-sm min-h-[120px]"
+          rows={6}
+        />
+      </Field>
 
       {suggestions && (
         <>
           <datalist id="dl-composer">{suggestions.composer.map((v) => <option key={v} value={v} />)}</datalist>
           <datalist id="dl-arranger">{suggestions.arranger.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="dl-lyricist">{suggestions.lyricist.map((v) => <option key={v} value={v} />)}</datalist>
           <datalist id="dl-delning">{suggestions.delning.map((v) => <option key={v} value={v} />)}</datalist>
           <datalist id="dl-languages">{suggestions.languages.map((v) => <option key={v} value={v} />)}</datalist>
           <datalist id="dl-instrument">{suggestions.instrument.map((v) => <option key={v} value={v} />)}</datalist>

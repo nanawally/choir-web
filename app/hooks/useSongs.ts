@@ -22,6 +22,7 @@ export const ALL_COLUMNS: ColumnDef[] = [
   { key: "name", labelKey: "common.name" },
   { key: "composer", labelKey: "songs.composer", width: "120px" },
   { key: "arranger", labelKey: "songs.arranger", width: "120px" },
+  { key: "lyricist", labelKey: "songs.lyricist", width: "120px" },
   { key: "delning", labelKey: "songs.delning", width: "100px" },
   { key: "languages", labelKey: "songs.languages", width: "120px" },
   { key: "length", labelKey: "songs.length", width: "80px" },

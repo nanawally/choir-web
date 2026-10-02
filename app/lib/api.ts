@@ -64,6 +64,7 @@ export type Song = {
   name: string;
   composer: string | null;
   arranger: string | null;
+  lyricist: string | null;
   delning: string | null;
   languages: string | null;
   length: string | null;
@@ -75,6 +76,7 @@ export type Song = {
   soloistNames: string | null;
   hasSheetMusic: boolean;
   hasSheetMusicFile: boolean;
+  lyrics: string | null;
 };
 
 export async function listSongs(): Promise<Song[]> {

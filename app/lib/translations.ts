@@ -108,6 +108,7 @@ const translations = {
   },
   "songs.composer": { en: "Composer", sv: "Kompositör" },
   "songs.arranger": { en: "Arranger", sv: "Arrangör" },
+  "songs.lyricist": { en: "Lyricist", sv: "Textförfattare" },
   "songs.delning": { en: "Delning", sv: "Delning" },
   "songs.languages": { en: "Languages", sv: "Språk" },
   "songs.languagesHint": {
@@ -131,6 +132,9 @@ const translations = {
   "songs.yearTo": { en: "To", sv: "Till" },
   "songs.sheetMusic": { en: "Sheet music", sv: "Noter" },
   "songs.sheetMusicTitle": { en: "Sheet Music", sv: "Noter" },
+  "songs.lyrics": { en: "Lyrics", sv: "Text" },
+  "songs.noLyrics": { en: "No lyrics added yet.", sv: "Ingen text tillagd ännu." },
+  "songs.tabInfo": { en: "Info", sv: "Info" },
   "songs.available": { en: "Available", sv: "Tillgänglig" },
   "songs.collection": { en: "Collection", sv: "Samling" },
   "songs.usedIn": { en: "Used in", sv: "Används i" },

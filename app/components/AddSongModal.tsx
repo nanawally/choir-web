@@ -11,6 +11,7 @@ const EMPTY_SONG: Song = {
   name: "",
   composer: null,
   arranger: null,
+  lyricist: null,
   delning: null,
   languages: null,
   length: null,
@@ -22,6 +23,7 @@ const EMPTY_SONG: Song = {
   soloistNames: null,
   hasSheetMusic: false,
   hasSheetMusicFile: false,
+  lyrics: null,
 };
 
 export default function AddSongModal({

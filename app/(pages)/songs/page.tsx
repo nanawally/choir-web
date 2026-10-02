@@ -14,6 +14,9 @@ import dynamic from "next/dynamic";
 const PdfPreview = dynamic(() => import("../../components/PdfPreview"), {
   ssr: false,
 });
+const PdfViewer = dynamic(() => import("../../components/PdfViewer"), {
+  ssr: false,
+});
 import {
   Table,
   Thead,
@@ -39,7 +42,6 @@ import {
   FileText,
   Trash2,
 } from "lucide-react";
-import Image from "next/image";
 import { useTranslation } from "../../lib/LanguageContext";
 
 export default function SongsPage() {
@@ -417,6 +419,7 @@ function SongModal({
   const [showAllConcerts, setShowAllConcerts] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [tab, setTab] = useState<"info" | "sheet" | "lyrics">("info");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -542,140 +545,180 @@ function SongModal({
               <p className="text-sm text-muted">{current.composer}</p>
             )}
           </div>
-          <div className="flex items-start gap-2">
-            {current.hasSheetMusicFile && (
-              <Image
-                src="/musical-score-icon.png"
-                alt="Sheet music available"
-                width={40}
-                height={40}
+          <button
+            onClick={() => {
+              setForm({ ...current });
+              setEditing(true);
+            }}
+            className="text-subtle hover:text-muted"
+            title={t("common.edit")}
+          >
+            <SquarePen size={16} />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-4 border-b border-border mb-4">
+          {(["info", "sheet", "lyrics"] as const).map((t2) => {
+            const label =
+              t2 === "info" ? t("songs.tabInfo") :
+              t2 === "sheet" ? t("songs.sheetMusicTitle") :
+              t("songs.lyrics");
+            return (
+              <button
+                key={t2}
+                onClick={() => setTab(t2)}
+                className={`pb-2 text-sm font-medium border-b-2 -mb-px ${
+                  tab === t2
+                    ? "border-primary text-foreground"
+                    : "border-transparent text-muted hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab: Info */}
+        {tab === "info" && (
+          <>
+            <div className="grid grid-cols-3 gap-x-6 gap-y-4 mb-6">
+              <DetailCell
+                label={t("songs.arranger")}
+                value={current.arranger ?? "—"}
               />
-            )}
-            <button
-              onClick={() => {
-                setForm({ ...current });
-                setEditing(true);
-              }}
-              className="text-subtle hover:text-muted"
-              title={t("common.edit")}
-            >
-              <SquarePen size={16} />
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-x-6 gap-y-4 mb-6">
-          <DetailCell
-            label={t("songs.arranger")}
-            value={current.arranger ?? "—"}
-          />
-          <DetailCell
-            label={t("songs.delning")}
-            value={current.delning ?? "—"}
-          />
-          <DetailCell
-            label={t("songs.languages")}
-            value={current.languages ?? "—"}
-          />
-          <DetailCell label={t("songs.length")} value={current.length ?? "—"} />
-          <DetailCell
-            label={t("songs.year")}
-            value={current.year?.toString() ?? "—"}
-          />
-          <DetailCell
-            label={t("songs.sheetMusic")}
-            value={current.hasSheetMusicFile ? t("common.yes") : t("common.no")}
-          />
-          <DetailCell
-            label={t("songs.collection")}
-            value={current.collectionName ?? "—"}
-          />
-          <BooleanDetail
-            label={t("songs.accompanied")}
-            flag={current.accompanied}
-            details={current.instrument}
-          />
-          <BooleanDetail
-            label={t("songs.soloists")}
-            flag={current.hasSoloists}
-            details={current.soloistNames}
-          />
-          {concerts.length > 0 && (
-            <div>
-              <span className="block text-xs text-muted mb-0.5">
-                {t("songs.usedIn")}
-              </span>
-              <ul className="text-sm text-foreground space-y-0.5">
-                {visibleConcerts.map((c) => (
-                  <li key={c.id}>{c.name}</li>
-                ))}
-              </ul>
-              {concerts.length > 3 && (
-                <button
-                  onClick={() => setShowAllConcerts(!showAllConcerts)}
-                  className="text-xs text-link hover:underline mt-1"
-                >
-                  {showAllConcerts
-                    ? t("common.showLess")
-                    : `${concerts.length - 3} ${t("common.showMore")}`}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Sheet music file */}
-        <div className="mt-4 pt-4 border-t border-dashed border-border">
-          <h3 className="text-base font-semibold mb-3">
-            {t("songs.sheetMusicTitle")}
-          </h3>
-          {current.hasSheetMusicFile ? (
-            <div>
-              {pdfUrl && (
-                <div className="mb-3">
-                  <PdfPreview url={pdfUrl} onClick={handleViewPdf} />
+              <DetailCell
+                label={t("songs.lyricist")}
+                value={current.lyricist ?? "—"}
+              />
+              <DetailCell
+                label={t("songs.delning")}
+                value={current.delning ?? "—"}
+              />
+              <DetailCell
+                label={t("songs.languages")}
+                value={current.languages ?? "—"}
+              />
+              <DetailCell label={t("songs.length")} value={current.length ?? "—"} />
+              <DetailCell
+                label={t("songs.year")}
+                value={current.year?.toString() ?? "—"}
+              />
+              <DetailCell
+                label={t("songs.sheetMusic")}
+                value={current.hasSheetMusicFile ? t("common.yes") : t("common.no")}
+              />
+              <DetailCell
+                label={t("songs.collection")}
+                value={current.collectionName ?? "—"}
+              />
+              <BooleanDetail
+                label={t("songs.accompanied")}
+                flag={current.accompanied}
+                details={current.instrument}
+              />
+              <BooleanDetail
+                label={t("songs.soloists")}
+                flag={current.hasSoloists}
+                details={current.soloistNames}
+              />
+              {concerts.length > 0 && (
+                <div>
+                  <span className="block text-xs text-muted mb-0.5">
+                    {t("songs.usedIn")}
+                  </span>
+                  <ul className="text-sm text-foreground space-y-0.5">
+                    {visibleConcerts.map((c) => (
+                      <li key={c.id}>{c.name}</li>
+                    ))}
+                  </ul>
+                  {concerts.length > 3 && (
+                    <button
+                      onClick={() => setShowAllConcerts(!showAllConcerts)}
+                      className="text-xs text-link hover:underline mt-1"
+                    >
+                      {showAllConcerts
+                        ? t("common.showLess")
+                        : `${concerts.length - 3} ${t("common.showMore")}`}
+                    </button>
+                  )}
                 </div>
               )}
-              <div className="flex items-center gap-3">
+            </div>
+            {/* PDF preview in info tab */}
+            {current.hasSheetMusicFile && pdfUrl && (
+              <div className="mt-2">
+                <PdfPreview url={pdfUrl} onClick={handleViewPdf} />
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Tab: Sheet Music */}
+        {tab === "sheet" && (
+          <div>
+            {current.hasSheetMusicFile ? (
+              <div>
+                {pdfUrl && (
+                  <div className="mb-3">
+                    <PdfViewer url={pdfUrl} />
+                  </div>
+                )}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleViewPdf}
+                    className="flex items-center gap-1.5 text-sm text-link hover:text-link-light-text"
+                  >
+                    <FileText size={16} />
+                    {t("songs.viewFullPdf")}
+                  </button>
+                  <button
+                    onClick={handleDeleteSheetMusic}
+                    className="flex items-center gap-1 text-sm text-danger hover:text-danger-hover"
+                  >
+                    <Trash2 size={14} />
+                    {t("common.delete")}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleUpload(file);
+                  }}
+                />
                 <button
-                  onClick={handleViewPdf}
-                  className="flex items-center gap-1.5 text-sm text-link hover:text-link-light-text"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50"
                 >
-                  <FileText size={16} />
-                  {t("songs.viewFullPdf")}
-                </button>
-                <button
-                  onClick={handleDeleteSheetMusic}
-                  className="flex items-center gap-1 text-sm text-danger hover:text-danger-hover"
-                >
-                  <Trash2 size={14} />
-                  {t("common.delete")}
+                  <Upload size={16} />
+                  {uploading ? t("common.uploading") : t("songs.uploadPdf")}
                 </button>
               </div>
-            </div>
-          ) : (
-            <div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleUpload(file);
-                }}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="flex items-center gap-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50"
-              >
-                <Upload size={16} />
-                {uploading ? t("common.uploading") : t("songs.uploadPdf")}
-              </button>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
+
+        {/* Tab: Lyrics */}
+        {tab === "lyrics" && (
+          <div>
+            {current.lyrics ? (
+              <pre className="text-sm whitespace-pre-wrap font-sans">
+                {current.lyrics}
+              </pre>
+            ) : (
+              <p className="text-sm text-subtle">{t("songs.noLyrics")}</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
