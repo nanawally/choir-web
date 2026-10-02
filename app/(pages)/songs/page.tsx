@@ -1,32 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   type Song,
-  type AudioFile,
-  type SongLink,
-  listSongConcerts,
-  uploadSheetMusic,
   getSheetMusicUrl,
-  deleteSheetMusic,
   getToken,
-  listAudioFiles,
-  uploadAudioFile,
-  deleteAudioFile,
-  getAudioStreamUrl,
-  listSongLinks,
-  addSongLink,
-  deleteSongLink,
-  listVoiceGroups,
 } from "../../lib/api";
-import dynamic from "next/dynamic";
-
-const PdfPreview = dynamic(() => import("../../components/PdfPreview"), {
-  ssr: false,
-});
-const PdfViewer = dynamic(() => import("../../components/PdfViewer"), {
-  ssr: false,
-});
+import SongInfoTab from "../../components/SongInfoTab";
+import SongSheetMusicTab from "../../components/SongSheetMusicTab";
+import SongLyricsTab from "../../components/SongLyricsTab";
+import SongListeningTab from "../../components/SongListeningTab";
 import {
   Table,
   Thead,
@@ -48,10 +31,6 @@ import {
   X,
   SquarePen,
   Columns3,
-  Upload,
-  FileText,
-  Trash,
-  Plus,
 } from "lucide-react";
 import { useTranslation } from "../../lib/LanguageContext";
 
@@ -369,48 +348,6 @@ export default function SongsPage() {
   );
 }
 
-function BooleanDetail({
-  label,
-  flag,
-  details,
-}: {
-  label: string;
-  flag: boolean | null;
-  details: string | null;
-}) {
-  const { t } = useTranslation();
-  if (flag == null) return <DetailCell label={label} value="—" />;
-  if (!flag) return <DetailCell label={label} value={t("common.no")} />;
-  const items = details
-    ? details
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    : [];
-  return (
-    <div>
-      <span className="block text-xs text-muted mb-0.5">{label}</span>
-      <span className="text-sm">{t("common.yes")}</span>
-      {items.length > 0 && (
-        <ul className="mt-1 ml-4 list-disc text-sm text-foreground">
-          {items.map((item, i) => (
-            <li key={i}>{item}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-function DetailCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <span className="block text-xs text-muted mb-0.5">{label}</span>
-      <span className="text-sm">{value || "—"}</span>
-    </div>
-  );
-}
-
 function SongModal({
   song,
   onClose,
@@ -426,40 +363,8 @@ function SongModal({
   const [editing, setEditing] = useState(false);
   const [current, setCurrent] = useState<Song>({ ...song });
   const [form, setForm] = useState<Song>({ ...song });
-  const [concerts, setConcerts] = useState<{ id: string; name: string }[]>([]);
-  const [showAllConcerts, setShowAllConcerts] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [tab, setTab] = useState<"info" | "sheet" | "lyrics" | "listening">("info");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioInputRef = useRef<HTMLInputElement>(null);
-
-  // Listening tab state
-  const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
-  const [songLinks, setSongLinks] = useState<SongLink[]>([]);
-  const [voiceParts, setVoiceParts] = useState<{ id: string; name: string }[]>([]);
-  const [newLinkUrl, setNewLinkUrl] = useState("");
-  const [newLinkLabel, setNewLinkLabel] = useState("");
-  const [uploadingAudio, setUploadingAudio] = useState(false);
-  const [selectedVoicePart, setSelectedVoicePart] = useState<string>("");
-
-  useEffect(() => {
-    listSongConcerts(song.id).then(setConcerts);
-  }, [song.id]);
-
-  useEffect(() => {
-    listAudioFiles(song.id).then(setAudioFiles);
-    listSongLinks(song.id).then(setSongLinks);
-    listVoiceGroups().then((groups: { id: string; name: string; parts: { id: string; name: string }[] }[]) => {
-      const parts: { id: string; name: string }[] = [];
-      for (const g of groups) {
-        for (const p of g.parts) {
-          parts.push({ id: p.id, name: `${g.name} – ${p.name}` });
-        }
-      }
-      setVoiceParts(parts);
-    });
-  }, [song.id]);
 
   useEffect(() => {
     if (!current.hasSheetMusicFile) return;
@@ -480,32 +385,9 @@ function SongModal({
     };
   }, [current.id, current.hasSheetMusicFile]);
 
-  async function handleUpload(file: File) {
-    setUploading(true);
-    const result = await uploadSheetMusic(current.id, file);
-    if (result) {
-      setCurrent((c) => ({
-        ...c,
-        hasSheetMusicFile: true,
-        hasSheetMusic: true,
-      }));
-      setForm((f) => ({ ...f, hasSheetMusicFile: true, hasSheetMusic: true }));
-    }
-    setUploading(false);
-  }
-
-  async function handleDeleteSheetMusic() {
-    if (!window.confirm(t("songs.confirmDeleteSheet"))) return;
-    if (await deleteSheetMusic(current.id)) {
-      setCurrent((c) => ({ ...c, hasSheetMusicFile: false }));
-      setForm((f) => ({ ...f, hasSheetMusicFile: false }));
-    }
-  }
-
   function handleViewPdf() {
     const url = getSheetMusicUrl(current.id);
     const token = getToken();
-    // Open in new tab — need to fetch with auth and open as blob
     fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((res) => res.blob())
       .then((blob) => {
@@ -530,7 +412,10 @@ function SongModal({
     setEditing(false);
   }
 
-  const visibleConcerts = showAllConcerts ? concerts : concerts.slice(0, 3);
+  function handleSheetMusicChange(hasFile: boolean) {
+    setCurrent((c) => ({ ...c, hasSheetMusicFile: hasFile, hasSheetMusic: hasFile || c.hasSheetMusic }));
+    setForm((f) => ({ ...f, hasSheetMusicFile: hasFile, hasSheetMusic: hasFile || f.hasSheetMusic }));
+  }
 
   if (editing) {
     return (
@@ -616,294 +501,20 @@ function SongModal({
           })}
         </div>
 
-        {/* Tab: Info */}
         {tab === "info" && (
-          <>
-            <div className="grid grid-cols-3 gap-x-6 gap-y-4 mb-6">
-              <DetailCell
-                label={t("songs.arranger")}
-                value={current.arranger ?? "—"}
-              />
-              <DetailCell
-                label={t("songs.lyricist")}
-                value={current.lyricist ?? "—"}
-              />
-              <DetailCell
-                label={t("songs.delning")}
-                value={current.delning ?? "—"}
-              />
-              <DetailCell
-                label={t("songs.languages")}
-                value={current.languages ?? "—"}
-              />
-              <DetailCell label={t("songs.length")} value={current.length ?? "—"} />
-              <DetailCell
-                label={t("songs.year")}
-                value={current.year?.toString() ?? "—"}
-              />
-              <DetailCell
-                label={t("songs.sheetMusic")}
-                value={current.hasSheetMusicFile ? t("common.yes") : t("common.no")}
-              />
-              <DetailCell
-                label={t("songs.collection")}
-                value={current.collectionName ?? "—"}
-              />
-              <BooleanDetail
-                label={t("songs.accompanied")}
-                flag={current.accompanied}
-                details={current.instrument}
-              />
-              <BooleanDetail
-                label={t("songs.soloists")}
-                flag={current.hasSoloists}
-                details={current.soloistNames}
-              />
-              {concerts.length > 0 && (
-                <div>
-                  <span className="block text-xs text-muted mb-0.5">
-                    {t("songs.usedIn")}
-                  </span>
-                  <ul className="text-sm text-foreground space-y-0.5">
-                    {visibleConcerts.map((c) => (
-                      <li key={c.id}>{c.name}</li>
-                    ))}
-                  </ul>
-                  {concerts.length > 3 && (
-                    <button
-                      onClick={() => setShowAllConcerts(!showAllConcerts)}
-                      className="text-xs text-link hover:underline mt-1"
-                    >
-                      {showAllConcerts
-                        ? t("common.showLess")
-                        : `${concerts.length - 3} ${t("common.showMore")}`}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-            {/* PDF preview in info tab */}
-            {current.hasSheetMusicFile && pdfUrl && (
-              <div className="mt-2">
-                <PdfPreview url={pdfUrl} onClick={handleViewPdf} />
-              </div>
-            )}
-          </>
+          <SongInfoTab song={current} pdfUrl={pdfUrl} onViewPdf={handleViewPdf} />
         )}
-
-        {/* Tab: Sheet Music */}
         {tab === "sheet" && (
-          <div>
-            {current.hasSheetMusicFile ? (
-              <div>
-                {pdfUrl && (
-                  <div className="mb-3">
-                    <PdfViewer url={pdfUrl} />
-                  </div>
-                )}
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleViewPdf}
-                    className="flex items-center gap-1.5 text-sm text-link hover:text-link-light-text"
-                  >
-                    <FileText size={16} />
-                    {t("songs.viewFullPdf")}
-                  </button>
-                  <button
-                    onClick={handleDeleteSheetMusic}
-                    className="flex items-center gap-1 text-sm text-danger hover:text-danger-hover"
-                  >
-                    <Trash size={14} />
-                    {t("common.delete")}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleUpload(file);
-                  }}
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                  className="flex items-center gap-1.5 text-sm text-muted hover:text-foreground disabled:opacity-50"
-                >
-                  <Upload size={16} />
-                  {uploading ? t("common.uploading") : t("songs.uploadPdf")}
-                </button>
-              </div>
-            )}
-          </div>
+          <SongSheetMusicTab
+            songId={current.id}
+            hasSheetMusicFile={current.hasSheetMusicFile}
+            pdfUrl={pdfUrl}
+            onViewPdf={handleViewPdf}
+            onSheetMusicChange={handleSheetMusicChange}
+          />
         )}
-
-        {/* Tab: Lyrics */}
-        {tab === "lyrics" && (
-          <div>
-            {current.lyrics ? (
-              <pre className="text-sm whitespace-pre-wrap font-sans">
-                {current.lyrics}
-              </pre>
-            ) : (
-              <p className="text-sm text-subtle">{t("songs.noLyrics")}</p>
-            )}
-          </div>
-        )}
-
-        {/* Tab: Listening */}
-        {tab === "listening" && (
-          <div className="space-y-6">
-            {/* Voice Part Files */}
-            <div>
-              <h3 className="text-sm font-semibold mb-3">{t("songs.voicePartFiles")}</h3>
-              {audioFiles.length === 0 ? (
-                <p className="text-sm text-subtle">{t("songs.noAudioFiles")}</p>
-              ) : (
-                <div className="space-y-2">
-                  {audioFiles.map((af) => {
-                    const partName = af.voicePartId
-                      ? voiceParts.find((vp) => vp.id === af.voicePartId)?.name ?? t("songs.general")
-                      : t("songs.general");
-                    const streamUrl = getAudioStreamUrl(af.id);
-                    return (
-                      <div key={af.id} className="flex items-center gap-3 p-2 bg-hover-bg rounded">
-                        <div className="flex-1 min-w-0">
-                          <span className="text-xs text-muted block">{partName}</span>
-                          <span className="text-sm truncate block">{af.fileName}</span>
-                        </div>
-                        <audio src={streamUrl} controls preload="none" className="h-8 w-40" />
-                        <button
-                          onClick={async () => {
-                            if (!window.confirm(t("songs.confirmDeleteAudio"))) return;
-                            if (await deleteAudioFile(af.id)) {
-                              setAudioFiles((prev) => prev.filter((f) => f.id !== af.id));
-                            }
-                          }}
-                          className="text-danger hover:text-danger-hover"
-                        >
-                          <Trash size={14} />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              <div className="flex items-center gap-2 mt-3">
-                <select
-                  value={selectedVoicePart}
-                  onChange={(e) => setSelectedVoicePart(e.target.value)}
-                  className="border border-border rounded px-2 py-1 text-sm"
-                >
-                  <option value="">{t("songs.general")}</option>
-                  {voiceParts.map((vp) => (
-                    <option key={vp.id} value={vp.id}>{vp.name}</option>
-                  ))}
-                </select>
-                <input
-                  ref={audioInputRef}
-                  type="file"
-                  accept="audio/*"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    setUploadingAudio(true);
-                    const result = await uploadAudioFile(
-                      current.id,
-                      file,
-                      selectedVoicePart || undefined,
-                    );
-                    if (result) {
-                      setAudioFiles((prev) => [...prev, result]);
-                    }
-                    setUploadingAudio(false);
-                    if (audioInputRef.current) audioInputRef.current.value = "";
-                  }}
-                />
-                <button
-                  onClick={() => audioInputRef.current?.click()}
-                  disabled={uploadingAudio}
-                  className="flex items-center gap-1 text-sm text-muted hover:text-foreground disabled:opacity-50"
-                >
-                  <Upload size={14} />
-                  {uploadingAudio ? t("common.uploading") : t("songs.uploadAudio")}
-                </button>
-              </div>
-            </div>
-
-            {/* Links */}
-            <div>
-              <h3 className="text-sm font-semibold mb-3">{t("songs.links")}</h3>
-              {songLinks.length === 0 ? (
-                <p className="text-sm text-subtle">{t("songs.noLinks")}</p>
-              ) : (
-                <div className="space-y-2">
-                  {songLinks.map((link) => (
-                    <div key={link.id} className="flex items-center gap-3 p-2 bg-hover-bg rounded">
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-link hover:underline truncate flex-1 min-w-0"
-                      >
-                        {link.label || link.url}
-                      </a>
-                      <button
-                        onClick={async () => {
-                          if (await deleteSongLink(link.id)) {
-                            setSongLinks((prev) => prev.filter((l) => l.id !== link.id));
-                          }
-                        }}
-                        className="text-danger hover:text-danger-hover"
-                      >
-                        <Trash size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex items-center gap-2 mt-3">
-                <input
-                  value={newLinkUrl}
-                  onChange={(e) => setNewLinkUrl(e.target.value)}
-                  placeholder={t("songs.linkUrl")}
-                  className="border border-border rounded px-2 py-1 text-sm flex-1"
-                />
-                <input
-                  value={newLinkLabel}
-                  onChange={(e) => setNewLinkLabel(e.target.value)}
-                  placeholder={t("songs.linkLabel")}
-                  className="border border-border rounded px-2 py-1 text-sm w-32"
-                />
-                <button
-                  onClick={async () => {
-                    if (!newLinkUrl.trim()) return;
-                    const link = await addSongLink(
-                      current.id,
-                      newLinkUrl.trim(),
-                      newLinkLabel.trim() || undefined,
-                    );
-                    if (link) {
-                      setSongLinks((prev) => [...prev, link]);
-                      setNewLinkUrl("");
-                      setNewLinkLabel("");
-                    }
-                  }}
-                  className="flex items-center gap-1 text-sm text-muted hover:text-foreground"
-                >
-                  <Plus size={14} />
-                  {t("songs.addLink")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {tab === "lyrics" && <SongLyricsTab lyrics={current.lyrics} />}
+        {tab === "listening" && <SongListeningTab songId={current.id} />}
       </div>
     </div>
   );
