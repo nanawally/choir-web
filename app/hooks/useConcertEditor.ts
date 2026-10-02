@@ -12,6 +12,7 @@ import {
   listVoiceGroups,
   loadFormation,
   saveHiddenChorists,
+  savePlacements,
   setConcertChorists,
   setSongFormations,
 } from "../lib/api";
@@ -29,7 +30,9 @@ type CachedFormation = { placements: Placement[]; rowSizes: number[]; name: stri
 export function useConcertEditor(concertId: string) {
   const [concertName, setConcertName] = useState<string>("");
   const [chorists, setChorists] = useState<Chorist[]>([]);
-  const [placements, setPlacements] = useState<Placement[]>([]);
+  const [placements, setPlacementsInternal] = useState<Placement[]>([]);
+  const [pastPlacements, setPastPlacements] = useState<Placement[][]>([]);
+  const [futurePlacements, setFuturePlacements] = useState<Placement[][]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<
@@ -75,6 +78,19 @@ export function useConcertEditor(concertId: string) {
     { choristId: string; voicePartId: string }[]
   >([]);
   const formationCacheRef = useRef<Map<string, CachedFormation>>(new Map());
+
+  // Auto-save
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSyncingRef = useRef(false);
+  const latestActiveConcertSongIdRef = useRef(activeConcertSongId);
+  const latestSongFormationIdsRef = useRef(songFormationIds);
+  const latestRowSizesRef = useRef(rowSizes);
+  const latestFormationNameRef = useRef(formationName);
+  useEffect(() => { latestActiveConcertSongIdRef.current = activeConcertSongId; }, [activeConcertSongId]);
+  useEffect(() => { latestSongFormationIdsRef.current = songFormationIds; }, [songFormationIds]);
+  useEffect(() => { latestRowSizesRef.current = rowSizes; }, [rowSizes]);
+  useEffect(() => { latestFormationNameRef.current = formationName; }, [formationName]);
 
   useEffect(() => {
     apiFetch("/chorists")
@@ -147,6 +163,52 @@ export function useConcertEditor(concertId: string) {
     });
   }, [formations]);
 
+  // Auto-save placements 500ms after the last change
+  useEffect(() => {
+    if (isSyncingRef.current) {
+      isSyncingRef.current = false;
+      return;
+    }
+    if (!activeFormationId) return;
+
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    setAutoSaveStatus("idle");
+
+    const capturedFormationId = activeFormationId;
+    const capturedPlacements = placements;
+
+    autoSaveTimerRef.current = setTimeout(async () => {
+      setAutoSaveStatus("saving");
+      await savePlacements(
+        capturedFormationId,
+        capturedPlacements.map((p) => ({ choristId: p.choristId, gridX: p.gridX, gridY: p.gridY })),
+      );
+      formationCacheRef.current.set(capturedFormationId, {
+        placements: capturedPlacements.map((p) => ({ choristId: p.choristId, gridX: p.gridX, gridY: p.gridY })),
+        rowSizes: latestRowSizesRef.current,
+        name: latestFormationNameRef.current ?? "",
+      });
+      const songId = latestActiveConcertSongIdRef.current;
+      const fIds = latestSongFormationIdsRef.current;
+      if (songId && !fIds.has(capturedFormationId)) {
+        const updatedIds = [...fIds, capturedFormationId];
+        await setSongFormations(songId, updatedIds);
+        setSongFormationIds(new Set(updatedIds));
+        setAllSongFormationIds((prev) => {
+          const next = new Map(prev);
+          next.set(songId, updatedIds);
+          return next;
+        });
+      }
+      setAutoSaveStatus("saved");
+      setTimeout(() => setAutoSaveStatus("idle"), 2000);
+    }, 500);
+
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [placements, activeFormationId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Fetch formation links for all songs so tags are always visible
   useEffect(() => {
     if (concertSongs.length === 0) return;
@@ -157,6 +219,29 @@ export function useConcertEditor(concertId: string) {
       }),
     ).then((entries) => setAllSongFormationIds(new Map(entries)));
   }, [concertSongs]);
+
+  // History-aware placement setter — use for all user-initiated changes
+  function setPlacements(newPlacements: Placement[]) {
+    setPastPlacements((prev) => [...prev.slice(-49), placements]);
+    setFuturePlacements([]);
+    setPlacementsInternal(newPlacements);
+  }
+
+  function undo() {
+    if (pastPlacements.length === 0) return;
+    const prev = pastPlacements[pastPlacements.length - 1];
+    setFuturePlacements((f) => [placements, ...f.slice(0, 49)]);
+    setPastPlacements((p) => p.slice(0, -1));
+    setPlacementsInternal(prev);
+  }
+
+  function redo() {
+    if (futurePlacements.length === 0) return;
+    const next = futurePlacements[0];
+    setPastPlacements((p) => [...p.slice(-49), placements]);
+    setFuturePlacements((f) => f.slice(1));
+    setPlacementsInternal(next);
+  }
 
   function handleSelectGroup(id: string | null) {
     setActiveGroupId(id);
@@ -221,8 +306,11 @@ export function useConcertEditor(concertId: string) {
       await handleSelectFormation(formationIds[0]);
     } else {
       // Song has no linked formations — clear the grid
+      isSyncingRef.current = true;
+      setPastPlacements([]);
+      setFuturePlacements([]);
       setActiveFormationId(null);
-      setPlacements([]);
+      setPlacementsInternal([]);
       setRowSizes([]);
       setFormationName(null);
     }
@@ -232,14 +320,18 @@ export function useConcertEditor(concertId: string) {
   async function handleSelectFormation(formationId: string) {
     const cached = formationCacheRef.current.get(formationId);
     if (cached) {
+      isSyncingRef.current = true;
+      setPastPlacements([]);
+      setFuturePlacements([]);
       setActiveFormationId(formationId);
-      setPlacements(cached.placements);
+      setPlacementsInternal(cached.placements);
       setRowSizes(cached.rowSizes);
       setFormationName(cached.name);
       return;
     }
     const data = await loadFormation(formationId);
     if (data) {
+      isSyncingRef.current = true;
       const entry: CachedFormation = {
         placements: data.placements.map((p: Placement) => ({
           choristId: p.choristId, gridX: p.gridX, gridY: p.gridY,
@@ -248,8 +340,10 @@ export function useConcertEditor(concertId: string) {
         name: data.name,
       };
       formationCacheRef.current.set(formationId, entry);
+      setPastPlacements([]);
+      setFuturePlacements([]);
       setActiveFormationId(formationId);
-      setPlacements(entry.placements);
+      setPlacementsInternal(entry.placements);
       setHiddenIds(new Set(data.hiddenChoristIds || []));
       setRowSizes(entry.rowSizes);
       setFormationName(entry.name);
@@ -303,10 +397,13 @@ export function useConcertEditor(concertId: string) {
     hidden: string[],
     loadedRowSizes: number[],
   ) {
+    isSyncingRef.current = true;
     const normalized = loaded.map((p) => ({
       choristId: p.choristId, gridX: p.gridX, gridY: p.gridY,
     }));
-    setPlacements(normalized);
+    setPastPlacements([]);
+    setFuturePlacements([]);
+    setPlacementsInternal(normalized);
     setHiddenIds(new Set(hidden));
     setRowSizes(loadedRowSizes);
     if (activeFormationId) {
@@ -399,6 +496,7 @@ export function useConcertEditor(concertId: string) {
   return {
     // State values
     concertName,
+    autoSaveStatus,
     chorists,
     sortedChorists,
     placements,
@@ -425,6 +523,12 @@ export function useConcertEditor(concertId: string) {
     getFormationsForSong,
     placedIds,
     rosterChorists,
+
+    // Undo/redo
+    canUndo: pastPlacements.length > 0,
+    canRedo: futurePlacements.length > 0,
+    undo,
+    redo,
 
     // Setters the UI needs directly
     setPlacements,

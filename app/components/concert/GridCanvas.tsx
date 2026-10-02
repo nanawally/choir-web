@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "../../lib/LanguageContext";
+import { Undo, Redo } from "lucide-react";
 import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 import Konva from "konva";
 import ChoristShape from "./ChoristShape";
@@ -37,6 +38,10 @@ type Props = {
   virtualWidth: number;
   virtualHeight: number;
   activeFormationId: string | null;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 };
 
 function snapToGrid(value: number): number {
@@ -83,6 +88,10 @@ export default function GridCanvas({
   virtualWidth,
   virtualHeight,
   activeFormationId,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
 }: Props) {
   const { t } = useTranslation();
   const stageRef = useRef<Konva.Stage>(null);
@@ -339,12 +348,32 @@ export default function GridCanvas({
 
   return (
     <div className="w-full h-full relative">
-      <button
-        onClick={handleDownload}
-        className="absolute top-1 right-14 z-10 px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded text-sm"
-      >
-        {t("common.downloadPng")}
-      </button>
+      <div className="absolute top-1 right-14 z-10 flex flex-col gap-1 items-end">
+        <button
+          onClick={handleDownload}
+          className="px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded text-sm"
+        >
+          {t("common.downloadPng")}
+        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded disabled:opacity-40"
+            title="Undo"
+          >
+            <Undo size={16} />
+          </button>
+          <button
+            onClick={onRedo}
+            disabled={!canRedo}
+            className="px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded disabled:opacity-40"
+            title="Redo"
+          >
+            <Redo size={16} />
+          </button>
+        </div>
+      </div>
       <Stage
         ref={stageRef}
         width={canvasWidth}

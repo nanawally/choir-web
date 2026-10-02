@@ -72,6 +72,7 @@ const translations = {
   "common.unassigned": { en: "— Unassigned —", sv: "— Ej tilldelad —" },
   "common.duplicate": { en: "Duplicate", sv: "Duplicera" },
   "common.saving": { en: "Saving...", sv: "Sparar..." },
+  "common.saved": { en: "Saved", sv: "Sparat" },
   "common.downloadCsv": { en: "Download CSV", sv: "Ladda ner CSV" },
   "common.downloadPng": { en: "Download PNG", sv: "Ladda ner PNG" },
   "common.columnVisibility": {

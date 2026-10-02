@@ -7,7 +7,6 @@ import {
   deleteFormation,
   duplicateFormation,
   renameFormation,
-  savePlacements,
   copyFormationToConcert,
   copyBaseIntoConcert,
   loadFormation,
@@ -41,6 +40,7 @@ type Props = {
   formationName: string | null;
   formations: Formation[];
   onFormationsChange: (formations: Formation[]) => void;
+  autoSaveStatus: "idle" | "saving" | "saved";
 };
 
 export default function FormationBar({
@@ -59,9 +59,9 @@ export default function FormationBar({
   formationName,
   formations,
   onFormationsChange,
+  autoSaveStatus,
 }: Props) {
   const { t } = useTranslation();
-  const [saving, setSaving] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
@@ -101,26 +101,6 @@ export default function FormationBar({
         onSongFormationsChange(new Set(updatedIds));
       }
     }
-  }
-
-  async function handleSave() {
-    if (!activeFormationId) return;
-    setSaving(true);
-    await savePlacements(
-      activeFormationId,
-      placements.map((p) => ({
-        choristId: p.choristId,
-        gridX: p.gridX,
-        gridY: p.gridY,
-      })),
-    );
-    // If a song is selected, ensure this formation is linked to it
-    if (activeConcertSongId && !songFormationIds.has(activeFormationId)) {
-      const updatedIds = [...songFormationIds, activeFormationId];
-      await setSongFormations(activeConcertSongId, updatedIds);
-      onSongFormationsChange(new Set(updatedIds));
-    }
-    setSaving(false);
   }
 
   async function handleDeleteFormation() {
@@ -324,16 +304,12 @@ export default function FormationBar({
       {/* Spacer before voice groups (rendered by parent) */}
       <div className="mt-2 border-t border-border" />
 
-      {/* Save / action buttons — only when a formation is selected */}
+      {/* Auto-save status + action buttons — only when a formation is selected */}
       {activeFormationId && (
         <div className="flex flex-col gap-2 mt-2">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-3 py-1.5 btn-success text-sm w-fit font-medium"
-          >
-            {saving ? t("common.saving") : t("formations.saveFormation")}
-          </button>
+          <p className={`text-xs ${autoSaveStatus === "saving" ? "text-muted" : autoSaveStatus === "saved" ? "text-success" : "invisible"}`}>
+            {autoSaveStatus === "saving" ? t("common.saving") : t("common.saved")}
+          </p>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={handleDuplicateFormation}
