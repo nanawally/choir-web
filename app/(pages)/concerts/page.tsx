@@ -187,7 +187,7 @@ export default function ConcertsPage() {
           </div>
 
           {showAdd && (
-            <div className="flex items-center gap-2 mb-6 p-3 border border-border rounded-lg bg-hover-bg">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-6 p-3 border border-border rounded-lg bg-hover-bg">
               <input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
@@ -207,7 +207,7 @@ export default function ConcertsPage() {
                 type="date"
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
-                className="border border-border rounded px-2 py-1 text-sm"
+                className="border border-border rounded px-2 py-1 text-sm w-full sm:w-auto"
               />
               <button
                 onClick={handleCreate}

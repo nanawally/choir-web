@@ -66,13 +66,13 @@ export default function RosterPage() {
         </h1>
 
         <div className="mx-auto w-full max-w-3xl">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t("chorists.searchByName")}
-                className="border border-border rounded px-3 py-2 text-sm w-64"
+                className="border border-border rounded px-3 py-2 text-sm w-full sm:w-64"
               />
               <div className="relative" ref={filterRef}>
                 <button

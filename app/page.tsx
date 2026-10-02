@@ -20,7 +20,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <main className="flex-1 flex flex-col items-center justify-center p-24">
+      <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-24">
         <h1 className="text-4xl font-bold">melisma</h1>
         <div className="flex flex-col mt-8 md:flex-row gap-4">
           <Link

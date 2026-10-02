@@ -465,7 +465,7 @@ export default function VoiceGroupsPage() {
 
         {showAddGroup && (
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="flex items-center gap-2 p-3 border border-border rounded-lg bg-hover-bg">
+            <div className="flex flex-wrap items-center gap-2 p-3 border border-border rounded-lg bg-hover-bg">
               <input
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
@@ -514,7 +514,7 @@ export default function VoiceGroupsPage() {
             </h2>
             <div className="flex flex-wrap gap-4 justify-center mb-8">
               {standardGroups.map((g) => (
-                <div key={g.id} className="w-64">
+                <div key={g.id} className="w-full sm:w-64">
                   <VoiceGroupCard group={g} {...cardProps} />
                 </div>
               ))}
@@ -529,7 +529,7 @@ export default function VoiceGroupsPage() {
             </h2>
             <div className="flex flex-wrap gap-4 justify-center">
               {otherGroups.map((g) => (
-                <div key={g.id} className="w-64">
+                <div key={g.id} className="w-full sm:w-64">
                   <VoiceGroupCard group={g} {...cardProps} />
                 </div>
               ))}

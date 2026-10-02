@@ -28,7 +28,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-72">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-72 max-w-[calc(100vw-2rem)]">
         <h1 className="text-2xl font-bold text-center">melisma</h1>
         <input
           value={username}

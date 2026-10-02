@@ -61,7 +61,7 @@ export default function SongListeningTab({ songId }: { songId: string }) {
                     <span className="text-xs text-muted block">{partName}</span>
                     <span className="text-sm truncate block">{af.fileName}</span>
                   </div>
-                  <audio src={streamUrl} controls preload="none" className="h-8 w-40" />
+                  <audio src={streamUrl} controls preload="none" className="h-8 w-32 sm:w-40" />
                   <button
                     onClick={async () => {
                       if (!window.confirm(t("songs.confirmDeleteAudio"))) return;
@@ -152,7 +152,7 @@ export default function SongListeningTab({ songId }: { songId: string }) {
             ))}
           </div>
         )}
-        <div className="flex items-center gap-2 mt-3">
+        <div className="flex flex-wrap items-center gap-2 mt-3">
           <input
             value={newLinkUrl}
             onChange={(e) => setNewLinkUrl(e.target.value)}

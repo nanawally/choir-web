@@ -84,12 +84,12 @@ export default function SongsPage() {
         </h1>
 
         {/* Toolbar */}
-        <div className="mx-auto w-full max-w-6xl flex items-center gap-3 mb-4">
+        <div className="mx-auto w-full max-w-6xl flex flex-wrap items-center gap-3 mb-4">
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("common.search")}
-            className="border border-border rounded px-3 py-1.5 text-sm w-64"
+            className="border border-border rounded px-3 py-1.5 text-sm w-full sm:w-64"
           />
           <div className="relative" ref={filterRef}>
             <button
@@ -478,7 +478,7 @@ function SongModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 border-b border-border mb-4">
+        <div className="flex gap-4 border-b border-border mb-4 overflow-x-auto">
           {(["info", "sheet", "lyrics", "listening"] as const).map((t2) => {
             const label =
               t2 === "info" ? t("songs.tabInfo") :
