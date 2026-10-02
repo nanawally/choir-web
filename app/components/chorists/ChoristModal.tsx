@@ -7,9 +7,9 @@ import {
   assignChorist,
   unassignChorist,
   archiveChorist,
-} from "../lib/api";
-import { sortVoiceGroups } from "../lib/voiceGroupSort";
-import { useTranslation } from "../lib/LanguageContext";
+} from "../../lib/api";
+import { sortVoiceGroups } from "../../lib/voiceGroupSort";
+import { useTranslation } from "../../lib/LanguageContext";
 
 type Chorist = {
   id: string;

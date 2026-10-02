@@ -1,7 +1,7 @@
 "use client";
 
-import type { Song } from "../lib/api";
-import { useTranslation } from "../lib/LanguageContext";
+import type { Song } from "../../lib/api";
+import { useTranslation } from "../../lib/LanguageContext";
 
 export type Suggestions = {
   composer: string[];

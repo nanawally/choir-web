@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslation } from "../lib/LanguageContext";
+import { useTranslation } from "../../lib/LanguageContext";
 
 export default function SongLyricsTab({ lyrics }: { lyrics: string | null }) {
   const { t } = useTranslation();

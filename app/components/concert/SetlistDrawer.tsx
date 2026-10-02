@@ -19,7 +19,7 @@ import {
 } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, ArrowLeft, ArrowRight } from "lucide-react";
-import { useTranslation } from "../lib/LanguageContext";
+import { useTranslation } from "../../lib/LanguageContext";
 
 type Formation = { id: string; name: string };
 type ConcertSong = { id: string; name: string; sortOrder: number };

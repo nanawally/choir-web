@@ -6,10 +6,10 @@ import {
   getSheetMusicUrl,
   getToken,
 } from "../../lib/api";
-import SongInfoTab from "../../components/SongInfoTab";
-import SongSheetMusicTab from "../../components/SongSheetMusicTab";
-import SongLyricsTab from "../../components/SongLyricsTab";
-import SongListeningTab from "../../components/SongListeningTab";
+import SongInfoTab from "../../components/songs/SongInfoTab";
+import SongSheetMusicTab from "../../components/songs/SongSheetMusicTab";
+import SongLyricsTab from "../../components/songs/SongLyricsTab";
+import SongListeningTab from "../../components/songs/SongListeningTab";
 import {
   Table,
   Thead,
@@ -20,8 +20,8 @@ import {
   Td,
 } from "../../components/StyledTable";
 import NavSidebar from "../../components/NavSidebar";
-import AddSongModal from "../../components/AddSongModal";
-import { SongFormFields, extractSuggestions } from "../../components/SongFormFields";
+import AddSongModal from "../../components/songs/AddSongModal";
+import { SongFormFields, extractSuggestions } from "../../components/songs/SongFormFields";
 import { useSongs, ALL_COLUMNS, FILTER_COLUMNS } from "../../hooks/useSongs";
 import {
   EllipsisVertical,

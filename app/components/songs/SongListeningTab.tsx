@@ -12,9 +12,9 @@ import {
   addSongLink,
   deleteSongLink,
   listVoiceGroups,
-} from "../lib/api";
+} from "../../lib/api";
 import { Trash, Upload, Plus } from "lucide-react";
-import { useTranslation } from "../lib/LanguageContext";
+import { useTranslation } from "../../lib/LanguageContext";
 
 export default function SongListeningTab({ songId }: { songId: string }) {
   const { t } = useTranslation();

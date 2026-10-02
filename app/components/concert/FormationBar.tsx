@@ -13,9 +13,9 @@ import {
   loadFormation,
   setSongFormations,
   updateRowSizes,
-} from "../lib/api";
+} from "../../lib/api";
 import AddFormationModal from "./AddFormationModal";
-import { useTranslation } from "../lib/LanguageContext";
+import { useTranslation } from "../../lib/LanguageContext";
 
 type Concert = { id: string; name: string };
 type Formation = { id: string; name: string; sortOrder: number };

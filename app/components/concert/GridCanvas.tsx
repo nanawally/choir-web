@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
-import { useTranslation } from "../lib/LanguageContext";
+import { useTranslation } from "../../lib/LanguageContext";
 import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 import Konva from "konva";
 import ChoristShape from "./ChoristShape";
-import { shortName } from "../lib/choristName";
+import { shortName } from "../../lib/choristName";
 
 const CELL_SIZE = 50;
 const ARC_PADDING = 40; // pixels of padding around the outermost arc
@@ -113,7 +113,14 @@ export default function GridCanvas({
       if (rowSize < 2) return;
       for (let gx = 0; gx < rowSize - 1; gx++) {
         const a = arcPosition(gx, gy, rowSize, centerX, centerY, rowSpacing);
-        const b = arcPosition(gx + 1, gy, rowSize, centerX, centerY, rowSpacing);
+        const b = arcPosition(
+          gx + 1,
+          gy,
+          rowSize,
+          centerX,
+          centerY,
+          rowSpacing,
+        );
         const gap = Math.hypot(b.x - a.x, b.y - a.y);
         if (gap < minGap) minGap = gap;
       }
@@ -366,7 +373,10 @@ export default function GridCanvas({
 
                     if (rowSizes.length > 0) {
                       const snapped = snapToArc(node.x(), node.y());
-                      if (!snapped || occupied.has(`${snapped.gridX},${snapped.gridY}`)) {
+                      if (
+                        !snapped ||
+                        occupied.has(`${snapped.gridX},${snapped.gridY}`)
+                      ) {
                         // Snap back to original position
                         node.position(origPos);
                         return;
@@ -408,7 +418,9 @@ export default function GridCanvas({
                         const hasCollision = placements
                           .filter((pl) => selectedIds.has(pl.choristId))
                           .some((pl) =>
-                            nonSelectedSet.has(`${pl.gridX + gridDx},${pl.gridY + gridDy}`),
+                            nonSelectedSet.has(
+                              `${pl.gridX + gridDx},${pl.gridY + gridDy}`,
+                            ),
                           );
                         if (hasCollision) {
                           node.position(origPos);

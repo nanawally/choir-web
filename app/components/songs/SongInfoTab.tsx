@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Song } from "../lib/api";
-import { listSongConcerts } from "../lib/api";
+import type { Song } from "../../lib/api";
+import { listSongConcerts } from "../../lib/api";
 import dynamic from "next/dynamic";
-import { useTranslation } from "../lib/LanguageContext";
+import { useTranslation } from "../../lib/LanguageContext";
 
-const PdfPreview = dynamic(() => import("./PdfPreview"), { ssr: false });
+const PdfPreview = dynamic(() => import("../PdfPreview"), { ssr: false });
 
 export default function SongInfoTab({
   song,

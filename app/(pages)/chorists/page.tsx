@@ -1,6 +1,6 @@
 "use client";
 
-import ChoristModal from "../../components/ChoristModal";
+import ChoristModal from "../../components/chorists/ChoristModal";
 import {
   Table,
   Thead,

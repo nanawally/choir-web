@@ -1,12 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { uploadSheetMusic, deleteSheetMusic } from "../lib/api";
+import { uploadSheetMusic, deleteSheetMusic } from "../../lib/api";
 import dynamic from "next/dynamic";
 import { FileText, Trash, Upload } from "lucide-react";
-import { useTranslation } from "../lib/LanguageContext";
+import { useTranslation } from "../../lib/LanguageContext";
 
-const PdfViewer = dynamic(() => import("./PdfViewer"), { ssr: false });
+const PdfViewer = dynamic(() => import("../PdfViewer"), { ssr: false });
 
 export default function SongSheetMusicTab({
   songId,

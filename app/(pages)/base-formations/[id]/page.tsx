@@ -1,8 +1,8 @@
 "use client";
 
 import { use, useCallback, useEffect, useRef, useState } from "react";
-import GridCanvas from "../../../components/GridCanvas";
-import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
+import GridCanvas from "../../../components/concert/GridCanvas";
+import VoiceGroupPanel from "../../../components/concert/VoiceGroupPanel";
 import Link from "next/link";
 import { ArrowBigLeft, UsersRound, UserRoundGroup } from "lucide-react";
 import { shortName } from "../../../lib/choristName";
@@ -79,7 +79,8 @@ export default function BaseFormationEditor({
     listVoiceGroups().then((groups) => {
       setVoiceGroups(groups);
       const fourPart = groups.find(
-        (g: { name: string }) => g.name.includes("4-part") || g.name.includes("4-stäm"),
+        (g: { name: string }) =>
+          g.name.includes("4-part") || g.name.includes("4-stäm"),
       );
       if (fourPart) getAssignments(fourPart.id).then(setFourPartAssignments);
     });
@@ -242,7 +243,11 @@ export default function BaseFormationEditor({
   const fourPartGroup = voiceGroups.find(
     (g) => g.name.includes("4-part") || g.name.includes("4-stäm"),
   );
-  const sortedChorists = sortChoristsByVoicePart(chorists, fourPartGroup, fourPartAssignments);
+  const sortedChorists = sortChoristsByVoicePart(
+    chorists,
+    fourPartGroup,
+    fourPartAssignments,
+  );
 
   const leftOpen = showChorists;
   const rightOpen = showVoiceGroups;

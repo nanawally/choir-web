@@ -2,15 +2,15 @@
 
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import { useConcertEditor } from "../../../hooks/useConcertEditor";
-import GridCanvas from "../../../components/GridCanvas";
-import RosterPanel from "../../../components/RosterPanel";
-import RosterModal from "@/app/components/RosterModal";
-import FormationBar from "../../../components/FormationBar";
-import VoiceGroupPanel from "../../../components/VoiceGroupPanel";
+import GridCanvas from "../../../components/concert/GridCanvas";
+import RosterPanel from "../../../components/concert/RosterPanel";
+import RosterModal from "../../../components/concert/RosterModal";
+import FormationBar from "../../../components/concert/FormationBar";
+import VoiceGroupPanel from "../../../components/concert/VoiceGroupPanel";
 import SetlistDrawer, {
   SetlistNavButtons,
-} from "@/app/components/SetlistDrawer";
-import EditSetlistModal from "@/app/components/EditSetlistModal";
+} from "../../../components/concert/SetlistDrawer";
+import EditSetlistModal from "../../../components/concert/EditSetlistModal";
 import Link from "next/link";
 import {
   ArrowBigLeft,

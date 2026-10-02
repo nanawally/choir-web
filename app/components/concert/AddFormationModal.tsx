@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listBaseFormations } from "../lib/api";
-import { useTranslation } from "../lib/LanguageContext";
+import { listBaseFormations } from "../../lib/api";
+import { useTranslation } from "../../lib/LanguageContext";
 
 type Formation = { id: string; name: string; sortOrder: number };
 type BaseFormation = { id: string; name: string };

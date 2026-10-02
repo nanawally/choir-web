@@ -24,8 +24,8 @@ import {
   addSongToConcert,
   removeSongFromConcert,
   reorderConcertSongs,
-} from "../lib/api";
-import { useTranslation } from "../lib/LanguageContext";
+} from "../../lib/api";
+import { useTranslation } from "../../lib/LanguageContext";
 
 type CatalogSong = { id: string; name: string; composer: string | null };
 type ConcertSong = { id: string; name: string; sortOrder: number };

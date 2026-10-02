@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { Song } from "../lib/api";
+import type { Song } from "../../lib/api";
 import { SongFormFields, type Suggestions } from "./SongFormFields";
 import { Upload, X } from "lucide-react";
-import { useTranslation } from "../lib/LanguageContext";
+import { useTranslation } from "../../lib/LanguageContext";
 
 const EMPTY_SONG: Song = {
   id: "",

@@ -19,8 +19,8 @@ import {
   restrictToParentElement,
 } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
-import { useTranslation } from "../lib/LanguageContext";
-import { sortVoiceGroups } from "../lib/voiceGroupSort";
+import { useTranslation } from "../../lib/LanguageContext";
+import { sortVoiceGroups } from "../../lib/voiceGroupSort";
 import {
   createVoiceGroup,
   deleteVoiceGroup,
@@ -28,7 +28,7 @@ import {
   updateVoicePart,
   deleteVoicePart,
   reorderVoiceParts,
-} from "../lib/api";
+} from "../../lib/api";
 
 type VoicePart = { id: string; name: string; color: string; shape: string };
 type VoiceGroup = {

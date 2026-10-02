@@ -1,8 +1,8 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { shortName } from "../lib/choristName";
-import { useTranslation } from "../lib/LanguageContext";
+import { shortName } from "../../lib/choristName";
+import { useTranslation } from "../../lib/LanguageContext";
 
 type Chorist = { id: string; firstName: string; lastName: string };
 
