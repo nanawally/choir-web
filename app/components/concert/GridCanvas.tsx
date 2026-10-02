@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "../../lib/LanguageContext";
 import { Group, Layer, Line, Rect, Stage, Text } from "react-konva";
 import Konva from "konva";
@@ -36,6 +36,7 @@ type Props = {
   scale: number;
   virtualWidth: number;
   virtualHeight: number;
+  activeFormationId: string | null;
 };
 
 function snapToGrid(value: number): number {
@@ -81,6 +82,7 @@ export default function GridCanvas({
   scale,
   virtualWidth,
   virtualHeight,
+  activeFormationId,
 }: Props) {
   const { t } = useTranslation();
   const stageRef = useRef<Konva.Stage>(null);
@@ -94,6 +96,15 @@ export default function GridCanvas({
     y: number;
   } | null>(null);
   const didMarquee = useRef(false);
+
+  // --- Formation transition animation ---
+  // offsetX/offsetY on each Group starts at (to - from) and tweens to 0.
+  // Visual position = (x - offsetX, y - offsetY), so it starts at "from" and ends at "to".
+  const committedPixelPosRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const fromPosRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const [animOffset, setAnimOffset] = useState<Map<string, { x: number; y: number }>>(new Map());
+  const prevFormationIdRef = useRef<string | null>(null);
+  const animCancelRef = useRef<(() => void) | null>(null);
 
   // Center of the virtual coordinate space (for arc rendering)
   const centerX = virtualWidth / 2;
@@ -130,6 +141,69 @@ export default function GridCanvas({
     }
   }
   
+  // Precompute current pixel positions for all placed chorists
+  const currentPixelPos = new Map(
+    placements.map((p) => [p.choristId, toPixel(p.gridX, p.gridY)]),
+  );
+
+  // Capture "from" positions just before they change.
+  // useLayoutEffect runs after every render (before useEffects), so when
+  // activeFormationId changes we save the previous committed positions first.
+  useLayoutEffect(() => {
+    if (activeFormationId !== prevFormationIdRef.current) {
+      fromPosRef.current = committedPixelPosRef.current; // snapshot before overwrite
+      prevFormationIdRef.current = activeFormationId;
+    }
+    committedPixelPosRef.current = currentPixelPos;
+  });
+
+  // Animate chorists to their new positions when the formation changes.
+  useEffect(() => {
+    if (!activeFormationId) {
+      animCancelRef.current?.();
+      return;
+    }
+
+    const from = fromPosRef.current;
+    const to = currentPixelPos;
+
+    animCancelRef.current?.();
+    let cancelled = false;
+    animCancelRef.current = () => { cancelled = true; };
+
+    const DURATION = 700;
+    const startTime = performance.now();
+
+    function easeInOut(t: number) {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function tick(now: number) {
+      if (cancelled) return;
+      const t = Math.min((now - startTime) / DURATION, 1);
+      const e = easeInOut(t);
+      const next = new Map<string, { x: number; y: number }>();
+      to.forEach((tp, id) => {
+        const fp = from.get(id) ?? tp; // new chorist → appears at target
+        next.set(id, {
+          x: (tp.x - fp.x) * (1 - e),
+          y: (tp.y - fp.y) * (1 - e),
+        });
+      });
+      setAnimOffset(next);
+      if (t < 1) requestAnimationFrame(tick);
+      else {
+        setAnimOffset(new Map());
+        animCancelRef.current = null;
+      }
+    }
+
+    requestAnimationFrame(tick);
+    return () => { cancelled = true; animCancelRef.current = null; };
+  }, [activeFormationId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => () => { animCancelRef.current?.(); }, []);
+
   // Convert physical pointer position to virtual coordinates
   function toVirtual(pos: { x: number; y: number }) {
     return { x: pos.x / scale, y: pos.y / scale };
@@ -348,14 +422,22 @@ export default function GridCanvas({
                 assignments.find((a) => a.choristId === p.choristId)
                   ?.voicePartId !== highlightPartId;
               const opacity = dimmed ? 0.2 : 1;
-              const pos = toPixel(p.gridX, p.gridY);
+              const pos = currentPixelPos.get(p.choristId) ?? toPixel(p.gridX, p.gridY);
+              const offset = animOffset.get(p.choristId) ?? { x: 0, y: 0 };
               return (
                 <Group
                   key={p.choristId}
                   x={pos.x}
                   y={pos.y}
+                  offsetX={offset.x}
+                  offsetY={offset.y}
                   draggable
                   onDragStart={(e) => {
+                    // Cancel any in-progress animation so drag coordinates are clean
+                    if (animCancelRef.current) {
+                      animCancelRef.current();
+                      setAnimOffset(new Map());
+                    }
                     const node = e.target;
                     setDragStart({ x: node.x(), y: node.y() });
                     if (!selectedIds.has(p.choristId)) {

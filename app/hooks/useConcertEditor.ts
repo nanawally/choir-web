@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   apiFetch,
   getAssignments,
@@ -24,6 +24,7 @@ const HEIGHT = 600;
 type Chorist = { id: string; firstName: string; lastName: string };
 type Placement = { choristId: string; gridX: number; gridY: number };
 type Formation = { id: string; name: string; sortOrder: number };
+type CachedFormation = { placements: Placement[]; rowSizes: number[]; name: string };
 
 export function useConcertEditor(concertId: string) {
   const [concertName, setConcertName] = useState<string>("");
@@ -73,6 +74,7 @@ export function useConcertEditor(concertId: string) {
   const [fourPartAssignments, setFourPartAssignments] = useState<
     { choristId: string; voicePartId: string }[]
   >([]);
+  const formationCacheRef = useRef<Map<string, CachedFormation>>(new Map());
 
   useEffect(() => {
     apiFetch("/chorists")
@@ -127,6 +129,23 @@ export function useConcertEditor(concertId: string) {
   useEffect(() => {
     listFormations(concertId).then(setFormations);
   }, [concertId]);
+
+  // Preload formation details into cache so navigation is instant
+  useEffect(() => {
+    formations.forEach((f) => {
+      if (formationCacheRef.current.has(f.id)) return;
+      loadFormation(f.id).then((data) => {
+        if (!data) return;
+        formationCacheRef.current.set(f.id, {
+          placements: data.placements.map((p: Placement) => ({
+            choristId: p.choristId, gridX: p.gridX, gridY: p.gridY,
+          })),
+          rowSizes: JSON.parse(data.rowSizes || "[]"),
+          name: data.name,
+        });
+      });
+    });
+  }, [formations]);
 
   // Fetch formation links for all songs so tags are always visible
   useEffect(() => {
@@ -211,19 +230,29 @@ export function useConcertEditor(concertId: string) {
 
   // Load a specific formation onto the grid (used by setlist tags and auto-load)
   async function handleSelectFormation(formationId: string) {
+    const cached = formationCacheRef.current.get(formationId);
+    if (cached) {
+      setActiveFormationId(formationId);
+      setPlacements(cached.placements);
+      setRowSizes(cached.rowSizes);
+      setFormationName(cached.name);
+      return;
+    }
     const data = await loadFormation(formationId);
     if (data) {
-      setActiveFormationId(formationId);
-      setPlacements(
-        data.placements.map((p: { choristId: string; gridX: number; gridY: number }) => ({
-          choristId: p.choristId,
-          gridX: p.gridX,
-          gridY: p.gridY,
+      const entry: CachedFormation = {
+        placements: data.placements.map((p: Placement) => ({
+          choristId: p.choristId, gridX: p.gridX, gridY: p.gridY,
         })),
-      );
+        rowSizes: JSON.parse(data.rowSizes || "[]"),
+        name: data.name,
+      };
+      formationCacheRef.current.set(formationId, entry);
+      setActiveFormationId(formationId);
+      setPlacements(entry.placements);
       setHiddenIds(new Set(data.hiddenChoristIds || []));
-      setRowSizes(JSON.parse(data.rowSizes || "[]"));
-      setFormationName(data.name);
+      setRowSizes(entry.rowSizes);
+      setFormationName(entry.name);
     }
   }
 
@@ -274,15 +303,19 @@ export function useConcertEditor(concertId: string) {
     hidden: string[],
     loadedRowSizes: number[],
   ) {
-    setPlacements(
-      loaded.map((p) => ({
-        choristId: p.choristId,
-        gridX: p.gridX,
-        gridY: p.gridY,
-      })),
-    );
+    const normalized = loaded.map((p) => ({
+      choristId: p.choristId, gridX: p.gridX, gridY: p.gridY,
+    }));
+    setPlacements(normalized);
     setHiddenIds(new Set(hidden));
     setRowSizes(loadedRowSizes);
+    if (activeFormationId) {
+      formationCacheRef.current.set(activeFormationId, {
+        placements: normalized,
+        rowSizes: loadedRowSizes,
+        name: formationName ?? "",
+      });
+    }
   }
 
   // Build a flat list of navigation stops: each formation is a stop,

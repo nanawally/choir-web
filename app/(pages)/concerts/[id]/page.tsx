@@ -191,6 +191,7 @@ export default function ConcertEditor({
             scale={scale}
             virtualWidth={windowSize.width}
             virtualHeight={windowSize.height}
+            activeFormationId={editor.activeFormationId}
           />
         </div>
 
