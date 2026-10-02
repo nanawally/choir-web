@@ -373,7 +373,11 @@ export default function BaseFormationEditor({
             canvasHeight={canvasHeight}
             scale={scale}
             virtualWidth={windowSize.width}
-            virtualHeight={windowSize.height} activeFormationId={null}          />
+            virtualHeight={windowSize.height} activeFormationId={null} onUndo={function (): void {
+              throw new Error("Function not implemented.");
+            } } onRedo={function (): void {
+              throw new Error("Function not implemented.");
+            } } canUndo={false} canRedo={false}          />
         </div>
 
         {/* Right toggle button */}
