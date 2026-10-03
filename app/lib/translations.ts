@@ -158,6 +158,7 @@ const translations = {
     en: "Delete the uploaded sheet music?",
     sv: "Ta bort den uppladdade noten?",
   },
+  "songs.openSong": { en: "Open song", sv: "Öppna stycke" },
 
   // Concerts
   "concerts.title": { en: "Concerts", sv: "Konserter" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import {
   type Song,
   getSheetMusicUrl,
@@ -31,6 +31,8 @@ import {
   X,
   SquarePen,
   Columns3,
+  BookOpen,
+  Trash,
 } from "lucide-react";
 import { useTranslation } from "../../lib/LanguageContext";
 
@@ -74,6 +76,8 @@ export default function SongsPage() {
 
   const { t } = useTranslation();
   const suggestions = extractSuggestions(songs);
+  const [expandedSongId, setExpandedSongId] = useState<string | null>(null);
+  const expandableColumns = columns.filter((c) => c.key !== "name" && c.key !== "composer");
 
   return (
     <div className="flex min-h-screen">
@@ -213,7 +217,7 @@ export default function SongsPage() {
                   {ALL_COLUMNS.filter((c) => c.key !== "name").map((c) => (
                     <label
                       key={c.key}
-                      className="flex items-center gap-2 px-3 py-1 text-sm hover:bg-hover-bg cursor-pointer"
+                      className={`flex items-center gap-2 px-3 py-1 text-sm hover:bg-hover-bg cursor-pointer${c.key === "composer" ? " hidden sm:flex" : ""}`}
                     >
                       <input
                         type="checkbox"
@@ -284,6 +288,7 @@ export default function SongsPage() {
                 {columns.map((c) => (
                   <Th
                     key={c.key}
+                    className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
                     style={
                       c.key === "name"
                         ? { minWidth: "250px" }
@@ -295,35 +300,93 @@ export default function SongsPage() {
                     {t(c.labelKey)}
                   </Th>
                 ))}
-                <Th compact />
+                <Th compact className="hidden sm:table-cell" />
               </TheadRow>
             </Thead>
             <Tbody>
               {filtered.map((s) => (
-                <Tr
-                  key={s.id}
-                  className="cursor-pointer"
-                  onClick={() => setEditingSong(s)}
-                >
-                  {columns.map((c) => (
-                    <Td key={c.key}>
-                      {c.render
-                        ? c.render(s, t)
-                        : ((s[c.key] as string | number | null) ?? "")}
+                <Fragment key={s.id}>
+                  <Tr
+                    className="cursor-pointer"
+                    onClick={() => {
+                      if (window.innerWidth >= 640) {
+                        setEditingSong(s);
+                      } else {
+                        setExpandedSongId(expandedSongId === s.id ? null : s.id);
+                      }
+                    }}
+                  >
+                    {columns.map((c) => (
+                      <Td
+                        key={c.key}
+                        className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
+                      >
+                        {c.key === "name" ? (
+                          <>
+                            <div className="flex items-center justify-between gap-2 sm:hidden">
+                              <div className="flex items-center gap-1 min-w-0">
+                                {expandedSongId === s.id
+                                  ? <ChevronDown size={14} className="shrink-0 text-muted" />
+                                  : <ChevronRight size={14} className="shrink-0 text-muted" />}
+                                <span className="truncate">{s.name}</span>
+                              </div>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setEditingSong(s); }}
+                                className="shrink-0 text-muted hover:text-foreground"
+                                title={t("songs.openSong")}
+                              >
+                                <BookOpen size={16} />
+                              </button>
+                            </div>
+                            <span className="hidden sm:inline">{s.name}</span>
+                          </>
+                        ) : (
+                          c.render
+                            ? c.render(s, t)
+                            : ((s[c.key] as string | number | null) ?? "")
+                        )}
+                      </Td>
+                    ))}
+                    <Td compact className="hidden sm:table-cell">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(s.id);
+                        }}
+                        className="text-danger hover:text-danger-hover text-xs"
+                      >
+                        {t("common.delete")}
+                      </button>
                     </Td>
-                  ))}
-                  <Td compact>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(s.id);
-                      }}
-                      className="text-danger hover:text-danger-hover text-xs"
-                    >
-                      {t("common.delete")}
-                    </button>
-                  </Td>
-                </Tr>
+                  </Tr>
+                  {expandedSongId === s.id && (
+                    <tr className="border-b border-border bg-surface-alt sm:hidden">
+                      <td colSpan={columns.length + 1} className="px-4 py-3">
+                        {expandableColumns.length > 0 && (
+                          <div className="grid grid-cols-3 gap-x-6 gap-y-3 text-sm mb-3">
+                            {expandableColumns.map((c) => {
+                              const val = c.render ? c.render(s, t) : String(s[c.key] ?? "");
+                              return (
+                                <div key={c.key}>
+                                  <div className="text-xs text-muted">{t(c.labelKey)}</div>
+                                  <div>{val || "—"}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <div className="flex justify-end">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDelete(s.id); }}
+                            className="p-2 btn-danger rounded"
+                          >
+                            <Trash size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </Tbody>
           </Table>
