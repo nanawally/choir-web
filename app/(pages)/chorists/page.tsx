@@ -60,7 +60,7 @@ export default function RosterPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8">
+      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8 min-w-0">
         <h1 className="text-4xl font-bold mb-6 text-center">
           {t("chorists.title")}
         </h1>
@@ -86,7 +86,7 @@ export default function RosterPage() {
                   <EllipsisVertical size={16} />
                 </button>
                 {filterMenuOpen && (
-                  <div className="absolute left-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-10 w-56">
+                  <div className="absolute right-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-50 w-56">
                     {sortedFilterGroups.map((group) => (
                       <div key={group.id}>
                         <button
@@ -179,72 +179,81 @@ export default function RosterPage() {
             </div>
           )}
 
-          <Table>
-            <Thead>
-              <TheadRow>
-                {fourPartGroup && <Th compact />}
-                <Th>{t("common.name")}</Th>
-                {otherStandardGroups.map((g) => (
-                  <Th key={g.id}>{g.name}</Th>
-                ))}
-                <Th compact />
-              </TheadRow>
-            </Thead>
-            <Tbody>
-              {filteredChorists.map((chorist) => {
-                const fourPartPart = fourPartGroup
-                  ? getPartForChorist(chorist.id, fourPartGroup)
-                  : null;
+          <div className="overflow-x-auto">
+            <Table className="min-w-[600px]">
+              <Thead>
+                <TheadRow>
+                  {fourPartGroup && (
+                    <Th className="sticky left-0 z-10 bg-surface w-[min(12vw,3rem)] whitespace-nowrap" />
+                  )}
+                  <Th className={`sticky z-10 bg-surface ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
+                    {t("common.name")}
+                  </Th>
+                  {otherStandardGroups.map((g) => (
+                    <Th key={g.id}>{g.name}</Th>
+                  ))}
+                  <Th compact />
+                </TheadRow>
+              </Thead>
+              <Tbody>
+                {filteredChorists.map((chorist) => {
+                  const fourPartPart = fourPartGroup
+                    ? getPartForChorist(chorist.id, fourPartGroup)
+                    : null;
 
-                const fourPartIndex = fourPartGroup
-                  ? fourPartGroup.parts.findIndex((p) => p.id === fourPartPart?.id)
-                  : -1;
-                const isAltRow = fourPartIndex % 2 === 1;
+                  const fourPartIndex = fourPartGroup
+                    ? fourPartGroup.parts.findIndex((p) => p.id === fourPartPart?.id)
+                    : -1;
+                  const isAltRow = fourPartIndex % 2 === 1;
+                  const stickyBg = isAltRow
+                    ? "bg-surface-alt group-hover:bg-hover-bg"
+                    : "bg-surface group-hover:bg-hover-bg";
 
-                return (
-                  <Tr key={chorist.id} className={isAltRow ? "bg-surface-alt" : ""}>
-                    {fourPartGroup && (
-                      <Td compact>
-                        <div className="flex items-center gap-1">
-                          <span className="text-muted">
-                            {fourPartPart?.name ?? "—"}
-                          </span>
-                          {chorist.isSectionLeader && (
-                            <span title={t("chorists.sectionLeaderTooltip")}>
-                              <Star
-                                size={14}
-                                className="text-yellow-500 fill-yellow-500"
-                              />
+                  return (
+                    <Tr key={chorist.id} className={isAltRow ? "bg-surface-alt" : ""}>
+                      {fourPartGroup && (
+                        <Td className={`sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap ${stickyBg}`}>
+                          <div className="flex items-center gap-1">
+                            <span className="text-muted">
+                              {fourPartPart?.name ?? "—"}
                             </span>
-                          )}
-                        </div>
-                      </Td>
-                    )}
-                    <Td className="font-medium">
-                      {chorist.firstName} {chorist.lastName}
-                    </Td>
-                    {otherStandardGroups.map((group) => {
-                      const part = getPartForChorist(chorist.id, group);
-                      return (
-                        <Td key={group.id} className="text-muted">
-                          {part?.name ?? "—"}
+                            {chorist.isSectionLeader && (
+                              <span title={t("chorists.sectionLeaderTooltip")}>
+                                <Star
+                                  size={14}
+                                  className="text-yellow-500 fill-yellow-500"
+                                />
+                              </span>
+                            )}
+                          </div>
                         </Td>
-                      );
-                    })}
-                    <Td compact className="text-center">
-                      <button
-                        onClick={() => setModal({ mode: "edit", chorist })}
-                        className="text-subtle hover:text-muted"
-                        title={t("chorists.editTitle")}
-                      >
-                        <SquarePen size={16} />
-                      </button>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
+                      )}
+                      <Td className={`sticky z-10 font-medium max-w-[min(38vw,12rem)] truncate ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"} ${stickyBg}`}>
+                        {chorist.firstName} {chorist.lastName}
+                      </Td>
+                      {otherStandardGroups.map((group) => {
+                        const part = getPartForChorist(chorist.id, group);
+                        return (
+                          <Td key={group.id} className="text-muted">
+                            {part?.name ?? "—"}
+                          </Td>
+                        );
+                      })}
+                      <Td compact className="text-center">
+                        <button
+                          onClick={() => setModal({ mode: "edit", chorist })}
+                          className="text-subtle hover:text-muted"
+                          title={t("chorists.editTitle")}
+                        >
+                          <SquarePen size={16} />
+                        </button>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          </div>
 
           {!loading && filteredChorists.length === 0 && (
             <p className="text-subtle text-sm mt-4 text-center">
@@ -289,11 +298,16 @@ export default function RosterPage() {
                   {t("chorists.noArchived")}
                 </p>
               ) : (
-                <Table>
+                <div className="overflow-x-auto">
+                <Table className="min-w-[600px]">
                   <Thead>
                     <TheadRow>
-                      {fourPartGroup && <Th compact />}
-                      <Th>{t("common.name")}</Th>
+                      {fourPartGroup && (
+                        <Th className="sticky left-0 z-10 bg-surface w-[min(12vw,3rem)] whitespace-nowrap" />
+                      )}
+                      <Th className={`sticky z-10 bg-surface ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
+                        {t("common.name")}
+                      </Th>
                       {otherStandardGroups.map((g) => (
                         <Th key={g.id}>{g.name}</Th>
                       ))}
@@ -309,13 +323,13 @@ export default function RosterPage() {
                       return (
                         <Tr key={chorist.id}>
                           {fourPartGroup && (
-                            <Td compact>
+                            <Td className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap bg-surface group-hover:bg-hover-bg">
                               <span className="text-muted">
                                 {fourPartPart?.name ?? "—"}
                               </span>
                             </Td>
                           )}
-                          <Td className="font-medium">
+                          <Td className={`sticky z-10 font-medium max-w-[min(38vw,12rem)] truncate ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"} bg-surface group-hover:bg-hover-bg`}>
                             {chorist.firstName} {chorist.lastName}
                           </Td>
                           {otherStandardGroups.map((group) => {
@@ -339,6 +353,7 @@ export default function RosterPage() {
                     })}
                   </Tbody>
                 </Table>
+              </div>
               )}
             </div>
           </div>

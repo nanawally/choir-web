@@ -79,7 +79,7 @@ type TrProps = {
 export function Tr({ children, onClick, className = "" }: TrProps) {
   return (
     <tr
-      className={`border-b border-border hover:bg-hover-bg ${className}`}
+      className={`group border-b border-border hover:bg-hover-bg ${className}`}
       onClick={onClick}
     >
       {children}
