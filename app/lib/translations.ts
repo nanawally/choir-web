@@ -66,6 +66,7 @@ const translations = {
   "common.copy": { en: "Copy", sv: "Kopiera" },
   "common.creating": { en: "Creating...", sv: "Skapar..." },
   "common.uploading": { en: "Uploading...", sv: "Laddar upp..." },
+  "common.adding": { en: "Adding...", sv: "Lägger till..." },
   "common.standard": { en: "Standard", sv: "Standard" },
   "common.other": { en: "Other", sv: "Övrig" },
   "common.name": { en: "Name", sv: "Namn" },
@@ -184,6 +185,7 @@ const translations = {
     sv: "Tillbaka till konserter",
   },
   "concerts.editSetlist": { en: "Edit Setlist", sv: "Redigera konsertrepertoar" },
+  "concerts.addFromSongbook": { en: "Add from songbook…", sv: "Lägg till från sångbok…" },
   "concerts.songCatalog": { en: "Song Catalog", sv: "Styckebibliotek" },
   "concerts.setlist": { en: "Setlist", sv: "Konsertrepertoar" },
   "concerts.setlistEmpty": {

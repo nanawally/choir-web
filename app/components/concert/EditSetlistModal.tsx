@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -24,6 +24,9 @@ import {
   addSongToConcert,
   removeSongFromConcert,
   reorderConcertSongs,
+  listSongbooks,
+  listSongbookSongs,
+  type Songbook,
 } from "../../lib/api";
 import { useTranslation } from "../../lib/LanguageContext";
 
@@ -95,6 +98,13 @@ export default function EditSetlistModal({
   const { t } = useTranslation();
   const [songs, setSongs] = useState<ConcertSong[]>(initialSongs);
   const [search, setSearch] = useState("");
+  const [songbooks, setSongbooks] = useState<Songbook[]>([]);
+  const [addingFromSongbook, setAddingFromSongbook] = useState(false);
+
+  useEffect(() => {
+    listSongbooks().then(setSongbooks);
+  }, []);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
@@ -122,6 +132,26 @@ export default function EditSetlistModal({
       setSongs(updated);
       onSongsChange(updated);
     }
+  }
+
+  async function handleAddFromSongbook(songbookId: string) {
+    setAddingFromSongbook(true);
+    const sbSongs = await listSongbookSongs(songbookId);
+    const currentNames = new Set(songs.map((s) => s.name));
+    let updated = [...songs];
+    for (const sbSong of sbSongs) {
+      if (currentNames.has(sbSong.name)) continue;
+      const catalogSong = catalogSongs.find((c) => c.id === sbSong.id);
+      if (!catalogSong) continue;
+      const added = await addSongToConcert(concertId, catalogSong.id);
+      if (added) {
+        updated = [...updated, added];
+        currentNames.add(sbSong.name);
+      }
+    }
+    setSongs(updated);
+    onSongsChange(updated);
+    setAddingFromSongbook(false);
   }
 
   async function handleRemove(concertSongId: string) {
@@ -190,6 +220,19 @@ export default function EditSetlistModal({
                 className="w-full border border-border rounded px-2 py-1 text-sm"
                 autoFocus
               />
+              {songbooks.length > 0 && (
+                <select
+                  value=""
+                  onChange={(e) => { if (e.target.value) handleAddFromSongbook(e.target.value); }}
+                  disabled={addingFromSongbook}
+                  className="mt-1.5 w-full border border-border rounded px-2 py-1 text-sm text-muted bg-surface disabled:opacity-50"
+                >
+                  <option value="">{addingFromSongbook ? t("common.adding") : t("concerts.addFromSongbook")}</option>
+                  {songbooks.map((sb) => (
+                    <option key={sb.id} value={sb.id}>{sb.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
             <ul className="flex-1 overflow-y-auto p-2 space-y-0.5">
               {availableSongs.map((s) => (
