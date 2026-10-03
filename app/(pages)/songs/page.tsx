@@ -308,37 +308,42 @@ export default function SongsPage() {
                       }
                     }}
                   >
-                    {columns.map((c) => (
-                      <Td
-                        key={c.key}
-                        className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
-                      >
-                        {c.key === "name" ? (
-                          <>
-                            <div className="flex items-center justify-between gap-2 sm:hidden">
-                              <div className="flex items-center gap-1 min-w-0">
-                                {expandedSongId === s.id
-                                  ? <ChevronDown size={14} className="shrink-0 text-muted" />
-                                  : <ChevronRight size={14} className="shrink-0 text-muted" />}
-                                <span className="truncate">{s.name}</span>
+                    {columns.map((c) => {
+                      const cellText = c.key !== "name"
+                        ? String(c.render ? c.render(s, t) : (s[c.key] ?? ""))
+                        : "";
+                      return (
+                        <Td
+                          key={c.key}
+                          className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
+                        >
+                          {c.key === "name" ? (
+                            <>
+                              <div className="flex items-center justify-between gap-2 sm:hidden">
+                                <div className="flex items-center gap-1 min-w-0">
+                                  {expandedSongId === s.id
+                                    ? <ChevronDown size={14} className="shrink-0 text-muted" />
+                                    : <ChevronRight size={14} className="shrink-0 text-muted" />}
+                                  <span className="truncate">{s.name}</span>
+                                </div>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setEditingSong(s); }}
+                                  className="shrink-0 text-muted hover:text-foreground"
+                                  title={t("songs.openSong")}
+                                >
+                                  <BookOpen size={16} />
+                                </button>
                               </div>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setEditingSong(s); }}
-                                className="shrink-0 text-muted hover:text-foreground"
-                                title={t("songs.openSong")}
-                              >
-                                <BookOpen size={16} />
-                              </button>
-                            </div>
-                            <span className="hidden sm:inline">{s.name}</span>
-                          </>
-                        ) : (
-                          c.render
-                            ? c.render(s, t)
-                            : ((s[c.key] as string | number | null) ?? "")
-                        )}
-                      </Td>
-                    ))}
+                              <span className="hidden sm:inline">{s.name}</span>
+                            </>
+                          ) : (
+                            cellText
+                              ? <span className="block truncate" style={{ maxWidth: c.width }} title={cellText}>{cellText}</span>
+                              : null
+                          )}
+                        </Td>
+                      );
+                    })}
                     <Td compact className="hidden sm:table-cell">
                       <button
                         onClick={(e) => {
