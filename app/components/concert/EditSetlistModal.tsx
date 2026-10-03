@@ -98,8 +98,11 @@ export default function EditSetlistModal({
   const { t } = useTranslation();
   const [songs, setSongs] = useState<ConcertSong[]>(initialSongs);
   const [search, setSearch] = useState("");
+  const [catalogLimit, setCatalogLimit] = useState(50);
   const [songbooks, setSongbooks] = useState<Songbook[]>([]);
   const [addingFromSongbook, setAddingFromSongbook] = useState(false);
+
+  useEffect(() => { setCatalogLimit(50); }, [search]);
 
   useEffect(() => {
     listSongbooks().then(setSongbooks);
@@ -189,11 +192,11 @@ export default function EditSetlistModal({
 
   return (
     <div
-      className="fixed inset-0 bg-overlay z-50 flex items-center justify-center overflow-y-auto p-4"
+      className="fixed inset-0 bg-overlay z-50"
       onClick={onClose}
     >
       <div
-        className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] max-w-3xl max-h-[calc(100vh-2rem)] flex flex-col my-auto"
+        className="absolute top-4 left-4 right-4 bottom-4 max-w-3xl mx-auto bg-surface rounded-xl shadow-xl flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-border">
@@ -208,7 +211,7 @@ export default function EditSetlistModal({
 
         <div className="flex flex-col md:flex-row flex-1 min-h-0">
           {/* Left: Song catalog */}
-          <div className="flex-1 border-b md:border-b-0 md:border-r border-border flex flex-col min-w-0">
+          <div className="flex-1 border-b md:border-b-0 md:border-r border-border flex flex-col min-w-0 min-h-0">
             <div className="p-3 border-b border-border">
               <h3 className="text-xs font-medium text-muted mb-1.5">
                 {t("concerts.songCatalog")}
@@ -235,7 +238,7 @@ export default function EditSetlistModal({
               )}
             </div>
             <ul className="flex-1 overflow-y-auto p-2 space-y-0.5">
-              {availableSongs.map((s) => (
+              {availableSongs.slice(0, catalogLimit).map((s) => (
                 <li
                   key={s.id}
                   className="text-sm py-1.5 px-2 rounded hover:bg-hover-bg cursor-pointer"
@@ -247,6 +250,16 @@ export default function EditSetlistModal({
                   )}
                 </li>
               ))}
+              {availableSongs.length > catalogLimit && (
+                <li className="text-sm text-center py-2">
+                  <button
+                    onClick={() => setCatalogLimit((l) => l + 50)}
+                    className="text-link hover:underline"
+                  >
+                    {t("common.showMore")} ({availableSongs.length - catalogLimit})
+                  </button>
+                </li>
+              )}
               {availableSongs.length === 0 && (
                 <li className="text-sm text-subtle text-center py-4">
                   {search ? t("songs.noMatch") : "—"}
@@ -256,7 +269,7 @@ export default function EditSetlistModal({
           </div>
 
           {/* Right: Current setlist */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 min-h-0">
             <div className="p-3 border-b border-border">
               <h3 className="text-xs font-medium text-muted">
                 {t("concerts.setlist")} ({songs.length})

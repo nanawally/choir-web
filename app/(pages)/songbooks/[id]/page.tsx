@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   listSongbooks,
@@ -29,7 +29,7 @@ import { ALL_COLUMNS, FILTER_COLUMNS, type ActiveFilter, type YearRange } from "
 import { extractSuggestions } from "../../../components/songs/SongFormFields";
 import { useTableSort } from "../../../lib/useTableSort";
 import { useTranslation } from "../../../lib/LanguageContext";
-import { ArrowLeft, ChevronDown, ChevronRight, Columns3, Download, EllipsisVertical, X } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronDown, ChevronRight, Columns3, Download, EllipsisVertical, Trash, X } from "lucide-react";
 
 const DEFAULT_VISIBLE = ["name", "composer", "arranger", "year", "collectionName"];
 const STORAGE_KEY = "songbook-songs-visible-columns";
@@ -122,6 +122,7 @@ export default function SongbookDetailPage({
   const [editingModalOpen, setEditingModalOpen] = useState(false);
   const [editingSong, setEditingSong] = useState<SongbookSong | null>(null);
   const [deletingTarget, setDeletingTarget] = useState<SongbookSong | null>(null);
+  const [expandedSongId, setExpandedSongId] = useState<string | null>(null);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -302,11 +303,12 @@ export default function SongbookDetailPage({
   }
 
   const suggestions = extractSuggestions(catalogSongs);
+  const expandableColumns = columns.filter((c) => c.key !== "name" && c.key !== "composer");
 
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8">
+      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8 min-w-0">
         <div className="mx-auto w-full max-w-6xl">
           <Link
             href="/songbooks"
@@ -471,6 +473,7 @@ export default function SongbookDetailPage({
                   {columns.map((c) => (
                     <Th
                       key={c.key}
+                      className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
                       style={
                         c.key === "name"
                           ? { minWidth: "250px" }
@@ -482,35 +485,90 @@ export default function SongbookDetailPage({
                       {t(c.labelKey)}
                     </Th>
                   ))}
-                  <Th compact />
+                  <Th compact className="hidden sm:table-cell" />
                 </TheadRow>
               </Thead>
               <Tbody>
                 {filtered.map((s) => (
-                  <Tr
-                    key={s.id}
-                    className="cursor-pointer"
-                    onClick={() => setEditingSong(s)}
-                  >
-                    {columns.map((c) => (
-                      <Td key={c.key}>
-                        {c.render
-                          ? c.render(s, t)
-                          : ((s[c.key as keyof Song] as string | number | null) ?? "")}
+                  <Fragment key={s.id}>
+                    <Tr
+                      className="cursor-pointer"
+                      onClick={() => {
+                        if (window.innerWidth >= 640) {
+                          setEditingSong(s);
+                        } else {
+                          setExpandedSongId(expandedSongId === s.id ? null : s.id);
+                        }
+                      }}
+                    >
+                      {columns.map((c) => (
+                        <Td
+                          key={c.key}
+                          className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
+                        >
+                          {c.key === "name" ? (
+                            <>
+                              <div className="flex items-center justify-between gap-2 sm:hidden">
+                                <div className="flex items-center gap-1 min-w-0">
+                                  {expandedSongId === s.id
+                                    ? <ChevronDown size={14} className="shrink-0 text-muted" />
+                                    : <ChevronRight size={14} className="shrink-0 text-muted" />}
+                                  <span className="truncate">{s.name}</span>
+                                </div>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setEditingSong(s); }}
+                                  className="shrink-0 text-muted hover:text-foreground"
+                                  title={t("songs.openSong")}
+                                >
+                                  <BookOpen size={16} />
+                                </button>
+                              </div>
+                              <span className="hidden sm:inline">{s.name}</span>
+                            </>
+                          ) : (
+                            c.render
+                              ? c.render(s, t)
+                              : ((s[c.key as keyof Song] as string | number | null) ?? "")
+                          )}
+                        </Td>
+                      ))}
+                      <Td compact className="hidden sm:table-cell">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setDeletingTarget(s); }}
+                          className="text-danger hover:text-danger-hover text-xs"
+                        >
+                          {t("common.delete")}
+                        </button>
                       </Td>
-                    ))}
-                    <Td compact>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeletingTarget(s);
-                        }}
-                        className="text-danger hover:text-danger-hover text-xs"
-                      >
-                        {t("common.delete")}
-                      </button>
-                    </Td>
-                  </Tr>
+                    </Tr>
+                    {expandedSongId === s.id && (
+                      <tr className="border-b border-border bg-surface-alt sm:hidden">
+                        <td colSpan={columns.length + 1} className="px-4 py-3">
+                          {expandableColumns.length > 0 && (
+                            <div className="grid grid-cols-3 gap-x-6 gap-y-3 text-sm mb-3">
+                              {expandableColumns.map((c) => {
+                                const val = c.render ? c.render(s, t) : String(s[c.key as keyof Song] ?? "");
+                                return (
+                                  <div key={c.key}>
+                                    <div className="text-xs text-muted">{t(c.labelKey)}</div>
+                                    <div>{val || "—"}</div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                          <div className="flex justify-end">
+                            <button
+                              onClick={() => setDeletingTarget(s)}
+                              className="p-2 btn-danger rounded"
+                            >
+                              <Trash size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
               </Tbody>
             </Table>
