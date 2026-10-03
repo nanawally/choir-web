@@ -18,13 +18,22 @@ export function extractSuggestions(songs: Song[]): Suggestions {
     const values = songs.map((s) => s[field]).filter((v): v is string => typeof v === "string" && v.length > 0);
     return [...new Set(values)].sort((a, b) => a.localeCompare(b));
   }
+  function uniqueTokens(field: keyof Song): string[] {
+    const tokens = new Set<string>();
+    songs.forEach((s) => {
+      const v = s[field];
+      if (typeof v !== "string" || !v) return;
+      v.split(",").forEach((t) => { const trimmed = t.trim(); if (trimmed) tokens.add(trimmed); });
+    });
+    return [...tokens].sort((a, b) => a.localeCompare(b));
+  }
   return {
-    composer: unique("composer"),
-    arranger: unique("arranger"),
-    lyricist: unique("lyricist"),
+    composer: uniqueTokens("composer"),
+    arranger: uniqueTokens("arranger"),
+    lyricist: uniqueTokens("lyricist"),
     delning: unique("delning"),
-    languages: unique("languages"),
-    instrument: unique("instrument"),
+    languages: uniqueTokens("languages"),
+    instrument: uniqueTokens("instrument"),
     collectionName: unique("collectionName"),
   };
 }
@@ -50,27 +59,27 @@ export function SongFormFields({
         />
       </Field>
       <Field label={t("songs.composer")}>
-        <input
-          value={form.composer ?? ""}
-          onChange={(e) => set("composer", e.target.value || null)}
-          className="w-full border border-border rounded px-2 py-1 text-sm"
-          list={suggestions ? "dl-composer" : undefined}
+        <MultiValueInput
+          value={form.composer}
+          onChange={(v) => set("composer", v)}
+          suggestions={suggestions?.composer ?? []}
+          datalistId="dl-composer"
         />
       </Field>
       <Field label={t("songs.arranger")}>
-        <input
-          value={form.arranger ?? ""}
-          onChange={(e) => set("arranger", e.target.value || null)}
-          className="w-full border border-border rounded px-2 py-1 text-sm"
-          list={suggestions ? "dl-arranger" : undefined}
+        <MultiValueInput
+          value={form.arranger}
+          onChange={(v) => set("arranger", v)}
+          suggestions={suggestions?.arranger ?? []}
+          datalistId="dl-arranger"
         />
       </Field>
       <Field label={t("songs.lyricist")}>
-        <input
-          value={form.lyricist ?? ""}
-          onChange={(e) => set("lyricist", e.target.value || null)}
-          className="w-full border border-border rounded px-2 py-1 text-sm"
-          list={suggestions ? "dl-lyricist" : undefined}
+        <MultiValueInput
+          value={form.lyricist}
+          onChange={(v) => set("lyricist", v)}
+          suggestions={suggestions?.lyricist ?? []}
+          datalistId="dl-lyricist"
         />
       </Field>
       <Field label={t("songs.delning")}>
@@ -82,11 +91,11 @@ export function SongFormFields({
         />
       </Field>
       <Field label={t("songs.languagesHint")}>
-        <input
-          value={form.languages ?? ""}
-          onChange={(e) => set("languages", e.target.value || null)}
-          className="w-full border border-border rounded px-2 py-1 text-sm"
-          list={suggestions ? "dl-languages" : undefined}
+        <MultiValueInput
+          value={form.languages}
+          onChange={(v) => set("languages", v)}
+          suggestions={suggestions?.languages ?? []}
+          datalistId="dl-languages"
         />
       </Field>
       <Field label={t("songs.lengthHint")}>
@@ -117,12 +126,11 @@ export function SongFormFields({
         </Field>
         {form.accompanied && (
           <Field label={t("songs.instrument")}>
-            <input
-              value={form.instrument ?? ""}
-              onChange={(e) => set("instrument", e.target.value || null)}
-              className="border border-border rounded px-2 py-1 text-sm"
-              placeholder="Piano"
-              list={suggestions ? "dl-instrument" : undefined}
+            <MultiValueInput
+              value={form.instrument}
+              onChange={(v) => set("instrument", v)}
+              suggestions={suggestions?.instrument ?? []}
+              datalistId="dl-instrument"
             />
           </Field>
         )}
@@ -185,16 +193,49 @@ export function SongFormFields({
 
       {suggestions && (
         <>
-          <datalist id="dl-composer">{suggestions.composer.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="dl-arranger">{suggestions.arranger.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="dl-lyricist">{suggestions.lyricist.map((v) => <option key={v} value={v} />)}</datalist>
           <datalist id="dl-delning">{suggestions.delning.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="dl-languages">{suggestions.languages.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="dl-instrument">{suggestions.instrument.map((v) => <option key={v} value={v} />)}</datalist>
           <datalist id="dl-collection">{suggestions.collectionName.map((v) => <option key={v} value={v} />)}</datalist>
         </>
       )}
     </div>
+  );
+}
+
+function MultiValueInput({
+  value,
+  onChange,
+  suggestions,
+  datalistId,
+}: {
+  value: string | null;
+  onChange: (v: string | null) => void;
+  suggestions: string[];
+  datalistId: string;
+}) {
+  const current = value ?? "";
+  const lastComma = current.lastIndexOf(",");
+  const prefix = lastComma >= 0 ? current.slice(0, lastComma + 1).trimEnd() + " " : "";
+  const token = (lastComma >= 0 ? current.slice(lastComma + 1) : current).trimStart();
+  const tokenLower = token.toLowerCase();
+  const selected = new Set(
+    current.split(",").slice(0, lastComma >= 0 ? -1 : 0).map((t) => t.trim().toLowerCase()),
+  );
+  const options = suggestions
+    .filter((s) => !selected.has(s.toLowerCase()) && (!tokenLower || s.toLowerCase().startsWith(tokenLower)))
+    .map((s) => `${prefix}${s}`);
+
+  return (
+    <>
+      <input
+        value={current}
+        onChange={(e) => onChange(e.target.value || null)}
+        className="w-full border border-border rounded px-2 py-1 text-sm"
+        list={datalistId}
+      />
+      <datalist id={datalistId}>
+        {options.map((v) => <option key={v} value={v} />)}
+      </datalist>
+    </>
   );
 }
 
