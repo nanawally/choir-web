@@ -366,6 +366,45 @@ const translations = {
     sv: "Inget ark konfigurerat.",
   },
 
+  // Songbooks
+  "nav.songbooks": { en: "Songbooks", sv: "Sångböcker" },
+  "home.manageSongbooks": { en: "Named song collections", sv: "Namngivna styckesamlingar" },
+  "songbooks.title": { en: "Songbooks", sv: "Sångböcker" },
+  "songbooks.newSongbook": { en: "+ New songbook", sv: "+ Ny sångbok" },
+  "songbooks.noSongbooks": { en: "No songbooks yet.", sv: "Inga sångböcker ännu." },
+  "songbooks.songbookName": { en: "Songbook name...", sv: "Sångboksnamn..." },
+  "songbooks.confirmDelete": {
+    en: "Delete {name}?",
+    sv: "Ta bort {name}?",
+  },
+  "songbooks.uploadImage": { en: "Upload image", sv: "Ladda upp bild" },
+  "songbooks.confirmDeleteImage": {
+    en: "Delete the songbook image?",
+    sv: "Ta bort sångboksbilden?",
+  },
+  "songbooks.invalidImageType": {
+    en: "Please select an image file (JPEG, PNG, or WebP).",
+    sv: "Välj en bildfil (JPEG, PNG eller WebP).",
+  },
+  "songbooks.nameForCopy": { en: "Name for the copy:", sv: "Namn för kopian:" },
+  "songbooks.backToSongbooks": { en: "Back to songbooks", sv: "Tillbaka till sångböcker" },
+  "songbooks.editSongbook": { en: "Edit Songbook", sv: "Redigera sångbok" },
+  "songbooks.songCatalog": { en: "Song Catalog", sv: "Styckebibliotek" },
+  "songbooks.songs": { en: "Songs", sv: "Stycken" },
+  "songbooks.songsEmpty": {
+    en: "Click a song on the left to add it.",
+    sv: "Klicka på ett stycke till vänster för att lägga till.",
+  },
+  "songbooks.noSongs": { en: "No songs in this songbook yet.", sv: "Inga stycken i denna sångbok ännu." },
+  "songbooks.pinned": { en: "Pinned", sv: "Fäst" },
+  "songbooks.confirmRemoveSong": {
+    en: "Remove \"{name}\" from this songbook?",
+    sv: "Ta bort \"{name}\" från denna sångbok?",
+  },
+  "songbooks.addSong": { en: "+ Add song", sv: "+ Lägg till stycke" },
+  "songbooks.removeFromSongbook": { en: "Remove from songbook", sv: "Ta bort från sångbok" },
+  "songbooks.deleteFromCatalog": { en: "Delete from catalog", sv: "Ta bort från biblioteket" },
+
   // Settings
   "settings.title": { en: "Settings", sv: "Inställningar" },
   "settings.language": { en: "Language", sv: "Språk" },

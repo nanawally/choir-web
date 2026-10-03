@@ -11,6 +11,7 @@ import type { TranslationKey } from "../lib/translations";
 const NAV_ITEMS: { href: string; labelKey: TranslationKey }[] = [
   { href: "/concerts", labelKey: "nav.concerts" },
   { href: "/songs", labelKey: "nav.songs" },
+  { href: "/songbooks", labelKey: "nav.songbooks" },
   { href: "/chorists", labelKey: "nav.chorists" },
   { href: "/voice-groups", labelKey: "nav.voiceGroups" },
   { href: "/base-formations", labelKey: "nav.baseFormations" },

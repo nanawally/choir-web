@@ -38,6 +38,13 @@ export default function Home() {
             <p className="text-sm text-muted">{t("home.manageSongs")}</p>
           </Link>
           <Link
+            href="/songbooks"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+          >
+            <h2 className="text-lg font-semibold">{t("nav.songbooks")}</h2>
+            <p className="text-sm text-muted">{t("home.manageSongbooks")}</p>
+          </Link>
+          <Link
             href="/chorists"
             className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
           >
