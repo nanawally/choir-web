@@ -26,8 +26,11 @@ import {
   reorderConcertSongs,
   listSongbooks,
   listSongbookSongs,
+  uploadConcertImage,
+  getSongbookImageUrl,
   type Songbook,
 } from "../../lib/api";
+import { getToken } from "../../lib/apiClient";
 import { useTranslation } from "../../lib/LanguageContext";
 
 type CatalogSong = { id: string; name: string; composer: string | null };
@@ -101,6 +104,7 @@ export default function EditSetlistModal({
   const [catalogLimit, setCatalogLimit] = useState(50);
   const [songbooks, setSongbooks] = useState<Songbook[]>([]);
   const [addingFromSongbook, setAddingFromSongbook] = useState(false);
+  const [pendingImageSongbook, setPendingImageSongbook] = useState<Songbook | null>(null);
 
   useEffect(() => { setCatalogLimit(50); }, [search]);
 
@@ -155,6 +159,22 @@ export default function EditSetlistModal({
     setSongs(updated);
     onSongsChange(updated);
     setAddingFromSongbook(false);
+    const sb = songbooks.find((s) => s.id === songbookId);
+    if (sb?.imageUrl) setPendingImageSongbook(sb);
+  }
+
+  async function handleUseSongbookImage() {
+    if (!pendingImageSongbook) return;
+    const token = getToken();
+    const res = await fetch(getSongbookImageUrl(pendingImageSongbook.id), {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.ok) {
+      const blob = await res.blob();
+      const file = new File([blob], "cover", { type: blob.type });
+      await uploadConcertImage(concertId, file);
+    }
+    setPendingImageSongbook(null);
   }
 
   async function handleRemove(concertSongId: string) {
@@ -208,6 +228,22 @@ export default function EditSetlistModal({
             {t("common.close")}
           </button>
         </div>
+
+        {pendingImageSongbook && (
+          <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-surface-alt border-b border-border text-sm shrink-0">
+            <span className="text-muted min-w-0 truncate">
+              {t("concerts.useSongbookImage")} <strong className="text-foreground">"{pendingImageSongbook.name}"</strong>?
+            </span>
+            <div className="flex gap-2 shrink-0">
+              <button onClick={handleUseSongbookImage} className="px-2.5 py-1 btn-primary text-xs">
+                {t("common.yes")}
+              </button>
+              <button onClick={() => setPendingImageSongbook(null)} className="px-2.5 py-1 border border-border rounded text-xs hover:bg-hover-bg">
+                {t("common.no")}
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col md:flex-row flex-1 min-h-0">
           {/* Left: Song catalog */}

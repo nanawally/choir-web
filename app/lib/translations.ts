@@ -186,6 +186,7 @@ const translations = {
   },
   "concerts.editSetlist": { en: "Edit Setlist", sv: "Redigera konsertrepertoar" },
   "concerts.addFromSongbook": { en: "Add from songbook…", sv: "Lägg till från sångbok…" },
+  "concerts.useSongbookImage": { en: "Use cover image from", sv: "Använd omslagsbild från" },
   "concerts.songCatalog": { en: "Song Catalog", sv: "Styckebibliotek" },
   "concerts.setlist": { en: "Setlist", sv: "Konsertrepertoar" },
   "concerts.setlistEmpty": {

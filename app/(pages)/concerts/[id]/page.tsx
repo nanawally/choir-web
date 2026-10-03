@@ -222,6 +222,7 @@ export default function ConcertEditor({
           concertId={id}
           placements={editor.placements}
           onLoad={editor.handleLoad}
+          onSelectFormation={editor.handleSelectFormation}
           onFormationNameChange={editor.setFormationName}
           songFormationIds={editor.songFormationIds}
           activeConcertSongId={editor.activeConcertSongId}

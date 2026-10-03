@@ -9,7 +9,6 @@ import {
   renameFormation,
   copyFormationToConcert,
   copyBaseIntoConcert,
-  loadFormation,
   setSongFormations,
   updateRowSizes,
 } from "../../lib/api";
@@ -28,6 +27,7 @@ type Props = {
     hiddenChoristIds: string[],
     rowSizes: number[],
   ) => void;
+  onSelectFormation: (id: string) => Promise<void>;
   onFormationNameChange: (name: string | null) => void;
   songFormationIds: Set<string>;
   activeConcertSongId: string | null;
@@ -47,6 +47,7 @@ export default function FormationBar({
   concertId,
   placements,
   onLoad,
+  onSelectFormation,
   onFormationNameChange,
   songFormationIds,
   activeConcertSongId,
@@ -127,8 +128,7 @@ export default function FormationBar({
     const copy = await duplicateFormation(activeFormationId);
     if (copy) {
       onFormationsChange([...formations, copy]);
-      onActiveFormationIdChange(copy.id);
-      onFormationNameChange(copy.name);
+      await onSelectFormation(copy.id);
     }
   }
 
@@ -136,23 +136,7 @@ export default function FormationBar({
     const result = await copyBaseIntoConcert(baseFormationId, concertId);
     if (result) {
       onFormationsChange([...formations, result]);
-      onActiveFormationIdChange(result.id);
-      onFormationNameChange(result.name);
-      // Load the copied formation's placements onto the grid
-      const detail = await loadFormation(result.id);
-      if (detail) {
-        onLoad(
-          detail.placements.map(
-            (p: { choristId: string; gridX: number; gridY: number }) => ({
-              choristId: p.choristId,
-              gridX: p.gridX,
-              gridY: p.gridY,
-            }),
-          ),
-          detail.hiddenChoristIds || [],
-          JSON.parse(detail.rowSizes || "[]"),
-        );
-      }
+      await onSelectFormation(result.id);
       if (activeConcertSongId) {
         const updatedIds = [...songFormationIds, result.id];
         await setSongFormations(activeConcertSongId, updatedIds);
