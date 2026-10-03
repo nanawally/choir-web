@@ -22,45 +22,45 @@ export default function Home() {
       <NavSidebar />
       <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-24">
         <h1 className="text-4xl font-bold">melisma</h1>
-        <div className="flex flex-col mt-8 md:flex-row gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 w-full max-w-4xl">
           <Link
             href="/concerts"
-            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
             <h2 className="text-lg font-semibold">{t("nav.concerts")}</h2>
             <p className="text-sm text-muted">{t("home.manageConcerts")}</p>
           </Link>
           <Link
             href="/songs"
-            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
             <h2 className="text-lg font-semibold">{t("nav.songs")}</h2>
             <p className="text-sm text-muted">{t("home.manageSongs")}</p>
           </Link>
           <Link
             href="/songbooks"
-            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
             <h2 className="text-lg font-semibold">{t("nav.songbooks")}</h2>
             <p className="text-sm text-muted">{t("home.manageSongbooks")}</p>
           </Link>
           <Link
             href="/chorists"
-            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
             <h2 className="text-lg font-semibold">{t("nav.chorists")}</h2>
             <p className="text-sm text-muted">{t("home.manageChorists")}</p>
           </Link>
           <Link
             href="/voice-groups"
-            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
             <h2 className="text-lg font-semibold">{t("nav.voiceGroups")}</h2>
             <p className="text-sm text-muted">{t("home.manageVoiceGroups")}</p>
           </Link>
           <Link
             href="/base-formations"
-            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
             <h2 className="text-lg font-semibold">{t("nav.baseFormations")}</h2>
             <p className="text-sm text-muted">
@@ -69,14 +69,14 @@ export default function Home() {
           </Link>
           <Link
             href="/krysslistan"
-            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
             <h2 className="text-lg font-semibold">{t("nav.krysslistan")}</h2>
             <p className="text-sm text-muted">{t("home.attendance")}</p>
           </Link>
           <Link
             href="/term-plan"
-            className="border border-border rounded-lg p-6 hover:bg-hover-bg flex-1 text-center"
+            className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
             <h2 className="text-lg font-semibold">{t("nav.termPlan")}</h2>
             <p className="text-sm text-muted">{t("home.schedule")}</p>
