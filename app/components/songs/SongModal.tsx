@@ -140,7 +140,7 @@ export default function SongModal({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 border-b border-border mb-4 overflow-x-auto">
+        <div className="grid grid-cols-4 border-b border-border mb-4">
           {(["info", "sheet", "lyrics", "listening"] as const).map((t2) => {
             const label =
               t2 === "info" ? t("songs.tabInfo") :
@@ -151,7 +151,7 @@ export default function SongModal({
               <button
                 key={t2}
                 onClick={() => setTab(t2)}
-                className={`pb-2 text-sm font-medium border-b-2 -mb-px ${
+                className={`pb-2 text-sm font-medium border-b-2 -mb-px text-center ${
                   tab === t2
                     ? "border-primary text-foreground"
                     : "border-transparent text-muted hover:text-foreground"
