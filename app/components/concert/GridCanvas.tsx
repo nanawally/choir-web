@@ -8,6 +8,9 @@ import { shortName } from "../../lib/choristName";
 
 const CELL_SIZE = 50;
 const ARC_PADDING = 40; // pixels of padding around the outermost arc
+// Fixed virtual canvas size for grid mode — content scales proportionally with screen
+const GRID_VIRTUAL_WIDTH = 1400;
+const GRID_VIRTUAL_HEIGHT = 800;
 
 type Chorist = { id: string; firstName: string; lastName: string };
 type Placement = { choristId: string; gridX: number; gridY: number };
@@ -94,6 +97,28 @@ export default function GridCanvas({
   canRedo,
 }: Props) {
   const { t } = useTranslation();
+
+  // Grid mode uses a fixed virtual reference size so content scales with the screen.
+  // Arc mode keeps the passed-in virtualWidth/Height (responsive to window size).
+  const isGridMode = rowSizes.length === 0;
+  const effectiveVW = isGridMode ? GRID_VIRTUAL_WIDTH : virtualWidth;
+  const effectiveVH = isGridMode ? GRID_VIRTUAL_HEIGHT : virtualHeight;
+  const effectiveScale = isGridMode ? canvasWidth / GRID_VIRTUAL_WIDTH : scale;
+
+  // Center the formation on the canvas by computing the offset to the bounding box mid-point.
+  let gridLayerX = 0;
+  let gridLayerY = 0;
+  if (isGridMode && placements.length > 0) {
+    const minGX = Math.min(...placements.map((p) => p.gridX));
+    const maxGX = Math.max(...placements.map((p) => p.gridX));
+    const minGY = Math.min(...placements.map((p) => p.gridY));
+    const maxGY = Math.max(...placements.map((p) => p.gridY));
+    const contentCenterX = ((minGX + maxGX) / 2 + 0.5) * CELL_SIZE;
+    const contentCenterY = ((minGY + maxGY) / 2 + 0.5) * CELL_SIZE;
+    gridLayerX = canvasWidth / 2 - contentCenterX * effectiveScale;
+    gridLayerY = canvasHeight / 2 - contentCenterY * effectiveScale;
+  }
+
   const stageRef = useRef<Konva.Stage>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
     null,
@@ -116,8 +141,8 @@ export default function GridCanvas({
   const animCancelRef = useRef<(() => void) | null>(null);
 
   // Center of the virtual coordinate space (for arc rendering)
-  const centerX = virtualWidth / 2;
-  const centerY = virtualHeight - 20;
+  const centerX = effectiveVW / 2;
+  const centerY = effectiveVH - 20;
 
   // Compute row spacing so the outermost arc fills the available space
   const numRows = rowSizes.length || 1;
@@ -213,9 +238,12 @@ export default function GridCanvas({
 
   useEffect(() => () => { animCancelRef.current?.(); }, []);
 
-  // Convert physical pointer position to virtual coordinates
+  // Convert physical pointer position to virtual coordinates (accounts for grid layer offset)
   function toVirtual(pos: { x: number; y: number }) {
-    return { x: pos.x / scale, y: pos.y / scale };
+    return {
+      x: (pos.x - gridLayerX) / effectiveScale,
+      y: (pos.y - gridLayerY) / effectiveScale,
+    };
   }
 
   function snapToArc(
@@ -323,25 +351,21 @@ export default function GridCanvas({
       }
     });
   } else {
-    // Rectangular grid — drawn to virtual dimensions
-    for (let x = 0; x <= virtualWidth; x += CELL_SIZE) {
+    // Rectangular grid — extend to cover the full canvas regardless of the centering offset.
+    // The layer has x={gridLayerX} scaleX={effectiveScale}, so the canvas edges in virtual
+    // coordinates are: left = -gridLayerX/effectiveScale, right = (canvasWidth-gridLayerX)/effectiveScale
+    const leftV = Math.floor(-gridLayerX / effectiveScale / CELL_SIZE) * CELL_SIZE;
+    const rightV = Math.ceil((canvasWidth - gridLayerX) / effectiveScale / CELL_SIZE) * CELL_SIZE;
+    const topV = Math.floor(-gridLayerY / effectiveScale / CELL_SIZE) * CELL_SIZE;
+    const bottomV = Math.ceil((canvasHeight - gridLayerY) / effectiveScale / CELL_SIZE) * CELL_SIZE;
+    for (let x = leftV; x <= rightV; x += CELL_SIZE) {
       gridLines.push(
-        <Line
-          key={`v-${x}`}
-          points={[x, 0, x, virtualHeight]}
-          stroke="#ddd"
-          strokeWidth={1}
-        />,
+        <Line key={`v-${x}`} points={[x, topV, x, bottomV]} stroke="#ddd" strokeWidth={1} />,
       );
     }
-    for (let y = 0; y <= virtualHeight; y += CELL_SIZE) {
+    for (let y = topV; y <= bottomV; y += CELL_SIZE) {
       gridLines.push(
-        <Line
-          key={`h-${y}`}
-          points={[0, y, virtualWidth, y]}
-          stroke="#ddd"
-          strokeWidth={1}
-        />,
+        <Line key={`h-${y}`} points={[leftV, y, rightV, y]} stroke="#ddd" strokeWidth={1} />,
       );
     }
   }
@@ -428,18 +452,19 @@ export default function GridCanvas({
           }
         }}
       >
-        <Layer listening={false} scaleX={scale} scaleY={scale}>
-          {/* White background so exported PNGs aren't transparent (invisible in dark mode) */}
+        <Layer listening={false} scaleX={effectiveScale} scaleY={effectiveScale} x={gridLayerX} y={gridLayerY}>
+          {/* White background so exported PNGs aren't transparent (invisible in dark mode).
+              In grid mode, sized to cover the full canvas regardless of the centering offset. */}
           <Rect
-            x={0}
-            y={0}
-            width={virtualWidth}
-            height={virtualHeight}
+            x={isGridMode ? -gridLayerX / effectiveScale : 0}
+            y={isGridMode ? -gridLayerY / effectiveScale : 0}
+            width={isGridMode ? canvasWidth / effectiveScale : effectiveVW}
+            height={isGridMode ? canvasHeight / effectiveScale : effectiveVH}
             fill="white"
           />
           {gridLines}
         </Layer>
-        <Layer scaleX={scale} scaleY={scale}>
+        <Layer scaleX={effectiveScale} scaleY={effectiveScale} x={gridLayerX} y={gridLayerY}>
           {placements
             .filter((p) => !hiddenIds.has(p.choristId))
             .map((p) => {
@@ -609,7 +634,7 @@ export default function GridCanvas({
               );
             })}
         </Layer>
-        <Layer listening={false} scaleX={scale} scaleY={scale}>
+        <Layer listening={false} scaleX={effectiveScale} scaleY={effectiveScale} x={gridLayerX} y={gridLayerY}>
           {marquee && (
             <Rect
               x={Math.min(marquee.startX, marquee.x)}
