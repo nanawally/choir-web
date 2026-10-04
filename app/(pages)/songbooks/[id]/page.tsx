@@ -1,6 +1,14 @@
 "use client";
 
-import { Fragment, use, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  use,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import {
   listSongbooks,
@@ -25,13 +33,34 @@ import {
 import NavSidebar from "../../../components/NavSidebar";
 import SongModal from "../../../components/songs/SongModal";
 import EditSongbookModal from "../../../components/songbooks/EditSongbookModal";
-import { ALL_COLUMNS, FILTER_COLUMNS, type ActiveFilter, type YearRange } from "../../../hooks/useSongs";
+import {
+  ALL_COLUMNS,
+  FILTER_COLUMNS,
+  type ActiveFilter,
+  type YearRange,
+} from "../../../hooks/useSongs";
 import { extractSuggestions } from "../../../components/songs/SongFormFields";
 import { useTableSort } from "../../../lib/useTableSort";
 import { useTranslation } from "../../../lib/LanguageContext";
-import { ArrowLeft, BookOpen, ChevronDown, ChevronRight, Columns3, Download, EllipsisVertical, Trash, X } from "lucide-react";
+import {
+  ArrowLeft,
+  FolderOpen,
+  ChevronDown,
+  ChevronRight,
+  Columns3,
+  Download,
+  EllipsisVertical,
+  Trash,
+  X,
+} from "lucide-react";
 
-const DEFAULT_VISIBLE = ["name", "composer", "arranger", "year", "collectionName"];
+const DEFAULT_VISIBLE = [
+  "name",
+  "composer",
+  "arranger",
+  "year",
+  "collectionName",
+];
 const STORAGE_KEY = "songbook-songs-visible-columns";
 
 function formatDate(iso: string): string {
@@ -46,7 +75,12 @@ type DeleteDialogProps = {
   onCancel: () => void;
 };
 
-function DeleteSongDialog({ songName, onRemove, onDelete, onCancel }: DeleteDialogProps) {
+function DeleteSongDialog({
+  songName,
+  onRemove,
+  onDelete,
+  onCancel,
+}: DeleteDialogProps) {
   const { t } = useTranslation();
   return (
     <div
@@ -96,7 +130,8 @@ export default function SongbookDetailPage({
   const [catalogSongs, setCatalogSongs] = useState<Song[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [visibleColumns, setVisibleColumns] = useState<string[]>(DEFAULT_VISIBLE);
+  const [visibleColumns, setVisibleColumns] =
+    useState<string[]>(DEFAULT_VISIBLE);
   const didRestoreColumns = useRef(false);
   useEffect(() => {
     if (didRestoreColumns.current) return;
@@ -109,19 +144,28 @@ export default function SongbookDetailPage({
           setVisibleColumns(parsed);
         }
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const [columnPickerOpen, setColumnPickerOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<ActiveFilter[]>([]);
-  const [yearRange, setYearRange] = useState<YearRange>({ from: null, to: null });
+  const [yearRange, setYearRange] = useState<YearRange>({
+    from: null,
+    to: null,
+  });
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [filterExpandedCol, setFilterExpandedCol] = useState<string | null>(null);
+  const [filterExpandedCol, setFilterExpandedCol] = useState<string | null>(
+    null,
+  );
   const filterRef = useRef<HTMLDivElement>(null);
   const [editingModalOpen, setEditingModalOpen] = useState(false);
   const [editingSong, setEditingSong] = useState<SongbookSong | null>(null);
-  const [deletingTarget, setDeletingTarget] = useState<SongbookSong | null>(null);
+  const [deletingTarget, setDeletingTarget] = useState<SongbookSong | null>(
+    null,
+  );
   const [expandedSongId, setExpandedSongId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -161,12 +205,19 @@ export default function SongbookDetailPage({
           const v = s[fc.key as keyof Song];
           if (v == null || v === "") continue;
           if (fc.key === "languages") {
-            String(v).split(",").forEach((l) => { const trimmed = l.trim(); if (trimmed) values.add(trimmed); });
+            String(v)
+              .split(",")
+              .forEach((l) => {
+                const trimmed = l.trim();
+                if (trimmed) values.add(trimmed);
+              });
           } else {
             values.add(String(v));
           }
         }
-        opts[fc.key] = [...values].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+        opts[fc.key] = [...values].sort((a, b) =>
+          a.localeCompare(b, undefined, { numeric: true }),
+        );
       }
     }
     return opts;
@@ -176,16 +227,23 @@ export default function SongbookDetailPage({
     return filters.some((f) => f.column === column && f.value === value);
   }
 
-  function toggleFilter(fc: typeof FILTER_COLUMNS[number], value: string) {
+  function toggleFilter(fc: (typeof FILTER_COLUMNS)[number], value: string) {
     if (isFilterActive(fc.key, value)) {
-      setFilters(filters.filter((f) => !(f.column === fc.key && f.value === value)));
+      setFilters(
+        filters.filter((f) => !(f.column === fc.key && f.value === value)),
+      );
     } else {
-      setFilters([...filters, { column: fc.key, columnLabel: t(fc.labelKey), value }]);
+      setFilters([
+        ...filters,
+        { column: fc.key, columnLabel: t(fc.labelKey), value },
+      ]);
     }
   }
 
   function removeFilter(column: string, value: string) {
-    setFilters(filters.filter((f) => !(f.column === column && f.value === value)));
+    setFilters(
+      filters.filter((f) => !(f.column === column && f.value === value)),
+    );
   }
 
   function clearFilters() {
@@ -193,54 +251,63 @@ export default function SongbookDetailPage({
     setYearRange({ from: null, to: null });
   }
 
-  const matchesFilters = useCallback((song: SongbookSong): boolean => {
-    if (yearRange.from != null || yearRange.to != null) {
-      const y = song.year;
-      if (y == null) return false;
-      if (yearRange.from != null && y < yearRange.from) return false;
-      if (yearRange.to != null && y > yearRange.to) return false;
-    }
-    if (filters.length === 0) return true;
-    const byColumn = new Map<string, string[]>();
-    for (const f of filters) {
-      const vals = byColumn.get(f.column) || [];
-      vals.push(f.value);
-      byColumn.set(f.column, vals);
-    }
-    for (const [col, vals] of byColumn) {
-      const fc = FILTER_COLUMNS.find((c) => c.key === col);
-      if (!fc) return false;
-      if (fc.type === "bool") {
-        const songVal = song[fc.key as keyof Song];
-        const display = songVal ? "Yes" : "No";
-        if (!vals.includes(display)) return false;
-      } else if (fc.key === "languages") {
-        const songLangs = String(song.languages ?? "").split(",").map((l) => l.trim()).filter(Boolean);
-        if (!vals.some((v) => songLangs.includes(v))) return false;
-      } else {
-        const songVal = String(song[fc.key as keyof Song] ?? "");
-        if (!vals.includes(songVal)) return false;
+  const matchesFilters = useCallback(
+    (song: SongbookSong): boolean => {
+      if (yearRange.from != null || yearRange.to != null) {
+        const y = song.year;
+        if (y == null) return false;
+        if (yearRange.from != null && y < yearRange.from) return false;
+        if (yearRange.to != null && y > yearRange.to) return false;
       }
-    }
-    return true;
-  }, [filters, yearRange]);
+      if (filters.length === 0) return true;
+      const byColumn = new Map<string, string[]>();
+      for (const f of filters) {
+        const vals = byColumn.get(f.column) || [];
+        vals.push(f.value);
+        byColumn.set(f.column, vals);
+      }
+      for (const [col, vals] of byColumn) {
+        const fc = FILTER_COLUMNS.find((c) => c.key === col);
+        if (!fc) return false;
+        if (fc.type === "bool") {
+          const songVal = song[fc.key as keyof Song];
+          const display = songVal ? "Yes" : "No";
+          if (!vals.includes(display)) return false;
+        } else if (fc.key === "languages") {
+          const songLangs = String(song.languages ?? "")
+            .split(",")
+            .map((l) => l.trim())
+            .filter(Boolean);
+          if (!vals.some((v) => songLangs.includes(v))) return false;
+        } else {
+          const songVal = String(song[fc.key as keyof Song] ?? "");
+          if (!vals.includes(songVal)) return false;
+        }
+      }
+      return true;
+    },
+    [filters, yearRange],
+  );
 
   const searched = useMemo(() => {
     const q = search.toLowerCase();
-    return sbSongs
-      .filter(matchesFilters)
-      .filter((s) => {
-        if (!q) return true;
-        return (
-          s.name.toLowerCase().includes(q) ||
-          (s.composer ?? "").toLowerCase().includes(q) ||
-          (s.arranger ?? "").toLowerCase().includes(q) ||
-          (s.collectionName ?? "").toLowerCase().includes(q)
-        );
-      });
+    return sbSongs.filter(matchesFilters).filter((s) => {
+      if (!q) return true;
+      return (
+        s.name.toLowerCase().includes(q) ||
+        (s.composer ?? "").toLowerCase().includes(q) ||
+        (s.arranger ?? "").toLowerCase().includes(q) ||
+        (s.collectionName ?? "").toLowerCase().includes(q)
+      );
+    });
   }, [sbSongs, search, matchesFilters]);
 
-  const { sorted: filtered, sortKey, sortDir, cycleSort } = useTableSort(searched, defaultSort);
+  const {
+    sorted: filtered,
+    sortKey,
+    sortDir,
+    cycleSort,
+  } = useTableSort(searched, defaultSort);
 
   const columns = ALL_COLUMNS.filter((c) => visibleColumns.includes(c.key));
 
@@ -303,7 +370,9 @@ export default function SongbookDetailPage({
   }
 
   const suggestions = extractSuggestions(catalogSongs);
-  const expandableColumns = columns.filter((c) => c.key !== "name" && c.key !== "composer");
+  const expandableColumns = columns.filter(
+    (c) => c.key !== "name" && c.key !== "composer",
+  );
 
   return (
     <div className="flex min-h-screen">
@@ -321,7 +390,9 @@ export default function SongbookDetailPage({
           <div className="mb-6 text-center">
             <h1 className="text-4xl font-bold">{songbook?.name ?? "…"}</h1>
             {songbook?.date && (
-              <p className="text-sm text-muted mt-1">{formatDate(songbook.date)}</p>
+              <p className="text-sm text-muted mt-1">
+                {formatDate(songbook.date)}
+              </p>
             )}
           </div>
 
@@ -335,7 +406,10 @@ export default function SongbookDetailPage({
             />
             <div className="relative" ref={filterRef}>
               <button
-                onClick={() => { setFilterMenuOpen(!filterMenuOpen); setFilterExpandedCol(null); }}
+                onClick={() => {
+                  setFilterMenuOpen(!filterMenuOpen);
+                  setFilterExpandedCol(null);
+                }}
                 className="px-2 py-1.5 border border-border rounded text-sm hover:bg-hover-bg"
                 title={t("common.filter")}
               >
@@ -345,26 +419,42 @@ export default function SongbookDetailPage({
                 <div className="absolute left-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-10 w-56">
                   {FILTER_COLUMNS.map((fc) => {
                     const options = filterOptions[fc.key] || [];
-                    if (fc.type !== "range" && options.length === 0) return null;
+                    if (fc.type !== "range" && options.length === 0)
+                      return null;
                     return (
                       <div key={fc.key}>
                         <button
-                          onClick={() => setFilterExpandedCol(filterExpandedCol === fc.key ? null : fc.key)}
+                          onClick={() =>
+                            setFilterExpandedCol(
+                              filterExpandedCol === fc.key ? null : fc.key,
+                            )
+                          }
                           className="w-full text-left px-3 py-2 text-sm hover:bg-hover-bg flex items-center justify-between"
                         >
                           <span>{t(fc.labelKey)}</span>
                           <span className="text-subtle text-xs">
-                            {filterExpandedCol === fc.key ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                            {filterExpandedCol === fc.key ? (
+                              <ChevronDown size={12} />
+                            ) : (
+                              <ChevronRight size={12} />
+                            )}
                           </span>
                         </button>
-                        {filterExpandedCol === fc.key && (
-                          fc.type === "range" ? (
+                        {filterExpandedCol === fc.key &&
+                          (fc.type === "range" ? (
                             <div className="px-3 pb-2 flex items-center gap-2">
                               <input
                                 type="number"
                                 placeholder={t("songs.yearFrom")}
                                 value={yearRange.from ?? ""}
-                                onChange={(e) => setYearRange((r) => ({ ...r, from: e.target.value ? parseInt(e.target.value) : null }))}
+                                onChange={(e) =>
+                                  setYearRange((r) => ({
+                                    ...r,
+                                    from: e.target.value
+                                      ? parseInt(e.target.value)
+                                      : null,
+                                  }))
+                                }
                                 className="w-20 border border-border rounded px-2 py-1 text-sm"
                               />
                               <span className="text-subtle text-sm">–</span>
@@ -372,25 +462,38 @@ export default function SongbookDetailPage({
                                 type="number"
                                 placeholder={t("songs.yearTo")}
                                 value={yearRange.to ?? ""}
-                                onChange={(e) => setYearRange((r) => ({ ...r, to: e.target.value ? parseInt(e.target.value) : null }))}
+                                onChange={(e) =>
+                                  setYearRange((r) => ({
+                                    ...r,
+                                    to: e.target.value
+                                      ? parseInt(e.target.value)
+                                      : null,
+                                  }))
+                                }
                                 className="w-20 border border-border rounded px-2 py-1 text-sm"
                               />
                             </div>
                           ) : (
                             <div className="pl-3 pb-1 max-h-48 overflow-y-auto">
                               {options.map((val) => (
-                                <label key={val} className="flex items-center gap-2 px-2 py-1 text-sm hover:bg-hover-bg cursor-pointer">
+                                <label
+                                  key={val}
+                                  className="flex items-center gap-2 px-2 py-1 text-sm hover:bg-hover-bg cursor-pointer"
+                                >
                                   <input
                                     type="checkbox"
                                     checked={isFilterActive(fc.key, val)}
                                     onChange={() => toggleFilter(fc, val)}
                                   />
-                                  {fc.type === "bool" ? (val === "Yes" ? t("common.yes") : t("common.no")) : val}
+                                  {fc.type === "bool"
+                                    ? val === "Yes"
+                                      ? t("common.yes")
+                                      : t("common.no")
+                                    : val}
                                 </label>
                               ))}
                             </div>
-                          )
-                        )}
+                          ))}
                       </div>
                     );
                   })}
@@ -441,25 +544,40 @@ export default function SongbookDetailPage({
           </div>
 
           {/* Filter tags */}
-          {(filters.length > 0 || yearRange.from != null || yearRange.to != null) && (
+          {(filters.length > 0 ||
+            yearRange.from != null ||
+            yearRange.to != null) && (
             <div className="flex items-center gap-2 mb-3 flex-wrap">
               {yearRange.from != null || yearRange.to != null ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-light-text rounded text-xs">
-                  {t("songs.year")}: {yearRange.from ?? "…"}–{yearRange.to ?? "…"}
-                  <button onClick={() => setYearRange({ from: null, to: null })} className="hover:text-link">
+                  {t("songs.year")}: {yearRange.from ?? "…"}–
+                  {yearRange.to ?? "…"}
+                  <button
+                    onClick={() => setYearRange({ from: null, to: null })}
+                    className="hover:text-link"
+                  >
                     <X size={12} />
                   </button>
                 </span>
               ) : null}
               {filters.map((f) => (
-                <span key={`${f.column}-${f.value}`} className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-light-text rounded text-xs">
+                <span
+                  key={`${f.column}-${f.value}`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-light text-primary-light-text rounded text-xs"
+                >
                   {f.columnLabel}: {f.value}
-                  <button onClick={() => removeFilter(f.column, f.value)} className="hover:text-link">
+                  <button
+                    onClick={() => removeFilter(f.column, f.value)}
+                    className="hover:text-link"
+                  >
                     <X size={12} />
                   </button>
                 </span>
               ))}
-              <button onClick={clearFilters} className="text-xs text-muted hover:text-foreground">
+              <button
+                onClick={clearFilters}
+                className="text-xs text-muted hover:text-foreground"
+              >
                 {t("common.clearAll")}
               </button>
             </div>
@@ -473,7 +591,11 @@ export default function SongbookDetailPage({
                   {columns.map((c) => (
                     <Th
                       key={c.key}
-                      className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
+                      className={
+                        c.key !== "name" && c.key !== "composer"
+                          ? "hidden sm:table-cell"
+                          : ""
+                      }
                       style={
                         c.key === "name"
                           ? { minWidth: "250px" }
@@ -497,44 +619,67 @@ export default function SongbookDetailPage({
                         if (window.innerWidth >= 640) {
                           setEditingSong(s);
                         } else {
-                          setExpandedSongId(expandedSongId === s.id ? null : s.id);
+                          setExpandedSongId(
+                            expandedSongId === s.id ? null : s.id,
+                          );
                         }
                       }}
                     >
                       {columns.map((c) => (
                         <Td
                           key={c.key}
-                          className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
+                          className={
+                            c.key !== "name" && c.key !== "composer"
+                              ? "hidden sm:table-cell"
+                              : ""
+                          }
                         >
                           {c.key === "name" ? (
                             <>
                               <div className="flex items-center justify-between gap-2 sm:hidden">
                                 <div className="flex items-center gap-1 min-w-0">
-                                  {expandedSongId === s.id
-                                    ? <ChevronDown size={14} className="shrink-0 text-muted" />
-                                    : <ChevronRight size={14} className="shrink-0 text-muted" />}
+                                  {expandedSongId === s.id ? (
+                                    <ChevronDown
+                                      size={14}
+                                      className="shrink-0 text-muted"
+                                    />
+                                  ) : (
+                                    <ChevronRight
+                                      size={14}
+                                      className="shrink-0 text-muted"
+                                    />
+                                  )}
                                   <span className="truncate">{s.name}</span>
                                 </div>
                                 <button
-                                  onClick={(e) => { e.stopPropagation(); setEditingSong(s); }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingSong(s);
+                                  }}
                                   className="shrink-0 text-muted hover:text-foreground"
                                   title={t("songs.openSong")}
                                 >
-                                  <BookOpen size={16} />
+                                  <FolderOpen size={16} />
                                 </button>
                               </div>
                               <span className="hidden sm:inline">{s.name}</span>
                             </>
+                          ) : c.render ? (
+                            c.render(s, t)
                           ) : (
-                            c.render
-                              ? c.render(s, t)
-                              : ((s[c.key as keyof Song] as string | number | null) ?? "")
+                            ((s[c.key as keyof Song] as
+                              | string
+                              | number
+                              | null) ?? "")
                           )}
                         </Td>
                       ))}
                       <Td compact className="hidden sm:table-cell">
                         <button
-                          onClick={(e) => { e.stopPropagation(); setDeletingTarget(s); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingTarget(s);
+                          }}
                           className="text-danger hover:text-danger-hover text-xs"
                         >
                           {t("common.delete")}
@@ -547,10 +692,14 @@ export default function SongbookDetailPage({
                           {expandableColumns.length > 0 && (
                             <div className="grid grid-cols-3 gap-x-6 gap-y-3 text-sm mb-3">
                               {expandableColumns.map((c) => {
-                                const val = c.render ? c.render(s, t) : String(s[c.key as keyof Song] ?? "");
+                                const val = c.render
+                                  ? c.render(s, t)
+                                  : String(s[c.key as keyof Song] ?? "");
                                 return (
                                   <div key={c.key}>
-                                    <div className="text-xs text-muted">{t(c.labelKey)}</div>
+                                    <div className="text-xs text-muted">
+                                      {t(c.labelKey)}
+                                    </div>
                                     <div>{val || "—"}</div>
                                   </div>
                                 );
@@ -574,7 +723,9 @@ export default function SongbookDetailPage({
             </Table>
             {!loading && filtered.length === 0 && (
               <p className="text-subtle text-sm text-center mt-8">
-                {sbSongs.length === 0 ? t("songbooks.noSongs") : t("songs.noMatch")}
+                {sbSongs.length === 0
+                  ? t("songbooks.noSongs")
+                  : t("songs.noMatch")}
               </p>
             )}
           </div>
