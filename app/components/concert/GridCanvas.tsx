@@ -103,9 +103,9 @@ export default function GridCanvas({
   const isGridMode = rowSizes.length === 0;
   const effectiveVW = isGridMode ? GRID_VIRTUAL_WIDTH : virtualWidth;
   const effectiveVH = isGridMode ? GRID_VIRTUAL_HEIGHT : virtualHeight;
-  const effectiveScale = isGridMode ? canvasWidth / GRID_VIRTUAL_WIDTH : scale;
+  let effectiveScale = isGridMode ? canvasWidth / GRID_VIRTUAL_WIDTH : scale;
 
-  // Center the formation on the canvas by computing the offset to the bounding box mid-point.
+  // Center the formation and guarantee at least 1 cell of padding around the outermost shapes.
   let gridLayerX = 0;
   let gridLayerY = 0;
   if (isGridMode && placements.length > 0) {
@@ -113,8 +113,21 @@ export default function GridCanvas({
     const maxGX = Math.max(...placements.map((p) => p.gridX));
     const minGY = Math.min(...placements.map((p) => p.gridY));
     const maxGY = Math.max(...placements.map((p) => p.gridY));
-    const contentCenterX = ((minGX + maxGX) / 2 + 0.5) * CELL_SIZE;
-    const contentCenterY = ((minGY + maxGY) / 2 + 0.5) * CELL_SIZE;
+    // Expand the bounding box by 1 cell on every side so there is always at
+    // least one grid line past the outermost shape (and the name label fits).
+    const PAD = 1;
+    const contentLeft = (minGX - PAD) * CELL_SIZE;
+    const contentRight = (maxGX + 1 + PAD) * CELL_SIZE;
+    const contentTop = (minGY - PAD) * CELL_SIZE;
+    const contentBottom = (maxGY + 1 + PAD) * CELL_SIZE;
+    // If the padded content is wider/taller than the canvas, scale down to fit.
+    effectiveScale = Math.min(
+      effectiveScale,
+      canvasWidth / (contentRight - contentLeft),
+      canvasHeight / (contentBottom - contentTop),
+    );
+    const contentCenterX = (contentLeft + contentRight) / 2;
+    const contentCenterY = (contentTop + contentBottom) / 2;
     gridLayerX = canvasWidth / 2 - contentCenterX * effectiveScale;
     gridLayerY = canvasHeight / 2 - contentCenterY * effectiveScale;
   }

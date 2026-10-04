@@ -349,6 +349,7 @@ const translations = {
   "roster.editRoster": { en: "Edit Roster", sv: "Redigera korister" },
   "roster.unplaced": { en: "Unplaced", sv: "Ej placerade" },
   "roster.placed": { en: "Placed", sv: "Placerade" },
+  "roster.unplace": { en: "Remove from grid", sv: "Ta bort från rutnätet" },
   "roster.showOnGrid": { en: "Show on grid", sv: "Visa i rutnätet" },
   "roster.hideFromGrid": {
     en: "Hide from grid",

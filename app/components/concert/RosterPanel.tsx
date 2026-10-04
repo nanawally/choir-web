@@ -10,6 +10,7 @@ type Props = {
   chorists: Chorist[];
   placedIds: Set<string>;
   onPlace: (id: string) => void;
+  onRemove: (id: string) => void;
   hiddenIds: Set<string>;
   onToggleHidden: (ids: Set<string>) => void;
   onEditRoster: () => void;
@@ -19,6 +20,7 @@ export default function RosterPanel({
   chorists,
   placedIds,
   onPlace,
+  onRemove,
   hiddenIds,
   onToggleHidden,
   onEditRoster,
@@ -92,7 +94,11 @@ export default function RosterPanel({
                     <Eye size={14} />
                   )}
                 </button>
-                <span className="flex-1 truncate">
+                <span
+                  className="flex-1 truncate cursor-pointer hover:line-through hover:text-muted"
+                  onClick={() => onRemove(c.id)}
+                  title={t("roster.unplace")}
+                >
                   {shortName(c, chorists)}
                 </span>
               </li>

@@ -103,6 +103,7 @@ export default function ConcertEditor({
               chorists={editor.rosterChorists}
               placedIds={editor.placedIds}
               onPlace={editor.handlePlace}
+              onRemove={editor.handleRemove}
               hiddenIds={editor.hiddenIds}
               onToggleHidden={editor.handleToggleHidden}
               onEditRoster={() => editor.setShowRosterModal(true)}
