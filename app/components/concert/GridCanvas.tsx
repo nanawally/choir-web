@@ -180,7 +180,7 @@ export default function GridCanvas({
     let cancelled = false;
     animCancelRef.current = () => { cancelled = true; };
 
-    const DURATION = 700;
+    const DURATION = 1000;
     const startTime = performance.now();
 
     function easeInOut(t: number) {
