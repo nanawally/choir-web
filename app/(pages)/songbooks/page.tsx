@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import imageCompression from "browser-image-compression";
 import {
   listSongbooks,
@@ -225,7 +226,7 @@ export default function SongbooksPage() {
                 {/* Pin toggle — top-left */}
                 <button
                   onClick={(e) => { e.preventDefault(); handleTogglePin(sb.id); }}
-                  className="absolute top-2 left-2 z-10 bg-surface/90 border border-border rounded p-1 shadow-sm"
+                  className={`absolute top-2 left-2 z-10 bg-surface/90 border border-border rounded p-1 shadow-sm transition-opacity ${sb.isPinned ? "" : "opacity-0 group-hover:opacity-100"}`}
                   title={t("songbooks.pinned")}
                 >
                   <Pin size={12} className={sb.isPinned ? "text-primary" : "text-muted"} />
@@ -235,7 +236,7 @@ export default function SongbooksPage() {
                 <Link href={`/songbooks/${sb.id}`}>
                   <div className="relative aspect-4/3 bg-surface-alt flex items-center justify-center">
                     {sb.imageUrl ? (
-                      <img src={sb.imageUrl} alt={sb.name} className="absolute inset-0 w-full h-full object-cover" />
+                      <Image src={sb.imageUrl} alt={sb.name} fill unoptimized className="object-cover" />
                     ) : (
                       <ClefTreble size={40} className="text-subtle" />
                     )}

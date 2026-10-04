@@ -74,9 +74,9 @@ export default function SongsPage() {
   );
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-dvh">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8">
+      <div className="flex-1 flex flex-col pt-16 pb-4 md:pt-8 px-4 md:px-8 overflow-hidden">
         <h1 className="text-4xl font-bold mb-6 text-center">
           {t("songs.title")}
         </h1>
@@ -275,7 +275,7 @@ export default function SongsPage() {
         )}
 
         {/* Table */}
-        <div className="mx-auto w-full max-w-6xl overflow-x-auto">
+        <div className="flex-1 min-h-0 mx-auto w-full max-w-6xl overflow-auto">
           <Table>
             <Thead>
               <TheadRow>

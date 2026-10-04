@@ -375,10 +375,10 @@ export default function SongbookDetailPage({
   );
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-dvh">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8 min-w-0">
-        <div className="mx-auto w-full max-w-6xl">
+      <div className="flex-1 flex flex-col pt-16 pb-4 md:pt-8 px-4 md:px-8 min-w-0 overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col mx-auto w-full max-w-6xl overflow-hidden">
           <Link
             href="/songbooks"
             className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground mb-4"
@@ -584,7 +584,7 @@ export default function SongbookDetailPage({
           )}
 
           {/* Table */}
-          <div className="overflow-x-auto">
+          <div className="flex-1 min-h-0 overflow-auto">
             <Table>
               <Thead>
                 <TheadRow>
@@ -625,55 +625,62 @@ export default function SongbookDetailPage({
                         }
                       }}
                     >
-                      {columns.map((c) => (
-                        <Td
-                          key={c.key}
-                          className={
-                            c.key !== "name" && c.key !== "composer"
-                              ? "hidden sm:table-cell"
-                              : ""
-                          }
-                        >
-                          {c.key === "name" ? (
-                            <>
-                              <div className="flex items-center justify-between gap-2 sm:hidden">
-                                <div className="flex items-center gap-1 min-w-0">
-                                  {expandedSongId === s.id ? (
-                                    <ChevronDown
-                                      size={14}
-                                      className="shrink-0 text-muted"
-                                    />
-                                  ) : (
-                                    <ChevronRight
-                                      size={14}
-                                      className="shrink-0 text-muted"
-                                    />
-                                  )}
-                                  <span className="truncate">{s.name}</span>
+                      {columns.map((c) => {
+                        const cellText =
+                          c.key !== "name"
+                            ? String(c.render ? c.render(s, t) : (s[c.key as keyof Song] ?? ""))
+                            : "";
+                        return (
+                          <Td
+                            key={c.key}
+                            className={
+                              c.key !== "name" && c.key !== "composer"
+                                ? "hidden sm:table-cell"
+                                : ""
+                            }
+                          >
+                            {c.key === "name" ? (
+                              <>
+                                <div className="flex items-center justify-between gap-2 sm:hidden">
+                                  <div className="flex items-center gap-1 min-w-0">
+                                    {expandedSongId === s.id ? (
+                                      <ChevronDown
+                                        size={14}
+                                        className="shrink-0 text-muted"
+                                      />
+                                    ) : (
+                                      <ChevronRight
+                                        size={14}
+                                        className="shrink-0 text-muted"
+                                      />
+                                    )}
+                                    <span className="truncate">{s.name}</span>
+                                  </div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingSong(s);
+                                    }}
+                                    className="shrink-0 text-muted hover:text-foreground"
+                                    title={t("songs.openSong")}
+                                  >
+                                    <FolderOpen size={16} />
+                                  </button>
                                 </div>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingSong(s);
-                                  }}
-                                  className="shrink-0 text-muted hover:text-foreground"
-                                  title={t("songs.openSong")}
-                                >
-                                  <FolderOpen size={16} />
-                                </button>
-                              </div>
-                              <span className="hidden sm:inline">{s.name}</span>
-                            </>
-                          ) : c.render ? (
-                            c.render(s, t)
-                          ) : (
-                            ((s[c.key as keyof Song] as
-                              | string
-                              | number
-                              | null) ?? "")
-                          )}
-                        </Td>
-                      ))}
+                                <span className="hidden sm:inline">{s.name}</span>
+                              </>
+                            ) : cellText ? (
+                              <span
+                                className="block truncate"
+                                style={{ maxWidth: c.width }}
+                                title={cellText}
+                              >
+                                {cellText}
+                              </span>
+                            ) : null}
+                          </Td>
+                        );
+                      })}
                       <Td compact className="hidden sm:table-cell">
                         <button
                           onClick={(e) => {
