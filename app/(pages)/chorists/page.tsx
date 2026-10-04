@@ -14,7 +14,6 @@ import NavSidebar from "../../components/NavSidebar";
 import { useChorists } from "../../hooks/useChorists";
 import { useTranslation } from "../../lib/LanguageContext";
 import {
-  EllipsisVertical,
   ChevronDown,
   ChevronRight,
   Download,
@@ -83,7 +82,7 @@ export default function RosterPage() {
                   className="px-2 py-2 border border-border rounded text-sm hover:bg-hover-bg"
                   title={t("common.filter")}
                 >
-                  <EllipsisVertical size={16} />
+                  {t("common.filter")}
                 </button>
                 {filterMenuOpen && (
                   <div className="absolute right-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-50 w-56">
@@ -180,7 +179,7 @@ export default function RosterPage() {
           )}
 
           <div className="overflow-x-auto">
-            <Table className="min-w-[600px]">
+            <Table className="min-w-150">
               <Thead>
                 <TheadRow>
                   {fourPartGroup && (
@@ -299,7 +298,7 @@ export default function RosterPage() {
                 </p>
               ) : (
                 <div className="overflow-x-auto">
-                <Table className="min-w-[600px]">
+                <Table className="min-w-150">
                   <Thead>
                     <TheadRow>
                       {fourPartGroup && (

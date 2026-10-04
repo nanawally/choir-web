@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Columns3,
   Download,
-  EllipsisVertical,
   FolderOpen,
   Trash,
   X,
@@ -229,7 +228,7 @@ export function SongsTableView<T extends Song>({
             className="px-2 py-1.5 border border-border rounded text-sm hover:bg-hover-bg"
             title={t("common.filter")}
           >
-            <EllipsisVertical size={16} />
+            {t("common.filter")}
           </button>
           {filterMenuOpen && (
             <div className="absolute left-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-10 w-56">
