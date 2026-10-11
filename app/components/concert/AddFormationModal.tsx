@@ -46,7 +46,7 @@ export default function AddFormationModal({
         <h2 className="font-bold mb-4">{t("formations.addFormation")}</h2>
 
         <h3 className="text-sm font-medium mb-2">{t("formations.newEmpty")}</h3>
-        <div className="flex gap-1 mb-4">
+        <div className="flex flex-col gap-1 mb-4">
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -54,13 +54,13 @@ export default function AddFormationModal({
               e.key === "Enter" && newName.trim() && onCreateNew(newName.trim())
             }
             placeholder={t("formations.formationName")}
-            className="flex-1 border border-border rounded px-2 py-1 text-sm"
+            className="border border-border rounded px-2 py-1 text-sm"
           />
           <button
             onClick={() => {
               if (newName.trim()) onCreateNew(newName.trim());
             }}
-            className="px-3 py-1 btn-primary text-sm"
+            className="px-3 py-1 btn-primary text-sm w-fit"
           >
             {t("common.create")}
           </button>

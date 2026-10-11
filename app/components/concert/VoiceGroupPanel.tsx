@@ -344,7 +344,7 @@ export default function VoiceGroupPanel({
       </select>
 
       {showAddGroup ? (
-        <div className="flex gap-1 mb-4">
+        <div className="flex flex-col gap-1 mb-4">
           <input
             value={newGroupName}
             onChange={(e) => setNewGroupName(e.target.value)}
@@ -356,12 +356,12 @@ export default function VoiceGroupPanel({
               }
             }}
             placeholder="New group..."
-            className="flex-1 border border-border rounded px-2 py-1 text-sm"
+            className="border border-border rounded px-2 py-1 text-sm"
             autoFocus
           />
           <button
             onClick={handleCreateGroup}
-            className="px-2 py-1 btn-primary text-sm"
+            className="px-2 py-1 btn-primary text-sm w-fit"
           >
             {t("common.add")}
           </button>
@@ -454,7 +454,7 @@ export default function VoiceGroupPanel({
                 <select
                   value={newPartShape}
                   onChange={(e) => setNewPartShape(e.target.value)}
-                  className="flex-1 border border-border rounded px-1 py-1 text-sm"
+                  className="flex-1 min-w-0 border border-border rounded px-1 py-1 text-sm"
                 >
                   {SHAPES.map((s) => (
                     <option key={s} value={s}>
@@ -462,13 +462,13 @@ export default function VoiceGroupPanel({
                     </option>
                   ))}
                 </select>
-                <button
-                  onClick={handleAddPart}
-                  className="px-2 py-1 btn-primary text-sm"
-                >
-                  {t("common.add")}
-                </button>
               </div>
+              <button
+                onClick={handleAddPart}
+                className="px-2 py-1 btn-primary text-sm w-fit"
+              >
+                {t("common.add")}
+              </button>
             </div>
           ) : (
             <button
