@@ -129,7 +129,7 @@ export default function SongbookDetailPage({
     <div className="flex h-dvh">
       <NavSidebar />
       <div className="flex-1 flex flex-col pt-16 pb-4 md:pt-8 px-4 md:px-[5.56vw] min-w-0 overflow-hidden">
-        <div className="flex-1 min-h-0 flex flex-col mx-auto w-full max-w-6xl overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col w-full overflow-hidden">
           <Link
             href="/songbooks"
             className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground mb-4"

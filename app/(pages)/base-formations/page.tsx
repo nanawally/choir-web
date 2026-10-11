@@ -66,7 +66,7 @@ export default function BaseFormationsPage() {
           {t("baseFormations.title")}
         </h1>
 
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-muted">
               {t("baseFormations.description")}

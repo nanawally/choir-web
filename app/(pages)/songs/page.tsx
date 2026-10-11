@@ -38,7 +38,7 @@ export default function SongsPage() {
           storageKey="songs-visible-columns"
           defaultSort={defaultSort}
           csvFilename="songs.csv"
-          className="mx-auto w-full max-w-6xl"
+          className="w-full"
           toolbarAction={
             <button
               onClick={() => setShowAdd(true)}
