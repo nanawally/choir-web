@@ -22,7 +22,7 @@ import { GripVertical, ArrowLeft, ArrowRight } from "lucide-react";
 import { useTranslation } from "../../lib/LanguageContext";
 
 type Formation = { id: string; name: string };
-type ConcertSong = { id: string; name: string; sortOrder: number };
+type ConcertSong = { id: string; songId: string; name: string; sortOrder: number };
 
 type Props = {
   concertSongs: ConcertSong[];

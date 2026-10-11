@@ -34,7 +34,7 @@ import { getToken } from "../../lib/apiClient";
 import { useTranslation } from "../../lib/LanguageContext";
 
 type CatalogSong = { id: string; name: string; composer: string | null };
-type ConcertSong = { id: string; name: string; sortOrder: number };
+type ConcertSong = { id: string; songId: string; name: string; sortOrder: number };
 
 type Props = {
   concertId: string;
@@ -116,18 +116,14 @@ export default function EditSetlistModal({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
-  // Map concertSong.name back to catalog to find the original songId
-  // ConcertSongs have their own id (the join entity), and .name is the song name
-  // We need the catalog songId to add, and the concertSong.id to remove
-
-  // Songs in the setlist — their names (a song can appear multiple times)
-  const setlistSongNames = new Set(songs.map((s) => s.name));
+  // Songs in the setlist — their catalog song IDs
+  const setlistSongIds = new Set(songs.map((s) => s.songId));
 
   // Filter catalog: show songs not already in setlist, matching search
   const searchLower = search.toLowerCase();
   const availableSongs = catalogSongs.filter(
     (s) =>
-      !setlistSongNames.has(s.name) &&
+      !setlistSongIds.has(s.id) &&
       (s.name.toLowerCase().includes(searchLower) ||
         (s.composer ?? "").toLowerCase().includes(searchLower)),
   );
@@ -144,16 +140,16 @@ export default function EditSetlistModal({
   async function handleAddFromSongbook(songbookId: string) {
     setAddingFromSongbook(true);
     const sbSongs = await listSongbookSongs(songbookId);
-    const currentNames = new Set(songs.map((s) => s.name));
+    const currentSongIds = new Set(songs.map((s) => s.songId));
     let updated = [...songs];
     for (const sbSong of sbSongs) {
-      if (currentNames.has(sbSong.name)) continue;
+      if (currentSongIds.has(sbSong.id)) continue;
       const catalogSong = catalogSongs.find((c) => c.id === sbSong.id);
       if (!catalogSong) continue;
       const added = await addSongToConcert(concertId, catalogSong.id);
       if (added) {
         updated = [...updated, added];
-        currentNames.add(sbSong.name);
+        currentSongIds.add(sbSong.id);
       }
     }
     setSongs(updated);
@@ -205,9 +201,8 @@ export default function EditSetlistModal({
     );
   }
 
-  // Find composer for a concert song by matching name back to catalog
-  function getComposer(songName: string): string | null {
-    return catalogSongs.find((s) => s.name === songName)?.composer ?? null;
+  function getComposer(songId: string): string | null {
+    return catalogSongs.find((s) => s.id === songId)?.composer ?? null;
   }
 
   return (
@@ -332,7 +327,7 @@ export default function EditSetlistModal({
                         <SortableSetlistItem
                           key={s.id}
                           song={s}
-                          composer={getComposer(s.name)}
+                          composer={getComposer(s.songId)}
                           onRemove={() => handleRemove(s.id)}
                         />
                       ))}

@@ -53,7 +53,7 @@ export function useConcertEditor(concertId: string) {
   const [showChorists, setShowChorists] = useState(false);
   const [showFormations, setShowFormations] = useState(false);
   const [concertSongs, setConcertSongs] = useState<
-    { id: string; name: string; sortOrder: number }[]
+    { id: string; songId: string; name: string; sortOrder: number }[]
   >([]);
   const [activeConcertSongId, setActiveConcertSongId] = useState<string | null>(
     null,
