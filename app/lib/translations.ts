@@ -220,7 +220,7 @@ const translations = {
     en: "No archived chorists.",
     sv: "Inga arkiverade korister.",
   },
-  "chorists.notes": { en: "Notes (admin only)", sv: "Anteckningar (admin)" },
+  "chorists.notes": { en: "Notes", sv: "Anteckningar" },
   "chorists.notesPlaceholder": {
     en: "Internal notes about this chorist...",
     sv: "Interna anteckningar om denna korist...",

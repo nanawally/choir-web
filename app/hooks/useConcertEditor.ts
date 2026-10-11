@@ -22,7 +22,7 @@ const CELL_SIZE = 50;
 const WIDTH = 800;
 const HEIGHT = 600;
 
-type Chorist = { id: string; firstName: string; lastName: string };
+type Chorist = { id: string; firstName: string; lastName: string; notes: string | null };
 type Placement = { choristId: string; gridX: number; gridY: number };
 type Formation = { id: string; name: string; sortOrder: number };
 type CachedFormation = { placements: Placement[]; rowSizes: number[]; name: string };
