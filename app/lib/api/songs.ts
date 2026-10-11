@@ -15,6 +15,7 @@ export type Song = {
   collectionName: string | null;
   hasSoloists: boolean | null;
   soloistNames: string | null;
+  soloistReservs: string | null;
   hasSheetMusic: boolean;
   hasSheetMusicFile: boolean;
   lyrics: string | null;

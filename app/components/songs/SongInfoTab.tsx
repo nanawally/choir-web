@@ -51,6 +51,13 @@ export default function SongInfoTab({
           flag={song.hasSoloists}
           details={song.soloistNames}
         />
+        {song.hasSoloists && song.soloistReservs && (
+          <BooleanDetail
+            label={t("songs.soloistReservs")}
+            flag={true}
+            details={song.soloistReservs}
+          />
+        )}
         {concerts.length > 0 && (
           <div>
             <span className="block text-xs text-muted mb-0.5">

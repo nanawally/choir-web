@@ -17,6 +17,7 @@ type Chorist = {
   lastName: string;
   isSectionLeader: boolean;
   isArchived: boolean;
+  notes: string | null;
 };
 
 type VoicePart = { id: string; name: string; color: string; shape: string };
@@ -55,6 +56,9 @@ export default function ChoristModal({
   const [sectionLeader, setSectionLeader] = useState(
     mode === "edit" && chorist ? chorist.isSectionLeader : false,
   );
+  const [notes, setNotes] = useState(
+    mode === "edit" && chorist ? chorist.notes ?? "" : "",
+  );
   const [parts, setParts] = useState<Record<string, string>>(
     mode === "edit" ? currentParts : {},
   );
@@ -81,6 +85,7 @@ export default function ChoristModal({
         firstName.trim(),
         lastName.trim(),
         sectionLeader,
+        notes.trim() || null,
       );
       for (const group of voiceGroups) {
         const newPartId = parts[group.id] ?? "";
@@ -138,6 +143,17 @@ export default function ChoristModal({
           />
           {t("chorists.sectionLeader")}
         </label>
+
+        <label className="block text-sm font-medium mb-1">
+          {t("chorists.notes")}
+        </label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="border border-border rounded px-3 py-2 text-sm w-full mb-4"
+          rows={2}
+          placeholder={t("chorists.notesPlaceholder")}
+        />
 
         <div className="space-y-3 mb-6">
           {sortVoiceGroups(voiceGroups).map((group) => (

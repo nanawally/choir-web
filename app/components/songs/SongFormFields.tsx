@@ -154,14 +154,24 @@ export function SongFormFields({
           </select>
         </Field>
         {form.hasSoloists && (
-          <Field label={t("songs.soloistNamesHint")}>
-            <input
-              value={form.soloistNames ?? ""}
-              onChange={(e) => set("soloistNames", e.target.value || null)}
-              className="border border-border rounded px-2 py-1 text-sm"
-              placeholder="Anna, Erik"
-            />
-          </Field>
+          <>
+            <Field label={t("songs.soloistNamesHint")}>
+              <input
+                value={form.soloistNames ?? ""}
+                onChange={(e) => set("soloistNames", e.target.value || null)}
+                className="border border-border rounded px-2 py-1 text-sm"
+                placeholder="Anna, Erik"
+              />
+            </Field>
+            <Field label={t("songs.soloistReservs")}>
+              <input
+                value={form.soloistReservs ?? ""}
+                onChange={(e) => set("soloistReservs", e.target.value || null)}
+                className="border border-border rounded px-2 py-1 text-sm"
+                placeholder="Anna, Erik"
+              />
+            </Field>
+          </>
         )}
       </div>
       <Field label={t("songs.year")}>

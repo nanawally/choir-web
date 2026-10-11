@@ -13,10 +13,10 @@ export async function createChorist(firstName: string, lastName: string, isSecti
   return res.ok ? res.json() : null;
 }
 
-export async function updateChorist(id: string, firstName: string, lastName: string, isSectionLeader = false) {
+export async function updateChorist(id: string, firstName: string, lastName: string, isSectionLeader = false, notes: string | null = null) {
   const res = await apiFetch(`/chorists/${id}`, {
     method: "PUT",
-    body: JSON.stringify({ firstName, lastName, isSectionLeader }),
+    body: JSON.stringify({ firstName, lastName, isSectionLeader, notes }),
   });
   return res.ok;
 }

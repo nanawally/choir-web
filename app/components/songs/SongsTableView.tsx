@@ -479,10 +479,22 @@ export function SongsTableView<T extends Song>({
                             const val = c.render
                               ? c.render(s, t)
                               : String(s[c.key] ?? "");
+                            const namesKey = c.key === "hasSoloists" ? "soloistNames" : c.key === "accompanied" ? "instrument" : null;
+                            const names = namesKey ? (s as Record<string, unknown>)[namesKey] as string | undefined : undefined;
+                            const items = names ? names.split(",").map((n) => n.trim()).filter(Boolean) : [];
                             return (
                               <div key={c.key}>
                                 <div className="text-xs text-muted">{t(c.labelKey)}</div>
-                                <div>{val || "—"}</div>
+                                {items.length > 1 ? (
+                                  <>
+                                    <div>{s[c.key as keyof typeof s] ? t("common.yes") : t("common.no")}</div>
+                                    <ul className="mt-1 ml-4 list-disc text-sm">
+                                      {items.map((item, i) => <li key={i}>{item}</li>)}
+                                    </ul>
+                                  </>
+                                ) : (
+                                  <div>{val || "—"}</div>
+                                )}
                               </div>
                             );
                           })}

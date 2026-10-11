@@ -159,10 +159,10 @@ function SortablePartItem({
               {...attributes}
               {...listeners}
               style={{ touchAction: "none" }}
-              className="cursor-grab active:cursor-grabbing select-none text-subtle"
+              className="cursor-grab active:cursor-grabbing select-none text-subtle p-1 -m-1"
               onClick={(e) => e.stopPropagation()}
             >
-              <GripVertical size={14} />
+              <GripVertical size={16} />
             </span>
             <span
               className="w-3 h-3 rounded-full inline-block"

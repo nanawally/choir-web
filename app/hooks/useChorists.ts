@@ -13,6 +13,7 @@ export type Chorist = {
   lastName: string;
   isSectionLeader: boolean;
   isArchived: boolean;
+  notes: string | null;
 };
 
 export type VoicePart = { id: string; name: string; color: string; shape: string };

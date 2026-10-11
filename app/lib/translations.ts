@@ -129,6 +129,10 @@ const translations = {
     en: "Soloist names (comma-separated)",
     sv: "Solistnamn (kommaseparerade)",
   },
+  "songs.soloistReservs": {
+    en: "Reserve soloists",
+    sv: "Reservsolister",
+  },
   "songs.year": { en: "Year", sv: "År" },
   "songs.yearFrom": { en: "From", sv: "Från" },
   "songs.yearTo": { en: "To", sv: "Till" },
@@ -215,6 +219,11 @@ const translations = {
   "chorists.noArchived": {
     en: "No archived chorists.",
     sv: "Inga arkiverade korister.",
+  },
+  "chorists.notes": { en: "Notes (admin only)", sv: "Anteckningar (admin)" },
+  "chorists.notesPlaceholder": {
+    en: "Internal notes about this chorist...",
+    sv: "Interna anteckningar om denna korist...",
   },
   "chorists.archive": { en: "Archive", sv: "Arkivera" },
   "chorists.unarchive": { en: "Unarchive", sv: "Avarkivera" },

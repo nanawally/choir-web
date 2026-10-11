@@ -67,9 +67,9 @@ function SortableFormation({
         {...attributes}
         {...listeners}
         style={{ touchAction: "none" }}
-        className="cursor-grab active:cursor-grabbing select-none text-subtle"
+        className="cursor-grab active:cursor-grabbing select-none text-subtle p-1 -m-1"
       >
-        <GripVertical size={14} />
+        <GripVertical size={16} />
       </span>
       <button onClick={onClick} className="flex-1 text-left hover:underline">
         {formation.name}

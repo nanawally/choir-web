@@ -76,10 +76,10 @@ function SortableSetlistItem({
         {...attributes}
         {...listeners}
         style={{ touchAction: "none" }}
-        className="cursor-grab active:cursor-grabbing select-none text-subtle"
+        className="cursor-grab active:cursor-grabbing select-none text-subtle p-1 -m-1"
         onClick={(e) => e.stopPropagation()}
       >
-        <GripVertical size={14} />
+        <GripVertical size={16} />
       </span>
       <span className="flex-1 min-w-0">
         <span>{song.name}</span>

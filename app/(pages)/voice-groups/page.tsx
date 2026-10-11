@@ -75,9 +75,9 @@ function SortablePartRow({
         {...attributes}
         {...listeners}
         style={{ touchAction: "none" }}
-        className="cursor-grab active:cursor-grabbing text-subtle select-none"
+        className="cursor-grab active:cursor-grabbing text-subtle select-none p-1 -m-1"
       >
-        <GripVertical size={14} />
+        <GripVertical size={16} />
       </span>
       {editing ? (
         <div className="flex items-center gap-2 flex-1">
