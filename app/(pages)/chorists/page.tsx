@@ -204,7 +204,7 @@ export default function RosterPage() {
                   const isAltRow = fourPartIndex % 2 === 1;
                   const stickyBg = isAltRow
                     ? "bg-surface-alt group-hover:bg-hover-bg"
-                    : "bg-surface group-hover:bg-hover-bg";
+                    : "bg-background group-hover:bg-hover-bg";
 
                   return (
                     <Tr key={chorist.id} className={`cursor-pointer ${isAltRow ? "bg-surface-alt" : ""}`} onClick={() => setModal({ mode: "view", chorist })}>
@@ -311,13 +311,13 @@ export default function RosterPage() {
                       return (
                         <Tr key={chorist.id}>
                           {fourPartGroup && (
-                            <Td className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap bg-surface group-hover:bg-hover-bg">
+                            <Td className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap bg-background group-hover:bg-hover-bg">
                               <span className="text-muted">
                                 {fourPartPart?.name ?? "—"}
                               </span>
                             </Td>
                           )}
-                          <Td className={`sticky z-10 font-medium max-w-[min(38vw,12rem)] truncate ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"} bg-surface group-hover:bg-hover-bg`}>
+                          <Td className={`sticky z-10 font-medium max-w-[min(38vw,12rem)] truncate ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"} bg-background group-hover:bg-hover-bg`}>
                             {chorist.firstName} {chorist.lastName}
                           </Td>
                           {otherStandardGroups.map((group) => {

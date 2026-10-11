@@ -22,7 +22,7 @@ export function Thead({ children }: { children: React.ReactNode }) {
 }
 
 export function TheadRow({ children }: { children: React.ReactNode }) {
-  return <tr className="border-b border-border">{children}</tr>;
+  return <tr className="border-b border-border bg-surface">{children}</tr>;
 }
 
 type ThProps = {
