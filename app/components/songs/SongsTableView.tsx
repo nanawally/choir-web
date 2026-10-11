@@ -374,16 +374,16 @@ export function SongsTableView<T extends Song>({
 
       {/* Table */}
       <div className="flex-1 min-h-0 overflow-auto">
-        <Table>
+        <Table className="table-fixed sm:table-auto">
           <Thead>
             <TheadRow>
               {columns.map((c) => (
                 <Th
                   key={c.key}
-                  className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : ""}
+                  className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : c.key === "name" ? "w-2/3 sm:w-auto" : "w-1/3 sm:w-auto"}
                   style={
-                    c.key === "name"
-                      ? { minWidth: "250px" }
+                    c.key === "name" || c.key === "composer"
+                      ? {}
                       : { width: c.width, minWidth: c.width }
                   }
                   sortDir={sortKey === c.key ? sortDir : null}
@@ -419,7 +419,7 @@ export function SongsTableView<T extends Song>({
                         className={
                           c.key !== "name" && c.key !== "composer"
                             ? "hidden sm:table-cell"
-                            : ""
+                            : "overflow-hidden"
                         }
                       >
                         {c.key === "name" ? (
