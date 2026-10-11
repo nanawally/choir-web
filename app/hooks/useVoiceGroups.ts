@@ -39,7 +39,7 @@ export function useVoiceGroups() {
   const [loading, setLoading] = useState(true);
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
-  const [newGroupStandard, setNewGroupStandard] = useState(true);
+  const [newGroupStandard, setNewGroupStandard] = useState(false);
   const [addingPartGroupId, setAddingPartGroupId] = useState<string | null>(null);
   const [newPartName, setNewPartName] = useState("");
   const [newPartColor, setNewPartColor] = useState(DEFAULT_COLORS[0]);

@@ -446,7 +446,7 @@ export default function VoiceGroupsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8">
+      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
         <h1 className="text-4xl font-bold mb-2 text-center">
           {t("voiceGroups.title")}
         </h1>
@@ -512,11 +512,9 @@ export default function VoiceGroupsPage() {
             <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3 text-center">
               {t("common.standard")}
             </h2>
-            <div className="flex flex-wrap gap-4 justify-center mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               {standardGroups.map((g) => (
-                <div key={g.id} className="w-full sm:w-64">
-                  <VoiceGroupCard group={g} {...cardProps} />
-                </div>
+                <VoiceGroupCard key={g.id} group={g} {...cardProps} />
               ))}
             </div>
           </>
@@ -527,11 +525,9 @@ export default function VoiceGroupsPage() {
             <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3 text-center">
               {t("common.other")}
             </h2>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {otherGroups.map((g) => (
-                <div key={g.id} className="w-full sm:w-64">
-                  <VoiceGroupCard group={g} {...cardProps} />
-                </div>
+                <VoiceGroupCard key={g.id} group={g} {...cardProps} />
               ))}
             </div>
           </>

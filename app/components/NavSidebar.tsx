@@ -93,7 +93,7 @@ export default function NavSidebar() {
       )}
 
       {/* Desktop sidebar */}
-      <nav className="hidden md:flex w-48 shrink-0 border-r border-border py-8 px-4 flex-col min-h-screen">
+      <nav className="hidden md:flex w-[16.67vw] shrink-0 border-r border-border py-8 px-4 flex-col min-h-screen">
         {navContent}
       </nav>
     </>

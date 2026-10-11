@@ -86,7 +86,7 @@ export default function SongModal({
         onClick={onClose}
       >
         <div
-          className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto"
+          className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] md:w-[50vw] max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto"
           onClick={(e) => e.stopPropagation()}
         >
           <h2 className="text-lg font-bold mb-4">{t("songs.editSong")}</h2>
@@ -117,7 +117,7 @@ export default function SongModal({
       onClick={onClose}
     >
       <div
-        className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] max-w-3xl max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto"
+        className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] md:w-[50vw] max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between mb-4">

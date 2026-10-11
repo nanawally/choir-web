@@ -43,7 +43,7 @@ export default function SettingsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-8">
+      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
         <h1 className="text-4xl font-bold mb-6 text-center">
           {t("settings.title")}
         </h1>

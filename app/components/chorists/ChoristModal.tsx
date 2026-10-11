@@ -152,7 +152,7 @@ export default function ChoristModal({
     return (
       <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={onClose}>
         <div
-          className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] max-w-2xl max-h-[80vh] overflow-y-auto"
+          className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] md:w-[50vw] max-h-[80vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-start justify-between mb-4">
@@ -225,7 +225,7 @@ export default function ChoristModal({
   // Edit / Add form
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50">
-      <div className="bg-surface rounded-lg shadow-lg p-6 w-96 max-w-[calc(100%-2rem)] max-h-[80vh] overflow-y-auto">
+      <div className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] md:w-[50vw] max-h-[80vh] overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4">
           {mode === "add" ? t("chorists.addTitle") : t("chorists.editTitle")}
         </h2>
