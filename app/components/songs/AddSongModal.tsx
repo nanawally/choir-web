@@ -24,6 +24,7 @@ const EMPTY_SONG: Song = {
   hasSheetMusic: false,
   hasSheetMusicFile: false,
   lyrics: null,
+  soloistReservs: null
 };
 
 export default function AddSongModal({
