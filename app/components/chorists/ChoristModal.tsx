@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SquarePen } from "lucide-react";
 import {
   createChorist,
   updateChorist,
@@ -29,10 +30,9 @@ type VoiceGroup = {
 };
 
 type ChoristModalProps = {
-  mode: "add" | "edit";
+  mode: "add" | "view";
   chorist?: Chorist;
   voiceGroups: VoiceGroup[];
-  /** Current part ID per group for this chorist (edit mode) */
   currentParts: Record<string, string>;
   onClose: () => void;
   onSaved: () => void;
@@ -47,21 +47,23 @@ export default function ChoristModal({
   onSaved,
 }: ChoristModalProps) {
   const { t } = useTranslation();
-  const [firstName, setFirstName] = useState(
-    mode === "edit" && chorist ? chorist.firstName : "",
-  );
-  const [lastName, setLastName] = useState(
-    mode === "edit" && chorist ? chorist.lastName : "",
-  );
-  const [sectionLeader, setSectionLeader] = useState(
-    mode === "edit" && chorist ? chorist.isSectionLeader : false,
-  );
-  const [notes, setNotes] = useState(
-    mode === "edit" && chorist ? chorist.notes ?? "" : "",
-  );
+  const [editing, setEditing] = useState(mode === "add");
+  const [firstName, setFirstName] = useState(chorist?.firstName ?? "");
+  const [lastName, setLastName] = useState(chorist?.lastName ?? "");
+  const [sectionLeader, setSectionLeader] = useState(chorist?.isSectionLeader ?? false);
+  const [notes, setNotes] = useState(chorist?.notes ?? "");
   const [parts, setParts] = useState<Record<string, string>>(
-    mode === "edit" ? currentParts : {},
+    mode === "view" ? currentParts : {},
   );
+
+  // Keep "current" state for reverting on cancel
+  const [current, setCurrent] = useState({
+    firstName: chorist?.firstName ?? "",
+    lastName: chorist?.lastName ?? "",
+    isSectionLeader: chorist?.isSectionLeader ?? false,
+    notes: chorist?.notes ?? "",
+    parts: mode === "view" ? { ...currentParts } : {} as Record<string, string>,
+  });
 
   async function handleSave() {
     if (!firstName.trim()) return;
@@ -79,6 +81,7 @@ export default function ChoristModal({
           await assignChorist(created.id, partId);
         }
       }
+      onSaved();
     } else if (chorist) {
       await updateChorist(
         chorist.id,
@@ -98,9 +101,29 @@ export default function ChoristModal({
           }
         }
       }
+      setCurrent({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        isSectionLeader: sectionLeader,
+        notes: notes.trim(),
+        parts: { ...parts },
+      });
+      setEditing(false);
+      onSaved();
     }
+  }
 
-    onSaved();
+  function handleCancel() {
+    if (mode === "add") {
+      onClose();
+      return;
+    }
+    setFirstName(current.firstName);
+    setLastName(current.lastName);
+    setSectionLeader(current.isSectionLeader);
+    setNotes(current.notes);
+    setParts({ ...current.parts });
+    setEditing(false);
   }
 
   async function handleArchive() {
@@ -109,6 +132,97 @@ export default function ChoristModal({
     onSaved();
   }
 
+  const sorted = sortVoiceGroups(voiceGroups);
+  const standardGroups = sorted.filter((g) => g.isStandard);
+  const nonStandardGroups = sorted.filter((g) => !g.isStandard);
+  const fourPartGroup = standardGroups.find(
+    (g) => g.name.includes("4-part") || g.name.includes("4-stäm"),
+  );
+  const otherStandardGroups = standardGroups.filter((g) => g.id !== fourPartGroup?.id);
+
+  function getPartName(groupId: string): string {
+    const partId = (editing ? parts : current.parts)[groupId];
+    if (!partId) return "—";
+    const group = voiceGroups.find((g) => g.id === groupId);
+    return group?.parts.find((p) => p.id === partId)?.name ?? "—";
+  }
+
+  // Read-only view
+  if (!editing && chorist) {
+    return (
+      <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={onClose}>
+        <div
+          className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] max-w-2xl max-h-[80vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold">
+                {current.firstName} {current.lastName}
+              </h2>
+              {current.isSectionLeader && (
+                <p className="text-xs text-muted">{t("chorists.sectionLeaderTooltip")}</p>
+              )}
+            </div>
+            <button
+              onClick={() => setEditing(true)}
+              className="text-subtle hover:text-muted"
+              title={t("common.edit")}
+            >
+              <SquarePen size={16} />
+            </button>
+          </div>
+
+          <div className="flex gap-6">
+            {/* Left: voice groups */}
+            <div className="flex-1 min-w-0">
+              {fourPartGroup && (
+                <div className="mb-3">
+                  <span className="block text-xs text-muted mb-0.5">{fourPartGroup.name}</span>
+                  <span className="text-sm font-medium">{getPartName(fourPartGroup.id)}</span>
+                </div>
+              )}
+
+              {otherStandardGroups.length > 0 && (
+                <div className="grid grid-cols-3 gap-x-4 gap-y-2 mb-3">
+                  {otherStandardGroups.map((group) => (
+                    <div key={group.id}>
+                      <span className="block text-xs text-muted mb-0.5">{group.name}</span>
+                      <span className="text-sm font-medium">{getPartName(group.id)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {nonStandardGroups.length > 0 && (
+                <>
+                  <hr className="border-border my-3" />
+                  <div className="space-y-2">
+                    {nonStandardGroups.map((group) => (
+                      <div key={group.id}>
+                        <span className="block text-xs text-muted mb-0.5">{group.name}</span>
+                        <span className="text-sm">{getPartName(group.id)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Right: notes */}
+            <div className="w-1/3 border-l border-border pl-6">
+              <span className="block text-xs text-muted mb-0.5">{t("chorists.notes")}</span>
+              {current.notes && (
+                <p className="text-sm whitespace-pre-wrap">{current.notes}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Edit / Add form
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50">
       <div className="bg-surface rounded-lg shadow-lg p-6 w-96 max-w-[calc(100%-2rem)] max-h-[80vh] overflow-y-auto">
@@ -156,7 +270,7 @@ export default function ChoristModal({
         />
 
         <div className="space-y-3 mb-6">
-          {sortVoiceGroups(voiceGroups).map((group) => (
+          {sorted.map((group) => (
             <div key={group.id}>
               <label className="block text-sm font-medium mb-1">
                 {group.name}
@@ -181,7 +295,7 @@ export default function ChoristModal({
 
         <div className="flex items-center justify-between">
           <div>
-            {mode === "edit" && (
+            {mode === "view" && (
               <button
                 onClick={handleArchive}
                 className="text-sm text-danger hover:text-danger-hover"
@@ -192,7 +306,7 @@ export default function ChoristModal({
           </div>
           <div className="flex gap-2">
             <button
-              onClick={onClose}
+              onClick={handleCancel}
               className="px-3 py-2 text-sm text-muted hover:text-foreground"
             >
               {t("common.cancel")}

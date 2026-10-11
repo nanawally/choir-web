@@ -23,7 +23,7 @@ type Assignment = { choristId: string; voicePartId: string };
 type ModalState =
   | { mode: "closed" }
   | { mode: "add" }
-  | { mode: "edit"; chorist: Chorist };
+  | { mode: "view"; chorist: Chorist };
 
 export type ActiveFilter = { groupId: string; groupName: string; partId: string; partName: string };
 

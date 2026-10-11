@@ -19,7 +19,6 @@ import {
   Download,
   X,
   Star,
-  SquarePen,
 } from "lucide-react";
 
 export default function RosterPage() {
@@ -191,7 +190,6 @@ export default function RosterPage() {
                   {otherStandardGroups.map((g) => (
                     <Th key={g.id}>{g.name}</Th>
                   ))}
-                  <Th compact />
                 </TheadRow>
               </Thead>
               <Tbody>
@@ -209,7 +207,7 @@ export default function RosterPage() {
                     : "bg-surface group-hover:bg-hover-bg";
 
                   return (
-                    <Tr key={chorist.id} className={isAltRow ? "bg-surface-alt" : ""}>
+                    <Tr key={chorist.id} className={`cursor-pointer ${isAltRow ? "bg-surface-alt" : ""}`} onClick={() => setModal({ mode: "view", chorist })}>
                       {fourPartGroup && (
                         <Td className={`sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap ${stickyBg}`}>
                           <div className="flex items-center gap-1">
@@ -238,15 +236,6 @@ export default function RosterPage() {
                           </Td>
                         );
                       })}
-                      <Td compact className="text-center">
-                        <button
-                          onClick={() => setModal({ mode: "edit", chorist })}
-                          className="text-subtle hover:text-muted"
-                          title={t("chorists.editTitle")}
-                        >
-                          <SquarePen size={16} />
-                        </button>
-                      </Td>
                     </Tr>
                   );
                 })}
@@ -264,10 +253,10 @@ export default function RosterPage() {
         {modal.mode !== "closed" && (
           <ChoristModal
             mode={modal.mode}
-            chorist={modal.mode === "edit" ? modal.chorist : undefined}
+            chorist={modal.mode === "view" ? modal.chorist : undefined}
             voiceGroups={voiceGroups}
             currentParts={
-              modal.mode === "edit" ? getCurrentParts(modal.chorist.id) : {}
+              modal.mode === "view" ? getCurrentParts(modal.chorist.id) : {}
             }
             onClose={() => setModal({ mode: "closed" })}
             onSaved={() => {
