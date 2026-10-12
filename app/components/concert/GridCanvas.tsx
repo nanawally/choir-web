@@ -23,6 +23,7 @@ type Assignment = { choristId: string; voicePartId: string };
 
 type Props = {
   chorists: Chorist[];
+  allChorists: Chorist[];
   placements: Placement[];
   setPlacements: (placements: Placement[]) => void;
   selectedIds: Set<string>;
@@ -73,6 +74,7 @@ function arcPosition(
 
 export default function GridCanvas({
   chorists,
+  allChorists,
   placements,
   setPlacements,
   selectedIds,
@@ -634,7 +636,7 @@ export default function GridCanvas({
                     shapeScale={shapeScale}
                   />
                   <Text
-                    text={shortName(chorist, chorists)}
+                    text={shortName(chorist, allChorists)}
                     fontSize={11 * shapeScale}
                     fill="#333"
                     opacity={opacity}

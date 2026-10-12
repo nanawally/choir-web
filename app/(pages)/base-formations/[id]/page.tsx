@@ -404,6 +404,7 @@ export default function BaseFormationEditor({
           )}
           <GridCanvas
             chorists={chorists}
+            allChorists={chorists}
             placements={placements}
             setPlacements={setPlacements}
             selectedIds={selectedIds}

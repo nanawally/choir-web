@@ -10,6 +10,7 @@ type Chorist = { id: string; firstName: string; lastName: string; notes: string 
 
 type Props = {
   chorists: Chorist[];
+  allChorists: Chorist[];
   placedIds: Set<string>;
   onPlace: (id: string) => void;
   onRemove: (id: string) => void;
@@ -20,6 +21,7 @@ type Props = {
 
 export default function RosterPanel({
   chorists,
+  allChorists,
   placedIds,
   onPlace,
   onRemove,
@@ -106,7 +108,7 @@ export default function RosterPanel({
                 className="flex items-center text-[1.1vw] py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer"
                 onClick={() => onPlace(c.id)}
               >
-                <span className="flex-1 truncate">{shortName(c, chorists)}</span>
+                <span className="flex-1 truncate">{shortName(c, allChorists)}</span>
                 {notesButton(c)}
               </li>
             ))}
@@ -145,7 +147,7 @@ export default function RosterPanel({
                     onClick={() => onRemove(c.id)}
                     title={t("roster.unplace")}
                   >
-                    {shortName(c, chorists)}
+                    {shortName(c, allChorists)}
                   </span>
                   {notesButton(c)}
                 </div>

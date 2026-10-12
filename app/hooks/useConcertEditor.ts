@@ -522,6 +522,7 @@ export function useConcertEditor(concertId: string) {
     formations,
     getFormationsForSong,
     placedIds,
+    allChorists: chorists,
     rosterChorists,
 
     // Undo/redo

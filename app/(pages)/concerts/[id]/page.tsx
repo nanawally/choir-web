@@ -101,6 +101,7 @@ export default function ConcertEditor({
           {editor.showChorists && (
             <RosterPanel
               chorists={editor.rosterChorists}
+              allChorists={editor.allChorists}
               placedIds={editor.placedIds}
               onPlace={editor.handlePlace}
               onRemove={editor.handleRemove}
@@ -173,6 +174,7 @@ export default function ConcertEditor({
           )}
           <GridCanvas
             chorists={editor.rosterChorists}
+            allChorists={editor.allChorists}
             placements={editor.placements}
             setPlacements={editor.setPlacements}
             selectedIds={editor.selectedIds}
