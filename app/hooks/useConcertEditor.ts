@@ -87,10 +87,35 @@ export function useConcertEditor(concertId: string) {
   const latestSongFormationIdsRef = useRef(songFormationIds);
   const latestRowSizesRef = useRef(rowSizes);
   const latestFormationNameRef = useRef(formationName);
+  const latestPlacementsRef = useRef(placements);
+  const latestActiveFormationIdRef = useRef(activeFormationId);
+  useEffect(() => { latestPlacementsRef.current = placements; }, [placements]);
+  useEffect(() => { latestActiveFormationIdRef.current = activeFormationId; }, [activeFormationId]);
   useEffect(() => { latestActiveConcertSongIdRef.current = activeConcertSongId; }, [activeConcertSongId]);
   useEffect(() => { latestSongFormationIdsRef.current = songFormationIds; }, [songFormationIds]);
   useEffect(() => { latestRowSizesRef.current = rowSizes; }, [rowSizes]);
   useEffect(() => { latestFormationNameRef.current = formationName; }, [formationName]);
+
+  // Flush pending auto-save immediately (call before switching formations)
+  async function flushPendingSave() {
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+      const fId = latestActiveFormationIdRef.current;
+      if (fId) {
+        const p = latestPlacementsRef.current;
+        await savePlacements(
+          fId,
+          p.map((pl) => ({ choristId: pl.choristId, gridX: pl.gridX, gridY: pl.gridY })),
+        );
+        formationCacheRef.current.set(fId, {
+          placements: p.map((pl) => ({ choristId: pl.choristId, gridX: pl.gridX, gridY: pl.gridY })),
+          rowSizes: latestRowSizesRef.current,
+          name: latestFormationNameRef.current ?? "",
+        });
+      }
+    }
+  }
 
   useEffect(() => {
     apiFetch("/chorists")
@@ -306,6 +331,7 @@ export function useConcertEditor(concertId: string) {
       await handleSelectFormation(formationIds[0]);
     } else {
       // Song has no linked formations — clear the grid
+      await flushPendingSave();
       isSyncingRef.current = true;
       setPastPlacements([]);
       setFuturePlacements([]);
@@ -318,6 +344,7 @@ export function useConcertEditor(concertId: string) {
 
   // Load a specific formation onto the grid (used by setlist tags and auto-load)
   async function handleSelectFormation(formationId: string) {
+    await flushPendingSave();
     const cached = formationCacheRef.current.get(formationId);
     if (cached) {
       isSyncingRef.current = true;
@@ -451,6 +478,7 @@ export function useConcertEditor(concertId: string) {
       await handleSelectFormation(stop.formationId);
     } else {
       // Song with no formations — clear the grid
+      await flushPendingSave();
       setActiveFormationId(null);
       setPlacements([]);
       setRowSizes([]);
