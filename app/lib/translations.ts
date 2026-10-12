@@ -133,6 +133,10 @@ const translations = {
     en: "Reserve soloists",
     sv: "Reservsolister",
   },
+  "songs.hasSoloistReservs": {
+    en: "Has reserve soloists",
+    sv: "Har reservsolister",
+  },
   "songs.year": { en: "Year", sv: "År" },
   "songs.yearFrom": { en: "From", sv: "Från" },
   "songs.yearTo": { en: "To", sv: "Till" },

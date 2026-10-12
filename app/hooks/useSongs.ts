@@ -66,6 +66,7 @@ export const FILTER_COLUMNS: FilterColumnDef[] = [
   { key: "year", labelKey: "songs.year", type: "range" },
   { key: "collectionName", labelKey: "songs.collection", type: "text" },
   { key: "hasSoloists", labelKey: "songs.soloists", type: "bool" },
+  { key: "soloistReservs", labelKey: "songs.hasSoloistReservs", type: "bool" },
   { key: "hasSheetMusicFile", labelKey: "songs.sheetMusic", type: "bool" },
 ];
 

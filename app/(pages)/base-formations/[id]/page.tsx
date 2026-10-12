@@ -1,10 +1,11 @@
 "use client";
 
 import { use, useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import GridCanvas from "../../../components/concert/GridCanvas";
 import VoiceGroupPanel from "../../../components/concert/VoiceGroupPanel";
 import Link from "next/link";
-import { ArrowBigLeft, UsersRound, UserRoundGroup } from "lucide-react";
+import { ArrowBigLeft, SquareText, UsersRound, UserRoundGroup } from "lucide-react";
 import { shortName } from "../../../lib/choristName";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { sortChoristsByVoicePart } from "../../../lib/voiceGroupSort";
@@ -22,7 +23,7 @@ const CELL_SIZE = 50;
 const WIDTH = 800;
 const HEIGHT = 600;
 
-type Chorist = { id: string; firstName: string; lastName: string };
+type Chorist = { id: string; firstName: string; lastName: string; notes: string | null };
 type Placement = { choristId: string; gridX: number; gridY: number };
 
 export default function BaseFormationEditor({
@@ -58,6 +59,51 @@ export default function BaseFormationEditor({
   const [fourPartAssignments, setFourPartAssignments] = useState<
     { choristId: string; voicePartId: string }[]
   >([]);
+
+  // Notes popover
+  const [expandedNotes, setExpandedNotes] = useState<string | null>(null);
+  const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!expandedNotes) return;
+    function handleClick(e: MouseEvent) {
+      const target = e.target as Node;
+      if (popoverRef.current?.contains(target)) return;
+      if (buttonRefs.current[expandedNotes!]?.contains(target)) return;
+      setExpandedNotes(null);
+      setPopoverPos(null);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [expandedNotes]);
+
+  const iconSize = "1.2vw";
+
+  function notesButton(c: Chorist) {
+    if (!c.notes) return null;
+    return (
+      <button
+        ref={(el) => { buttonRefs.current[c.id] = el; }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (expandedNotes === c.id) {
+            setExpandedNotes(null);
+            setPopoverPos(null);
+          } else {
+            const rect = buttonRefs.current[c.id]?.getBoundingClientRect();
+            if (rect) setPopoverPos({ top: rect.top, left: rect.right + 8 });
+            setExpandedNotes(c.id);
+          }
+        }}
+        className={`ml-auto pl-2 ${expandedNotes === c.id ? "text-muted" : "text-subtle hover:text-muted"}`}
+        title={t("chorists.notes")}
+      >
+        <SquareText style={{ width: iconSize, height: iconSize }} />
+      </button>
+    );
+  }
 
   // Panels
   const [showChorists, setShowChorists] = useState(false);
@@ -264,11 +310,11 @@ export default function BaseFormationEditor({
               .map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center justify-between text-sm py-1 px-2 rounded hover:bg-surface-alt cursor-pointer"
+                  className="flex items-center text-[1.1vw] py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer"
                   onClick={() => handlePlace(c.id)}
                 >
-                  <span>{shortName(c, chorists)}</span>
-                  <span className="text-subtle text-xs">+</span>
+                  <span className="flex-1 truncate">{shortName(c, chorists)}</span>
+                  {notesButton(c)}
                 </div>
               ))}
           </div>
@@ -285,8 +331,9 @@ export default function BaseFormationEditor({
               {sortedChorists
                 .filter((c) => placedIds.has(c.id))
                 .map((c) => (
-                  <div key={c.id} className="text-sm py-0.5 px-2 text-subtle">
-                    {shortName(c, chorists)}
+                  <div key={c.id} className="flex items-center text-[1.1vw] py-0.5 px-2 text-subtle">
+                    <span className="flex-1 truncate">{shortName(c, chorists)}</span>
+                    {notesButton(c)}
                   </div>
                 ))}
             </>
@@ -390,6 +437,23 @@ export default function BaseFormationEditor({
           </button>
         </div>
       </div>
+
+      {/* Notes popover */}
+      {expandedNotes && popoverPos && (() => {
+        const c = chorists.find((ch) => ch.id === expandedNotes);
+        if (!c?.notes) return null;
+        return createPortal(
+          <div
+            ref={popoverRef}
+            className="fixed w-64 p-4 bg-surface border border-border rounded-lg shadow-lg z-50"
+            style={{ top: popoverPos.top, left: popoverPos.left }}
+          >
+            <h4 className="font-medium mb-1">{t("chorists.notes")}</h4>
+            <p className="text-sm text-muted whitespace-pre-wrap">{c.notes}</p>
+          </div>,
+          document.body,
+        );
+      })()}
 
       {/* Right drawer — voice groups + controls */}
       {showVoiceGroups && (
