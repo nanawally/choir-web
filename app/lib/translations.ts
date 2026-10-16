@@ -331,6 +331,10 @@ const translations = {
     en: "Delete {name}?",
     sv: "Ta bort {name}?",
   },
+  "formations.confirmUnlink": {
+    en: "Remove \"{name}\" from this song? It is also used by {count} other song(s) and will not be deleted.",
+    sv: "Ta bort \"{name}\" från detta stycke? Den används även av {count} andra stycke(n) och tas inte bort från dessa.",
+  },
   "formations.arcRows": {
     en: "Arc rows (empty = rectangular grid)",
     sv: "Bågade rader (tomt = rektangulärt rutnät)",

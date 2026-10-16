@@ -46,6 +46,7 @@ type Props = {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  autoSaveStatus: "idle" | "saving" | "saved";
 };
 
 function snapToGrid(value: number): number {
@@ -97,6 +98,7 @@ export default function GridCanvas({
   onRedo,
   canUndo,
   canRedo,
+  autoSaveStatus,
 }: Props) {
   const { t } = useTranslation();
 
@@ -412,6 +414,11 @@ export default function GridCanvas({
             <Redo size={16} />
           </button>
         </div>
+        {autoSaveStatus !== "idle" && (
+          <span className={`text-xs px-2 py-0.5 rounded font-medium ${autoSaveStatus === "saving" ? "bg-warning-bg text-warning-text" : "bg-success-bg text-success-text"}`}>
+            {autoSaveStatus === "saving" ? t("common.saving") : t("common.saved")}
+          </span>
+        )}
       </div>
       <Stage
         ref={stageRef}

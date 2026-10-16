@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "../lib/LanguageContext";
 import {
   apiFetch,
   getAssignments,
@@ -15,6 +16,7 @@ import {
   savePlacements,
   setConcertChorists,
   setSongFormations,
+  deleteFormation,
 } from "../lib/api";
 import { sortChoristsByVoicePart } from "../lib/voiceGroupSort";
 
@@ -28,6 +30,7 @@ type Formation = { id: string; name: string; sortOrder: number };
 type CachedFormation = { placements: Placement[]; rowSizes: number[]; name: string };
 
 export function useConcertEditor(concertId: string) {
+  const { t } = useTranslation();
   const [concertName, setConcertName] = useState<string>("");
   const [chorists, setChorists] = useState<Chorist[]>([]);
   const [placements, setPlacementsInternal] = useState<Placement[]>([]);
@@ -245,6 +248,29 @@ export function useConcertEditor(concertId: string) {
     ).then((entries) => setAllSongFormationIds(new Map(entries)));
   }, [concertSongs]);
 
+  // Auto-select first song on initial load
+  const hasAutoSelectedSongRef = useRef(false);
+  useEffect(() => {
+    if (hasAutoSelectedSongRef.current) return;
+    if (concertSongs.length === 0) return;
+    hasAutoSelectedSongRef.current = true;
+    handleSelectConcertSong(concertSongs[0].id);
+  }, [concertSongs]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-select 4-part voice group on initial load
+  const hasAutoSelectedGroupRef = useRef(false);
+  useEffect(() => {
+    if (hasAutoSelectedGroupRef.current) return;
+    if (voiceGroups.length === 0) return;
+    const fourPart = voiceGroups.find(
+      (g) => g.name.includes("4-part") || g.name.includes("4-stäm"),
+    );
+    if (fourPart) {
+      hasAutoSelectedGroupRef.current = true;
+      handleSelectGroup(fourPart.id);
+    }
+  }, [voiceGroups]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // History-aware placement setter — use for all user-initiated changes
   function setPlacements(newPlacements: Placement[]) {
     setPastPlacements((prev) => [...prev.slice(-49), placements]);
@@ -387,6 +413,42 @@ export function useConcertEditor(concertId: string) {
   async function handleSaveRoster(ids: Set<string>) {
     await setConcertChorists(concertId, Array.from(ids));
     setRosterIds(ids);
+  }
+
+  async function handleDeleteOrUnlinkFormation() {
+    if (!activeFormationId) return;
+    const formation = formations.find((f) => f.id === activeFormationId);
+    const name = formation?.name ?? "";
+    // Check how many songs reference this formation
+    const songsUsingFormation = Array.from(allSongFormationIds.entries()).filter(
+      ([, ids]) => ids.includes(activeFormationId),
+    );
+    const isShared = songsUsingFormation.length > 1;
+
+    if (isShared) {
+      if (!window.confirm(t("formations.confirmUnlink").replace("{name}", name).replace("{count}", String(songsUsingFormation.length - 1)))) return;
+      if (activeConcertSongId) {
+        const updatedIds = Array.from(songFormationIds).filter((id) => id !== activeFormationId);
+        await setSongFormations(activeConcertSongId, updatedIds);
+        updateSongFormationIds(new Set(updatedIds));
+      }
+    } else {
+      if (!window.confirm(t("formations.confirmDelete").replace("{name}", name))) return;
+      if (!(await deleteFormation(activeFormationId))) return;
+      setFormations(formations.filter((f) => f.id !== activeFormationId));
+      if (activeConcertSongId) {
+        const updatedIds = Array.from(songFormationIds).filter((id) => id !== activeFormationId);
+        updateSongFormationIds(new Set(updatedIds));
+      }
+    }
+
+    setActiveFormationId(null);
+    setFormationName(null);
+    isSyncingRef.current = true;
+    setPastPlacements([]);
+    setFuturePlacements([]);
+    setPlacementsInternal([]);
+    setRowSizes([]);
   }
 
   function handlePlace(choristId: string) {
@@ -585,6 +647,7 @@ export function useConcertEditor(concertId: string) {
     handleLoad,
     handleClampPlacements,
     handleReorderFormations,
+    handleDeleteOrUnlinkFormation,
     setFormationName,
     setHighlightPartId,
     hasPrevFormation,

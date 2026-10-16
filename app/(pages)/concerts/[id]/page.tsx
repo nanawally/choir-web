@@ -197,6 +197,7 @@ export default function ConcertEditor({
             onRedo={editor.redo}
             canUndo={editor.canUndo}
             canRedo={editor.canRedo}
+            autoSaveStatus={editor.autoSaveStatus}
           />
         </div>
 
@@ -238,7 +239,7 @@ export default function ConcertEditor({
           formationName={editor.formationName}
           formations={editor.formations}
           onFormationsChange={editor.setFormations}
-          autoSaveStatus={editor.autoSaveStatus}
+          onDeleteOrUnlinkFormation={editor.handleDeleteOrUnlinkFormation}
         />
         <VoiceGroupPanel
           activeGroupId={editor.activeGroupId}

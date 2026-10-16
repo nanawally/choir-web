@@ -26,6 +26,11 @@
  *
  * Status:
  *   success           Green accents (chorist placed, positive state)
+ *   warning           Yellow accents (in-progress state)
+ *   warning-bg        Light yellow background for warning badges
+ *   warning-text      Text on warning-bg backgrounds
+ *   success-bg        Light green background for success badges
+ *   success-text      Text on success-bg backgrounds
  *   primary-light     Light blue highlights (filter tags, active states)
  *   primary-light-text Text on primary-light backgrounds
  */
@@ -49,6 +54,10 @@
   --overlay: rgba(0, 0, 0, 0.3);
 
   --success: #22c55e;
+  --warning-bg: #fef9c3;
+  --warning-text: #854d0e;
+  --success-bg: #dcfce7;
+  --success-text: #166534;
   --primary-light: #dbeafe;
   --primary-light-text: #1e40af;
 }
@@ -72,6 +81,10 @@
   --overlay: rgba(0, 0, 0, 0.5);
 
   --success: #22c55e;
+  --warning-bg: #422006;
+  --warning-text: #fef08a;
+  --success-bg: #052e16;
+  --success-text: #86efac;
   --primary-light: rgba(59, 130, 246, 0.2);
   --primary-light-text: #93c5fd;
 }
@@ -95,6 +108,10 @@
   --color-overlay: var(--overlay);
 
   --color-success: var(--success);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-text: var(--warning-text);
+  --color-success-bg: var(--success-bg);
+  --color-success-text: var(--success-text);
   --color-primary-light: var(--primary-light);
   --color-primary-light-text: var(--primary-light-text);
 

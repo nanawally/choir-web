@@ -4,7 +4,6 @@ import { useRef, useState } from "react";
 import {
   listConcerts,
   createFormation,
-  deleteFormation,
   duplicateFormation,
   renameFormation,
   copyFormationToConcert,
@@ -40,7 +39,7 @@ type Props = {
   formationName: string | null;
   formations: Formation[];
   onFormationsChange: (formations: Formation[]) => void;
-  autoSaveStatus: "idle" | "saving" | "saved";
+  onDeleteOrUnlinkFormation: () => void;
 };
 
 export default function FormationBar({
@@ -60,7 +59,7 @@ export default function FormationBar({
   formationName,
   formations,
   onFormationsChange,
-  autoSaveStatus,
+  onDeleteOrUnlinkFormation,
 }: Props) {
   const { t } = useTranslation();
   const [showAddModal, setShowAddModal] = useState(false);
@@ -101,18 +100,6 @@ export default function FormationBar({
         await setSongFormations(activeConcertSongId, updatedIds);
         onSongFormationsChange(new Set(updatedIds));
       }
-    }
-  }
-
-  async function handleDeleteFormation() {
-    if (!activeFormationId) return;
-    const formation = formations.find((f) => f.id === activeFormationId);
-    if (!window.confirm(t("formations.confirmDelete").replace("{name}", formation?.name ?? ""))) return;
-    if (await deleteFormation(activeFormationId)) {
-      onFormationsChange(formations.filter((f) => f.id !== activeFormationId));
-      onActiveFormationIdChange(null);
-      onFormationNameChange(null);
-      onLoad([], [], []);
     }
   }
 
@@ -291,9 +278,6 @@ export default function FormationBar({
       {/* Auto-save status + action buttons — only when a formation is selected */}
       {activeFormationId && (
         <div className="flex flex-col gap-2 mt-2">
-          <p className={`text-xs ${autoSaveStatus === "saving" ? "text-muted" : autoSaveStatus === "saved" ? "text-success" : "invisible"}`}>
-            {autoSaveStatus === "saving" ? t("common.saving") : t("common.saved")}
-          </p>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={handleDuplicateFormation}
@@ -308,7 +292,7 @@ export default function FormationBar({
               {t("formations.copyTo")}
             </button>
             <button
-              onClick={handleDeleteFormation}
+              onClick={onDeleteOrUnlinkFormation}
               className="px-2 py-1 btn-danger text-sm"
             >
               {t("common.delete")}
