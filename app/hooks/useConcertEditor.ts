@@ -55,6 +55,7 @@ export function useConcertEditor(concertId: string) {
   const [showSetlist, setShowSetlist] = useState(false);
   const [showChorists, setShowChorists] = useState(false);
   const [showFormations, setShowFormations] = useState(false);
+  const [showVoiceGroups, setShowVoiceGroups] = useState(false);
   const [concertSongs, setConcertSongs] = useState<
     { id: string; songId: string; name: string; sortOrder: number }[]
   >([]);
@@ -411,8 +412,22 @@ export function useConcertEditor(concertId: string) {
   }
 
   async function handleSaveRoster(ids: Set<string>) {
+    const removedIds = new Set(Array.from(rosterIds).filter((id) => !ids.has(id)));
     await setConcertChorists(concertId, Array.from(ids));
     setRosterIds(ids);
+    if (removedIds.size > 0) {
+      // Clean up current formation placements
+      setPlacementsInternal((prev) => prev.filter((p) => !removedIds.has(p.choristId)));
+      setPastPlacements([]);
+      setFuturePlacements([]);
+      // Clean up formation cache
+      formationCacheRef.current.forEach((cached, fId) => {
+        formationCacheRef.current.set(fId, {
+          ...cached,
+          placements: cached.placements.filter((p) => !removedIds.has(p.choristId)),
+        });
+      });
+    }
   }
 
   async function handleDeleteOrUnlinkFormation() {
@@ -624,9 +639,11 @@ export function useConcertEditor(concertId: string) {
     // Setters the UI needs directly
     setPlacements,
     setSelectedIds,
+    showVoiceGroups,
     setShowSetlist,
     setShowChorists,
     setShowFormations,
+    setShowVoiceGroups,
     setShowRosterModal,
     setShowEditSetlist,
     setConcertSongs,

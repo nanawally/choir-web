@@ -14,9 +14,10 @@ import EditSetlistModal from "../../../components/concert/EditSetlistModal";
 import Link from "next/link";
 import {
   ArrowBigLeft,
+  CirclePile,
+  Shapes,
   SquareMenu,
   UsersRound,
-  UserRoundGroup,
 } from "lucide-react";
 import { useTranslation } from "../../../lib/LanguageContext";
 
@@ -31,7 +32,7 @@ export default function ConcertEditor({
   const { t } = useTranslation();
   const editor = useConcertEditor(id);
   const leftOpen = editor.showSetlist || editor.showChorists;
-  const rightOpen = editor.showFormations;
+  const rightOpen = editor.showFormations || editor.showVoiceGroups;
 
   // Track full window size (the "virtual" coordinate space)
   const [windowSize, setWindowSize] = useState({ width: 1600, height: 734 });
@@ -201,13 +202,27 @@ export default function ConcertEditor({
           />
         </div>
 
-        {/* Right toggle button — sits beside the canvas, not on top */}
+        {/* Right toggle buttons — sits beside the canvas, not on top */}
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
           <button
-            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
-            onClick={() => editor.setShowFormations(!editor.showFormations)}
+            className={`rounded-lg shadow p-2 hover:bg-surface-alt ${editor.showFormations ? "bg-primary-light" : "bg-surface"}`}
+            onClick={() => {
+              editor.setShowFormations(!editor.showFormations);
+              editor.setShowVoiceGroups(false);
+            }}
+            title={t("formations.formations")}
           >
-            <UserRoundGroup size={20} />
+            <CirclePile size={20} />
+          </button>
+          <button
+            className={`rounded-lg shadow p-2 hover:bg-surface-alt ${editor.showVoiceGroups ? "bg-primary-light" : "bg-surface"}`}
+            onClick={() => {
+              editor.setShowVoiceGroups(!editor.showVoiceGroups);
+              editor.setShowFormations(false);
+            }}
+            title={t("voiceGroups.title")}
+          >
+            <Shapes size={20} />
           </button>
         </div>
       </div>
@@ -216,39 +231,43 @@ export default function ConcertEditor({
       {!isDesktop && (
         <div
           className={`absolute inset-0 bg-overlay z-10 transition-opacity duration-300 ease-in-out ${rightOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-          onClick={() => editor.setShowFormations(false)}
+          onClick={() => { editor.setShowFormations(false); editor.setShowVoiceGroups(false); }}
         />
       )}
       <div
         className={`absolute top-0 right-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-20 transition-transform duration-300 ease-in-out ${rightOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <FormationBar
-          concertId={id}
-          placements={editor.placements}
-          onLoad={editor.handleLoad}
-          onSelectFormation={editor.handleSelectFormation}
-          onFormationNameChange={editor.setFormationName}
-          songFormationIds={editor.songFormationIds}
-          activeConcertSongId={editor.activeConcertSongId}
-          onSongFormationsChange={editor.updateSongFormationIds}
-          rowSizes={editor.rowSizes}
-          onRowSizesChange={editor.setRowSizes}
-          onClampPlacements={editor.handleClampPlacements}
-          activeFormationId={editor.activeFormationId}
-          onActiveFormationIdChange={editor.setActiveFormationId}
-          formationName={editor.formationName}
-          formations={editor.formations}
-          onFormationsChange={editor.setFormations}
-          onDeleteOrUnlinkFormation={editor.handleDeleteOrUnlinkFormation}
-        />
-        <VoiceGroupPanel
-          activeGroupId={editor.activeGroupId}
-          onSelectGroup={editor.handleSelectGroup}
-          voiceGroups={editor.voiceGroups}
-          setVoiceGroups={editor.setVoiceGroups}
-          highlightPartId={editor.highlightPartId}
-          onHighlightPart={editor.setHighlightPartId}
-        />
+        {editor.showFormations && (
+          <FormationBar
+            concertId={id}
+            placements={editor.placements}
+            onLoad={editor.handleLoad}
+            onSelectFormation={editor.handleSelectFormation}
+            onFormationNameChange={editor.setFormationName}
+            songFormationIds={editor.songFormationIds}
+            activeConcertSongId={editor.activeConcertSongId}
+            onSongFormationsChange={editor.updateSongFormationIds}
+            rowSizes={editor.rowSizes}
+            onRowSizesChange={editor.setRowSizes}
+            onClampPlacements={editor.handleClampPlacements}
+            activeFormationId={editor.activeFormationId}
+            onActiveFormationIdChange={editor.setActiveFormationId}
+            formationName={editor.formationName}
+            formations={editor.formations}
+            onFormationsChange={editor.setFormations}
+            onDeleteOrUnlinkFormation={editor.handleDeleteOrUnlinkFormation}
+          />
+        )}
+        {editor.showVoiceGroups && (
+          <VoiceGroupPanel
+            activeGroupId={editor.activeGroupId}
+            onSelectGroup={editor.handleSelectGroup}
+            voiceGroups={editor.voiceGroups}
+            setVoiceGroups={editor.setVoiceGroups}
+            highlightPartId={editor.highlightPartId}
+            onHighlightPart={editor.setHighlightPartId}
+          />
+        )}
       </div>
       {/* Bottom navigation bar — visible when a formation is selected and setlist drawer is closed */}
       {!editor.showSetlist && editor.activeFormationId && (

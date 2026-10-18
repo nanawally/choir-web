@@ -425,7 +425,7 @@ export default function BaseFormationEditor({
               throw new Error("Function not implemented.");
             } } onRedo={function (): void {
               throw new Error("Function not implemented.");
-            } } canUndo={false} canRedo={false}          />
+            } } canUndo={false} canRedo={false} autoSaveStatus={"saving"}          />
         </div>
 
         {/* Right toggle button */}
