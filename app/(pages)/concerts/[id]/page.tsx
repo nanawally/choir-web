@@ -194,6 +194,7 @@ export default function ConcertEditor({
             virtualWidth={windowSize.width}
             virtualHeight={windowSize.height}
             activeFormationId={editor.activeFormationId}
+            songName={editor.concertSongs.find((s) => s.id === editor.activeConcertSongId)?.name ?? null}
             onUndo={editor.undo}
             onRedo={editor.redo}
             canUndo={editor.canUndo}

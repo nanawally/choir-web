@@ -42,6 +42,7 @@ type Props = {
   virtualWidth: number;
   virtualHeight: number;
   activeFormationId: string | null;
+  songName: string | null;
   onUndo: () => void;
   onRedo: () => void;
   canUndo: boolean;
@@ -94,6 +95,7 @@ export default function GridCanvas({
   virtualWidth,
   virtualHeight,
   activeFormationId,
+  songName,
   onUndo,
   onRedo,
   canUndo,
@@ -295,9 +297,36 @@ export default function GridCanvas({
   function handleDownload() {
     const stage = stageRef.current;
     if (!stage) return;
-    const dataURL = stage.toDataURL({ pixelRatio: 2 });
+
+    let dataURL: string;
+    if (rowSizes.length > 0) {
+      // Arc mode: crop to bounding box of all arc positions + padding
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      rowSizes.forEach((rowSize, gy) => {
+        for (let gx = 0; gx < rowSize; gx++) {
+          const pos = arcPosition(gx, gy, rowSize, centerX, centerY, rowSpacing);
+          if (pos.x < minX) minX = pos.x;
+          if (pos.x > maxX) maxX = pos.x;
+          if (pos.y < minY) minY = pos.y;
+          if (pos.y > maxY) maxY = pos.y;
+        }
+      });
+      // Pad by one shape radius + label height in virtual units
+      const PAD = 40;
+      const cropX = Math.max(0, minX - PAD) * effectiveScale;
+      const cropY = Math.max(0, minY - PAD) * effectiveScale;
+      const cropW = (Math.min(effectiveVW, maxX + PAD) - Math.max(0, minX - PAD)) * effectiveScale;
+      const cropH = (Math.min(effectiveVH, maxY + PAD) - Math.max(0, minY - PAD)) * effectiveScale;
+      dataURL = stage.toDataURL({ x: cropX, y: cropY, width: cropW, height: cropH, pixelRatio: 2 });
+    } else {
+      dataURL = stage.toDataURL({ pixelRatio: 2 });
+    }
+
     const link = document.createElement("a");
-    link.download = (formationName || "formation") + ".png";
+    const filename = songName && formationName
+      ? `${songName} - ${formationName}`
+      : songName || formationName || "formation";
+    link.download = filename + ".png";
     link.href = dataURL;
     link.click();
   }
@@ -531,26 +560,54 @@ export default function GridCanvas({
 
                     if (rowSizes.length > 0) {
                       const snapped = snapToArc(node.x(), node.y());
-                      if (
-                        !snapped ||
-                        occupied.has(`${snapped.gridX},${snapped.gridY}`)
-                      ) {
-                        // Snap back to original position
+                      if (!snapped) {
                         node.position(origPos);
                         return;
                       }
-                      node.position({ x: snapped.x, y: snapped.y });
-                      setPlacements(
-                        placements.map((pl) =>
-                          pl.choristId === p.choristId
-                            ? {
-                                ...pl,
-                                gridX: snapped.gridX,
-                                gridY: snapped.gridY,
-                              }
-                            : pl,
-                        ),
-                      );
+
+                      if (dragStart && selectedIds.has(p.choristId) && selectedIds.size > 1) {
+                        const dgx = snapped.gridX - p.gridX;
+                        const dgy = snapped.gridY - p.gridY;
+                        const nonSelectedPositions = new Set(
+                          placements
+                            .filter((pl) => !selectedIds.has(pl.choristId))
+                            .map((pl) => `${pl.gridX},${pl.gridY}`),
+                        );
+                        const hasCollision = placements
+                          .filter((pl) => selectedIds.has(pl.choristId))
+                          .some((pl) => {
+                            const nx = pl.gridX + dgx;
+                            const ny = pl.gridY + dgy;
+                            if (ny < 0 || ny >= rowSizes.length) return true;
+                            if (nx < 0 || nx >= rowSizes[ny]) return true;
+                            return nonSelectedPositions.has(`${nx},${ny}`);
+                          });
+                        if (hasCollision) {
+                          node.position(origPos);
+                          return;
+                        }
+                        node.position({ x: snapped.x, y: snapped.y });
+                        setPlacements(
+                          placements.map((pl) =>
+                            selectedIds.has(pl.choristId)
+                              ? { ...pl, gridX: pl.gridX + dgx, gridY: pl.gridY + dgy }
+                              : pl,
+                          ),
+                        );
+                      } else {
+                        if (occupied.has(`${snapped.gridX},${snapped.gridY}`)) {
+                          node.position(origPos);
+                          return;
+                        }
+                        node.position({ x: snapped.x, y: snapped.y });
+                        setPlacements(
+                          placements.map((pl) =>
+                            pl.choristId === p.choristId
+                              ? { ...pl, gridX: snapped.gridX, gridY: snapped.gridY }
+                              : pl,
+                          ),
+                        );
+                      }
                     } else {
                       const newX = snapToGrid(node.x());
                       const newY = snapToGrid(node.y());
