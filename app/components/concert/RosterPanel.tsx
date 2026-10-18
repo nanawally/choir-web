@@ -88,7 +88,7 @@ export default function RosterPanel({
 
   return (<>
     <div className="overflow-y-auto h-full">
-      <h2 className="font-bold mb-3">Chorists</h2>
+      <h2 className="font-bold mb-3">{t("chorists.title")}</h2>
       <button
         onClick={() => onEditRoster()}
         className="m-4 px-3 py-1 btn-primary text-sm"

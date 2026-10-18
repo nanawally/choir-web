@@ -328,14 +328,14 @@ export default function VoiceGroupPanel({
 
   return (
     <div className="w-64 p-4 overflow-y-auto">
-      <h2 className="font-bold mb-3">Voice Groups</h2>
+      <h2 className="font-bold mb-3">{t("voiceGroups.title")}</h2>
 
       <select
         value={activeGroupId || ""}
         onChange={(e) => onSelectGroup(e.target.value || null)}
         className="w-full border border-border rounded px-2 py-1 text-sm mb-2"
       >
-        <option value="">No voice group</option>
+        <option value="">{t("voiceGroups.noGroup")}</option>
         {sortVoiceGroups(voiceGroups).map((g) => (
           <option key={g.id} value={g.id}>
             {g.name}
@@ -355,7 +355,7 @@ export default function VoiceGroupPanel({
                 setNewGroupName("");
               }
             }}
-            placeholder="New group..."
+            placeholder={t("voiceGroups.newGroup")}
             className="border border-border rounded px-2 py-1 text-sm"
             autoFocus
           />
@@ -378,7 +378,7 @@ export default function VoiceGroupPanel({
       {activeGroup && (
         <>
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs text-muted font-medium">Parts</h3>
+            <h3 className="text-xs text-muted font-medium">{t("voiceGroups.parts")}</h3>
             <button
               onClick={handleDeleteGroup}
               className="text-danger hover:text-danger-hover text-xs"
@@ -440,7 +440,7 @@ export default function VoiceGroupPanel({
                     setNewPartName("");
                   }
                 }}
-                placeholder="Part name..."
+                placeholder={t("voiceGroups.partName")}
                 className="border border-border rounded px-2 py-1 text-sm"
                 autoFocus
               />

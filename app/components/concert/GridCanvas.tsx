@@ -401,7 +401,7 @@ export default function GridCanvas({
             onClick={onUndo}
             disabled={!canUndo}
             className="px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded disabled:opacity-40"
-            title="Undo"
+            title={t("common.undo")}
           >
             <Undo size={16} />
           </button>
@@ -409,7 +409,7 @@ export default function GridCanvas({
             onClick={onRedo}
             disabled={!canRedo}
             className="px-2 py-1 bg-surface-alt hover:bg-surface-alt rounded disabled:opacity-40"
-            title="Redo"
+            title={t("common.redo")}
           >
             <Redo size={16} />
           </button>

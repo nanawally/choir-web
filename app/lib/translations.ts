@@ -74,6 +74,8 @@ const translations = {
   "common.duplicate": { en: "Duplicate", sv: "Duplicera" },
   "common.saving": { en: "Saving...", sv: "Sparar..." },
   "common.saved": { en: "Saved", sv: "Sparat" },
+  "common.undo": { en: "Undo", sv: "Ångra" },
+  "common.redo": { en: "Redo", sv: "Gör om" },
   "common.downloadCsv": { en: "Download CSV", sv: "Ladda ner CSV" },
   "common.downloadPng": { en: "Download PNG", sv: "Ladda ner PNG" },
   "common.columnVisibility": {
@@ -129,6 +131,7 @@ const translations = {
     en: "Soloist names (comma-separated)",
     sv: "Solistnamn (kommaseparerade)",
   },
+  "songs.soloistPlaceholder": { en: "Anna, Erik", sv: "Anna, Erik" },
   "songs.soloistReservs": {
     en: "Reserve soloists",
     sv: "Reservsolister",
@@ -254,6 +257,9 @@ const translations = {
   },
   "voiceGroups.addPart": { en: "+ Add part", sv: "+ Lägg till stämma" },
   "voiceGroups.partName": { en: "Part name...", sv: "Stämnamn..." },
+  "voiceGroups.newGroup": { en: "New group...", sv: "Ny stämdelning..." },
+  "voiceGroups.noGroup": { en: "No voice group", sv: "Ingen stämdelning" },
+  "voiceGroups.parts": { en: "Parts", sv: "Stämmor" },
   "voiceGroups.partCount": { en: "part", sv: "stämma" },
   "voiceGroups.partsCount": { en: "parts", sv: "stämmor" },
   "voiceGroups.deleteGroup": {
