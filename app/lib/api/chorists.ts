@@ -35,3 +35,8 @@ export async function deleteChorist(id: string) {
   const res = await apiFetch(`/chorists/${id}`, { method: "DELETE" });
   return res.ok;
 }
+
+export async function createChoristAccount(id: string): Promise<{ username: string; setupToken: string } | null> {
+  const res = await apiFetch(`/chorists/${id}/account`, { method: "POST" });
+  return res.ok ? res.json() : null;
+}

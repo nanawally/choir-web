@@ -11,6 +11,7 @@ const translations = {
   "nav.termPlan": { en: "Term Plan", sv: "Terminsplan" },
   "nav.settings": { en: "Settings", sv: "Inställningar" },
   "nav.logOut": { en: "Log out", sv: "Logga ut" },
+  "nav.logIn": { en: "Log in", sv: "Logga in" },
 
   // Home page
   "home.manageConcerts": {
@@ -242,6 +243,9 @@ const translations = {
     en: "Section leader",
     sv: "Stämfiskal",
   },
+  "chorists.createAccount": { en: "Create account", sv: "Skapa konto" },
+  "chorists.accountPending": { en: "Account pending", sv: "Konto väntar" },
+  "chorists.accountActive": { en: "Account active", sv: "Konto aktivt" },
 
   // Voice Groups
   "voiceGroups.title": { en: "Voice Groups", sv: "Stämdelningar" },
@@ -441,6 +445,29 @@ const translations = {
   "settings.themeSystem": { en: "System", sv: "System" },
   "settings.themeLight": { en: "Light", sv: "Ljust" },
   "settings.themeDark": { en: "Dark", sv: "Mörkt" },
+  "settings.users": { en: "Users", sv: "Användare" },
+  "settings.usersTitle": { en: "User management", sv: "Hantera användare" },
+  "settings.createUser": { en: "Create user", sv: "Skapa användare" },
+  "settings.username": { en: "Username", sv: "Användarnamn" },
+  "settings.role": { en: "Role", sv: "Roll" },
+  "settings.resetAccount": { en: "Reset account", sv: "Återställ konto" },
+  "settings.showSetupQr": { en: "Show setup QR", sv: "Visa QR-kod" },
+  "settings.noUsers": { en: "No users yet.", sv: "Inga användare ännu." },
+  "setup.title": { en: "Set up your account", sv: "Skapa ditt konto" },
+  "setup.intro": { en: "You're setting up the account", sv: "Du skapar kontot" },
+  "setup.password": { en: "Password", sv: "Lösenord" },
+  "setup.confirmPassword": { en: "Confirm password", sv: "Bekräfta lösenord" },
+  "setup.mismatch": { en: "Passwords don't match", sv: "Lösenorden matchar inte" },
+  "setup.submit": { en: "Set password", sv: "Ange lösenord" },
+  "setup.success": { en: "Account set up! You can now log in.", sv: "Konto skapat! Du kan nu logga in." },
+  "setup.invalidToken": { en: "This setup link is invalid or has expired.", sv: "Denna länk är ogiltig eller har gått ut." },
+  "setup.loading": { en: "Loading…", sv: "Laddar…" },
+  "setup.goToLogin": { en: "Go to login page", sv: "Gå till inloggningssidan" },
+  "qrModal.title": { en: "Account created", sv: "Konto skapat" },
+  "qrModal.instruction": { en: "Have the member scan this QR code to set their password.", sv: "Be medlemmen skanna denna QR-kod för att ange sitt lösenord." },
+  "qrModal.username": { en: "Username:", sv: "Användarnamn:" },
+  "qrModal.copy": { en: "Copy link", sv: "Kopiera länk" },
+  "qrModal.copied": { en: "Copied!", sv: "Kopierat!" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

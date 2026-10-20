@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { SquarePen } from "lucide-react";
+import { SquarePen, UserPlus, Clock, Check } from "lucide-react";
 import {
   createChorist,
   updateChorist,
   assignChorist,
   unassignChorist,
   archiveChorist,
+  createChoristAccount,
+  getTokenRole,
 } from "../../lib/api";
 import { sortVoiceGroups } from "../../lib/voiceGroupSort";
 import { useTranslation } from "../../lib/LanguageContext";
+import AccountQrModal from "./AccountQrModal";
 
 type Chorist = {
   id: string;
@@ -19,6 +22,7 @@ type Chorist = {
   isSectionLeader: boolean;
   isArchived: boolean;
   notes: string | null;
+  accountStatus: "none" | "pending" | "active" | null;
 };
 
 type VoicePart = { id: string; name: string; color: string; shape: string };
@@ -47,7 +51,9 @@ export default function ChoristModal({
   onSaved,
 }: ChoristModalProps) {
   const { t } = useTranslation();
+  const isAdmin = getTokenRole() === "admin";
   const [editing, setEditing] = useState(mode === "add");
+  const [qrData, setQrData] = useState<{ username: string; setupToken: string } | null>(null);
   const [firstName, setFirstName] = useState(chorist?.firstName ?? "");
   const [lastName, setLastName] = useState(chorist?.lastName ?? "");
   const [sectionLeader, setSectionLeader] = useState(chorist?.isSectionLeader ?? false);
@@ -164,14 +170,45 @@ export default function ChoristModal({
                 <p className="text-xs text-muted">{t("chorists.sectionLeaderTooltip")}</p>
               )}
             </div>
-            <button
-              onClick={() => setEditing(true)}
-              className="text-subtle hover:text-muted"
-              title={t("common.edit")}
-            >
-              <SquarePen size={16} />
-            </button>
+            <div className="flex items-center gap-2">
+              {isAdmin && chorist.accountStatus === "none" && (
+                <button
+                  onClick={async () => {
+                    const data = await createChoristAccount(chorist.id);
+                    if (data) setQrData(data);
+                  }}
+                  className="text-subtle hover:text-muted"
+                  title={t("chorists.createAccount")}
+                >
+                  <UserPlus size={16} />
+                </button>
+              )}
+              {isAdmin && chorist.accountStatus === "pending" && (
+                <span className="text-warning-text" title={t("chorists.accountPending")}>
+                  <Clock size={14} />
+                </span>
+              )}
+              {isAdmin && chorist.accountStatus === "active" && (
+                <span className="text-success" title={t("chorists.accountActive")}>
+                  <Check size={14} />
+                </span>
+              )}
+              <button
+                onClick={() => setEditing(true)}
+                className="text-subtle hover:text-muted"
+                title={t("common.edit")}
+              >
+                <SquarePen size={16} />
+              </button>
+            </div>
           </div>
+          {qrData && (
+            <AccountQrModal
+              username={qrData.username}
+              setupToken={qrData.setupToken}
+              onClose={() => { setQrData(null); onSaved(); }}
+            />
+          )}
 
           <div className="flex gap-6">
             {/* Left: voice groups */}

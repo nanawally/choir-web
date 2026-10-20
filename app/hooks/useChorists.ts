@@ -14,6 +14,7 @@ export type Chorist = {
   isSectionLeader: boolean;
   isArchived: boolean;
   notes: string | null;
+  accountStatus: "none" | "pending" | "active" | null;
 };
 
 export type VoicePart = { id: string; name: string; color: string; shape: string };

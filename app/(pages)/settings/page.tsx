@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
+import { getTokenRole } from "../../lib/api";
 
 type Theme = "system" | "light" | "dark";
 
@@ -30,6 +32,11 @@ function applyTheme(theme: Theme) {
 
 export default function SettingsPage() {
   const { lang, setLang, t } = useTranslation();
+  const isAdmin = useSyncExternalStore(
+    () => () => {},
+    () => getTokenRole() === "admin",
+    () => false,
+  );
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   function handleThemeChange(next: Theme) {
@@ -49,6 +56,15 @@ export default function SettingsPage() {
         </h1>
 
         <div className="mx-auto w-full max-w-md space-y-4">
+          {/* User management — admin only */}
+          {isAdmin && (
+            <Link
+              href="/settings/users"
+              className="block border border-border rounded-lg p-4 hover:bg-hover-bg"
+            >
+              <span className="text-sm font-medium">{t("settings.users")}</span>
+            </Link>
+          )}
           {/* Language */}
           <div className="border border-border rounded-lg p-4">
             <label className="block text-sm font-medium text-text-muted mb-2">
