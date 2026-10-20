@@ -93,73 +93,133 @@ export default function UsersPage() {
         ) : users.length === 0 ? (
           <p className="text-muted">{t("settings.noUsers")}</p>
         ) : (
-          <div className="overflow-x-auto mb-8">
-            <table className="w-full border-collapse text-sm">
-              <thead>
-                <tr className="border-b-2 border-border">
-                  <th className="text-left p-2">{t("settings.username")}</th>
-                  <th className="text-left p-2">{t("settings.role")}</th>
-                  <th className="text-left p-2">Status</th>
-                  <th className="p-2" />
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id} className="border-b border-border">
-                    <td className="p-2 font-mono">{user.username}</td>
-                    <td className="p-2">
-                      <select
-                        value={user.role}
-                        onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                        className="border border-border rounded px-2 py-1 bg-surface text-sm"
-                      >
-                        <option value="user">user</option>
-                        <option value="admin">admin</option>
-                      </select>
-                    </td>
-                    <td className="p-2 text-muted">
-                      {user.isPending ? t("chorists.accountPending") : t("chorists.accountActive")}
-                    </td>
-                    <td className="p-2">
-                      <div className="flex gap-2 justify-end">
-                        <button
-                          onClick={() => handleReset(user.id)}
-                          className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
-                        >
-                          {user.isPending ? t("settings.showSetupQr") : t("settings.resetAccount")}
-                        </button>
-                        {user.isArchived ? (
-                          <button
-                            onClick={async () => { await unarchiveUser(user.id); load(); }}
-                            className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
-                          >
-                            {t("chorists.unarchive")}
-                          </button>
-                        ) : (
-                          <button
-                            onClick={async () => { await archiveUser(user.id); load(); }}
-                            className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
-                          >
-                            {t("chorists.archive")}
-                          </button>
-                        )}
-                        <button
-                          onClick={async () => {
-                            if (window.confirm(`Delete ${user.username}?`)) {
-                              await deleteUser(user.id); load();
-                            }
-                          }}
-                          className="text-xs px-2 py-1 text-danger border border-danger rounded hover:bg-hover-bg"
-                        >
-                          {t("common.delete")}
-                        </button>
-                      </div>
-                    </td>
+          <>
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto mb-8">
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b-2 border-border">
+                    <th className="text-left p-2">{t("settings.username")}</th>
+                    <th className="text-left p-2">{t("settings.role")}</th>
+                    <th className="text-left p-2">Status</th>
+                    <th className="p-2" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user.id} className="border-b border-border">
+                      <td className="p-2 font-mono">{user.username}</td>
+                      <td className="p-2">
+                        <select
+                          value={user.role}
+                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                          className="border border-border rounded px-2 py-1 bg-surface text-sm"
+                        >
+                          <option value="user">user</option>
+                          <option value="admin">admin</option>
+                        </select>
+                      </td>
+                      <td className="p-2 text-muted">
+                        {user.isPending ? t("chorists.accountPending") : t("chorists.accountActive")}
+                      </td>
+                      <td className="p-2">
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={() => handleReset(user.id)}
+                            className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
+                          >
+                            {user.isPending ? t("settings.showSetupQr") : t("settings.resetAccount")}
+                          </button>
+                          {user.isArchived ? (
+                            <button
+                              onClick={async () => { await unarchiveUser(user.id); load(); }}
+                              className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
+                            >
+                              {t("chorists.unarchive")}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={async () => { await archiveUser(user.id); load(); }}
+                              className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
+                            >
+                              {t("chorists.archive")}
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              if (window.confirm(`Delete ${user.username}?`)) {
+                                await deleteUser(user.id); load();
+                              }
+                            }}
+                            className="text-xs px-2 py-1 text-danger border border-danger rounded hover:bg-hover-bg"
+                          >
+                            {t("common.delete")}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden flex flex-col gap-2 mb-8">
+              {users.map((user) => (
+                <div key={user.id} className="border border-border rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-mono text-sm font-medium flex-1 min-w-0 truncate">
+                      {user.username}
+                    </span>
+                    <span className="text-xs text-muted shrink-0">
+                      {user.isPending ? t("chorists.accountPending") : t("chorists.accountActive")}
+                    </span>
+                    <select
+                      value={user.role}
+                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                      className="border border-border rounded px-2 py-1 bg-surface text-sm shrink-0"
+                    >
+                      <option value="user">user</option>
+                      <option value="admin">admin</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => handleReset(user.id)}
+                      className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
+                    >
+                      {user.isPending ? t("settings.showSetupQr") : t("settings.resetAccount")}
+                    </button>
+                    {user.isArchived ? (
+                      <button
+                        onClick={async () => { await unarchiveUser(user.id); load(); }}
+                        className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
+                      >
+                        {t("chorists.unarchive")}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={async () => { await archiveUser(user.id); load(); }}
+                        className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
+                      >
+                        {t("chorists.archive")}
+                      </button>
+                    )}
+                    <button
+                      onClick={async () => {
+                        if (window.confirm(`Delete ${user.username}?`)) {
+                          await deleteUser(user.id); load();
+                        }
+                      }}
+                      className="text-xs px-2 py-1 text-danger border border-danger rounded hover:bg-hover-bg ml-auto"
+                    >
+                      {t("common.delete")}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         <div className="max-w-sm">
