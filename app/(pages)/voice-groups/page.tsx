@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   GripVertical,
-  EllipsisVertical,
+  Users,
   ChevronUp,
   ChevronRight,
 } from "lucide-react";
@@ -15,6 +15,7 @@ import {
   type VoicePart,
   type VoiceGroup,
 } from "../../hooks/useVoiceGroups";
+import VoiceGroupDetailModal from "../../components/voiceGroups/VoiceGroupDetailModal";
 import {
   DndContext,
   closestCenter,
@@ -158,21 +159,15 @@ function VoiceGroupCard({
   newPartName,
   newPartColor,
   newPartShape,
-  renamingGroupId,
-  renameValue,
   onSetAddingPartGroupId,
   onSetNewPartName,
   onSetNewPartColor,
   onSetNewPartShape,
-  onSetRenamingGroupId,
-  onSetRenameValue,
   onAddPart,
   onUpdatePart,
   onDeletePart,
   onPartDragEnd,
-  onRenameGroup,
-  onToggleStandard,
-  onDeleteGroup,
+  onOpenDetail,
 }: {
   group: VoiceGroup;
   sensors: ReturnType<typeof useSensors>;
@@ -180,14 +175,10 @@ function VoiceGroupCard({
   newPartName: string;
   newPartColor: string;
   newPartShape: string;
-  renamingGroupId: string | null;
-  renameValue: string;
   onSetAddingPartGroupId: (id: string | null) => void;
   onSetNewPartName: (v: string) => void;
   onSetNewPartColor: (v: string) => void;
   onSetNewPartShape: (v: string) => void;
-  onSetRenamingGroupId: (id: string | null) => void;
-  onSetRenameValue: (v: string) => void;
   onAddPart: (groupId: string) => void;
   onUpdatePart: (
     partId: string,
@@ -197,14 +188,10 @@ function VoiceGroupCard({
   ) => void;
   onDeletePart: (partId: string) => void;
   onPartDragEnd: (groupId: string, event: DragEndEvent) => void;
-  onRenameGroup: (id: string) => void;
-  onToggleStandard: (id: string, current: boolean) => void;
-  onDeleteGroup: (id: string) => void;
+  onOpenDetail: (group: VoiceGroup) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const isRenaming = renamingGroupId === group.id;
   const hasMore = group.parts.length > VISIBLE_ROWS;
   const visibleParts =
     expanded || !hasMore ? group.parts : group.parts.slice(0, VISIBLE_ROWS - 1);
@@ -213,22 +200,18 @@ function VoiceGroupCard({
     <div className="border border-border rounded-lg overflow-hidden flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 bg-hover-bg">
-        <div className="flex items-center gap-2">
-          {isRenaming ? (
-            <input
-              value={renameValue}
-              onChange={(e) => onSetRenameValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") onRenameGroup(group.id);
-                if (e.key === "Escape") onSetRenamingGroupId(null);
-              }}
-              className="border border-border rounded px-2 py-0.5 text-sm w-24"
-              autoFocus
-            />
-          ) : (
-            <span className="font-medium text-sm">{group.name}</span>
-          )}
-          <span className="text-xs text-subtle">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-medium text-sm truncate">{group.name}</span>
+          <div className="flex items-center gap-0.5 shrink-0">
+            {group.parts.slice(0, 5).map((p) => (
+              <span
+                key={p.id}
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: p.color }}
+              />
+            ))}
+          </div>
+          <span className="text-xs text-subtle shrink-0">
             {group.parts.length}{" "}
             {group.parts.length !== 1
               ? t("voiceGroups.partsCount")
@@ -236,42 +219,13 @@ function VoiceGroupCard({
           </span>
         </div>
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="text-subtle hover:text-muted text-sm px-1"
-          title={t("common.options")}
+          onClick={() => onOpenDetail(group)}
+          className="text-subtle hover:text-muted text-sm px-1 shrink-0"
+          title={t("voiceGroups.manageGroup")}
         >
-          <EllipsisVertical size={16} />
+          <Users size={16} />
         </button>
       </div>
-
-      {/* Collapsible menu */}
-      {menuOpen && (
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-hover-bg border-t border-border">
-          <label className="flex items-center gap-1 text-xs text-muted">
-            <input
-              type="checkbox"
-              checked={group.isStandard}
-              onChange={() => onToggleStandard(group.id, group.isStandard)}
-            />
-            {t("common.standard")}
-          </label>
-          <button
-            onClick={() => {
-              onSetRenamingGroupId(group.id);
-              onSetRenameValue(group.name);
-            }}
-            className="text-subtle hover:text-muted text-xs"
-          >
-            {t("common.rename")}
-          </button>
-          <button
-            onClick={() => onDeleteGroup(group.id)}
-            className="text-danger hover:text-danger-hover text-xs"
-          >
-            {t("common.delete")}
-          </button>
-        </div>
-      )}
 
       {/* Parts list */}
       <div className="px-2 py-1 flex-1">
@@ -385,6 +339,7 @@ function VoiceGroupCard({
 export default function VoiceGroupsPage() {
   const { t } = useTranslation();
   const {
+    groups,
     loading,
     standardGroups,
     otherGroups,
@@ -402,10 +357,6 @@ export default function VoiceGroupsPage() {
     setNewPartColor,
     newPartShape,
     setNewPartShape,
-    renamingGroupId,
-    setRenamingGroupId,
-    renameValue,
-    setRenameValue,
     handleCreateGroup,
     handleRenameGroup,
     handleToggleStandard,
@@ -415,6 +366,11 @@ export default function VoiceGroupsPage() {
     handleDeletePart,
     handlePartDragEnd,
   } = useVoiceGroups();
+
+  const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
+  const detailGroup = detailGroupId
+    ? (groups.find((g) => g.id === detailGroupId) ?? null)
+    : null;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -426,21 +382,15 @@ export default function VoiceGroupsPage() {
     newPartName,
     newPartColor,
     newPartShape,
-    renamingGroupId,
-    renameValue,
     onSetAddingPartGroupId: setAddingPartGroupId,
     onSetNewPartName: setNewPartName,
     onSetNewPartColor: setNewPartColor,
     onSetNewPartShape: setNewPartShape,
-    onSetRenamingGroupId: setRenamingGroupId,
-    onSetRenameValue: setRenameValue,
     onAddPart: handleAddPart,
     onUpdatePart: handleUpdatePart,
     onDeletePart: handleDeletePart,
     onPartDragEnd: handlePartDragEnd,
-    onRenameGroup: handleRenameGroup,
-    onToggleStandard: handleToggleStandard,
-    onDeleteGroup: handleDeleteGroup,
+    onOpenDetail: (g: VoiceGroup) => setDetailGroupId(g.id),
   };
 
   return (
@@ -541,6 +491,16 @@ export default function VoiceGroupsPage() {
             </p>
           )}
       </div>
+
+      {detailGroup && (
+        <VoiceGroupDetailModal
+          group={detailGroup}
+          onClose={() => setDetailGroupId(null)}
+          onRename={handleRenameGroup}
+          onToggleStandard={handleToggleStandard}
+          onDelete={handleDeleteGroup}
+        />
+      )}
     </div>
   );
 }

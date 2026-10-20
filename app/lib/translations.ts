@@ -274,6 +274,13 @@ const translations = {
     en: "Delete {name}?",
     sv: "Ta bort {name}?",
   },
+  "voiceGroups.manageGroup": { en: "Manage group", sv: "Hantera stämdelning" },
+  "voiceGroups.assignChorist": { en: "+ Assign chorist", sv: "+ Tilldela korist" },
+  "voiceGroups.unassign": { en: "Unassign", sv: "Ta bort tilldelning" },
+  "voiceGroups.noParts": {
+    en: "No parts in this group yet.",
+    sv: "Inga stämmor i denna grupp ännu.",
+  },
 
   // Base Formations
   "baseFormations.title": { en: "Base Formations", sv: "Grunduppställningar" },

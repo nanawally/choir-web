@@ -44,8 +44,6 @@ export function useVoiceGroups() {
   const [newPartName, setNewPartName] = useState("");
   const [newPartColor, setNewPartColor] = useState(DEFAULT_COLORS[0]);
   const [newPartShape, setNewPartShape] = useState(SHAPES[0]);
-  const [renamingGroupId, setRenamingGroupId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
 
   useEffect(() => {
     listVoiceGroups().then(setGroups).finally(() => setLoading(false));
@@ -65,16 +63,15 @@ export function useVoiceGroups() {
     }
   }
 
-  async function handleRenameGroup(id: string) {
-    if (!renameValue.trim()) return;
-    if (await renameVoiceGroup(id, renameValue.trim())) {
+  async function handleRenameGroup(id: string, newName: string) {
+    if (!newName.trim()) return;
+    if (await renameVoiceGroup(id, newName.trim())) {
       setGroups(
         groups.map((g) =>
-          g.id === id ? { ...g, name: renameValue.trim() } : g,
+          g.id === id ? { ...g, name: newName.trim() } : g,
         ),
       );
     }
-    setRenamingGroupId(null);
   }
 
   async function handleToggleStandard(id: string, current: boolean) {
@@ -173,10 +170,6 @@ export function useVoiceGroups() {
     setNewPartColor,
     newPartShape,
     setNewPartShape,
-    renamingGroupId,
-    setRenamingGroupId,
-    renameValue,
-    setRenameValue,
     handleCreateGroup,
     handleRenameGroup,
     handleToggleStandard,

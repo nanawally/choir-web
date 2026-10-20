@@ -37,11 +37,16 @@ export default function SettingsPage() {
     () => getTokenRole() === "admin",
     () => false,
   );
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [, forceUpdate] = useState(0);
+  const theme = useSyncExternalStore(
+    () => () => {},
+    getInitialTheme,
+    () => "system" as Theme,
+  );
 
   function handleThemeChange(next: Theme) {
     applyTheme(next);
-    setTheme(next);
+    forceUpdate((n) => n + 1);
   }
 
   const activeBtn = "btn-primary";
