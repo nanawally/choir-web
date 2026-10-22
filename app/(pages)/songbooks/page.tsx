@@ -40,7 +40,7 @@ export default function SongbooksPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
-  const { canEdit: canEditPerm } = usePermissions();
+  const { canEdit: canEditPerm, canDelete: canDeletePerm } = usePermissions();
 
   useEffect(() => {
     listSongbooks()
@@ -179,11 +179,13 @@ export default function SongbooksPage() {
         <h1 className="text-4xl font-bold mb-6 text-center">{t("songbooks.title")}</h1>
 
         <div className="w-full">
-          <div className="flex justify-end mb-6">
-            <button onClick={() => setShowAdd(true)} className="px-3 py-2 btn-primary text-sm font-medium">
-              {t("songbooks.newSongbook")}
-            </button>
-          </div>
+          {canEditPerm("songbooks") && (
+            <div className="flex justify-end mb-6">
+              <button onClick={() => setShowAdd(true)} className="px-3 py-2 btn-primary text-sm font-medium">
+                {t("songbooks.newSongbook")}
+              </button>
+            </div>
+          )}
 
           {showAdd && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-6 p-3 border border-border rounded-lg bg-hover-bg">
@@ -235,13 +237,15 @@ export default function SongbooksPage() {
                 className={`border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group relative ${sb.isHidden ? "opacity-60" : ""}`}
               >
                 {/* Pin toggle — top-left */}
-                <button
-                  onClick={(e) => { e.preventDefault(); handleTogglePin(sb.id); }}
-                  className={`absolute top-2 left-2 z-10 bg-surface/90 border border-border rounded p-1 shadow-sm transition-opacity ${sb.isPinned ? "" : "opacity-0 group-hover:opacity-100"}`}
-                  title={t("songbooks.pinned")}
-                >
-                  <Pin size={12} className={sb.isPinned ? "text-primary" : "text-muted"} />
-                </button>
+                {canEditPerm("songbooks") && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); handleTogglePin(sb.id); }}
+                    className={`absolute top-2 left-2 z-10 bg-surface/90 border border-border rounded p-1 shadow-sm transition-opacity ${sb.isPinned ? "" : "opacity-0 group-hover:opacity-100"}`}
+                    title={t("songbooks.pinned")}
+                  >
+                    <Pin size={12} className={sb.isPinned ? "text-primary" : "text-muted"} />
+                  </button>
+                )}
 
                 {/* Hidden toggle — top-left, next to pin */}
                 {canEditPerm("songbooks_hidden") && (
@@ -347,29 +351,35 @@ export default function SongbooksPage() {
                 </div>
 
                 {/* Action buttons — visible on hover */}
-                {editingId !== sb.id && (
+                {editingId !== sb.id && (canEditPerm("songbooks") || canDeletePerm("songbooks")) && (
                   <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => { setEditingId(sb.id); setEditName(sb.name); setEditDate(sb.date || ""); }}
-                      className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
-                      title={t("common.edit")}
-                    >
-                      {t("common.edit")}
-                    </button>
-                    <button
-                      onClick={() => handleDuplicate(sb.id)}
-                      className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
-                      title={t("common.duplicate")}
-                    >
-                      {t("common.copy")}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(sb.id)}
-                      className="px-1.5 py-0.5 btn-danger text-xs shadow-sm"
-                      title={t("common.delete")}
-                    >
-                      X
-                    </button>
+                    {canEditPerm("songbooks") && (
+                      <button
+                        onClick={() => { setEditingId(sb.id); setEditName(sb.name); setEditDate(sb.date || ""); }}
+                        className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
+                        title={t("common.edit")}
+                      >
+                        {t("common.edit")}
+                      </button>
+                    )}
+                    {canEditPerm("songbooks") && (
+                      <button
+                        onClick={() => handleDuplicate(sb.id)}
+                        className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
+                        title={t("common.duplicate")}
+                      >
+                        {t("common.copy")}
+                      </button>
+                    )}
+                    {canDeletePerm("songbooks") && (
+                      <button
+                        onClick={() => handleDelete(sb.id)}
+                        className="px-1.5 py-0.5 btn-danger text-xs shadow-sm"
+                        title={t("common.delete")}
+                      >
+                        X
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

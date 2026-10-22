@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
+import { usePermissions } from "../../lib/usePermissions";
 import {
   useVoiceGroups,
   SHAPES,
@@ -41,10 +42,14 @@ function SortablePartRow({
   part,
   onUpdate,
   onDelete,
+  canEdit,
+  canDelete,
 }: {
   part: VoicePart;
   onUpdate: (name: string, color: string, shape: string) => void;
   onDelete: () => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
@@ -72,14 +77,18 @@ function SortablePartRow({
       style={style}
       className="flex items-center gap-2 h-8 px-2 border-b border-border"
     >
-      <span
-        {...attributes}
-        {...listeners}
-        style={{ touchAction: "none" }}
-        className="cursor-grab active:cursor-grabbing text-subtle select-none p-1 -m-1"
-      >
-        <GripVertical size={16} />
-      </span>
+      {canEdit ? (
+        <span
+          {...attributes}
+          {...listeners}
+          style={{ touchAction: "none" }}
+          className="cursor-grab active:cursor-grabbing text-subtle select-none p-1 -m-1"
+        >
+          <GripVertical size={16} />
+        </span>
+      ) : (
+        <span className="w-6 shrink-0" />
+      )}
       {editing ? (
         <div className="flex items-center gap-2 flex-1">
           <input
@@ -126,26 +135,28 @@ function SortablePartRow({
             style={{ backgroundColor: part.color }}
           />
           <span
-            className="text-sm font-medium cursor-pointer hover:text-link"
-            onDoubleClick={() => {
+            className={`text-sm font-medium ${canEdit ? "cursor-pointer hover:text-link" : ""}`}
+            onDoubleClick={canEdit ? () => {
               setName(part.name);
               setColor(part.color);
               setShape(part.shape);
               setEditing(true);
-            }}
-            title={t("common.doubleClickToEdit")}
+            } : undefined}
+            title={canEdit ? t("common.doubleClickToEdit") : undefined}
           >
             {part.name}
           </span>
           <span className="text-xs text-subtle">{part.shape}</span>
-          <div className="ml-auto">
-            <button
-              onClick={onDelete}
-              className="text-danger hover:text-danger-hover text-xs"
-            >
-              {t("common.delete")}
-            </button>
-          </div>
+          {canDelete && (
+            <div className="ml-auto">
+              <button
+                onClick={onDelete}
+                className="text-danger hover:text-danger-hover text-xs"
+              >
+                {t("common.delete")}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </li>
@@ -168,6 +179,8 @@ function VoiceGroupCard({
   onDeletePart,
   onPartDragEnd,
   onOpenDetail,
+  canEdit,
+  canDelete,
 }: {
   group: VoiceGroup;
   sensors: ReturnType<typeof useSensors>;
@@ -189,6 +202,8 @@ function VoiceGroupCard({
   onDeletePart: (partId: string) => void;
   onPartDragEnd: (groupId: string, event: DragEndEvent) => void;
   onOpenDetail: (group: VoiceGroup) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -248,6 +263,8 @@ function VoiceGroupCard({
                     onUpdatePart(p.id, name, color, shape)
                   }
                   onDelete={() => onDeletePart(p.id)}
+                  canEdit={canEdit}
+                  canDelete={canDelete}
                 />
               ))}
             </ul>
@@ -283,7 +300,7 @@ function VoiceGroupCard({
           })()}
 
         {/* Add part */}
-        {addingPartGroupId === group.id ? (
+        {canEdit && addingPartGroupId === group.id ? (
           <div className="flex items-center gap-2 py-2 px-2">
             <input
               value={newPartName}
@@ -320,7 +337,7 @@ function VoiceGroupCard({
               {t("common.add")}
             </button>
           </div>
-        ) : (
+        ) : canEdit ? (
           <button
             onClick={() => {
               onSetAddingPartGroupId(group.id);
@@ -330,7 +347,7 @@ function VoiceGroupCard({
           >
             {t("voiceGroups.addPart")}
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -338,6 +355,7 @@ function VoiceGroupCard({
 
 export default function VoiceGroupsPage() {
   const { t } = useTranslation();
+  const { canEdit: canEditPerm, canDelete: canDeletePerm } = usePermissions();
   const {
     groups,
     loading,
@@ -391,6 +409,8 @@ export default function VoiceGroupsPage() {
     onDeletePart: handleDeletePart,
     onPartDragEnd: handlePartDragEnd,
     onOpenDetail: (g: VoiceGroup) => setDetailGroupId(g.id),
+    canEdit: canEditPerm("voice_groups"),
+    canDelete: canDeletePerm("voice_groups"),
   };
 
   return (
@@ -405,12 +425,14 @@ export default function VoiceGroupsPage() {
         </p>
 
         <div className="flex justify-center mb-6">
-          <button
-            onClick={() => setShowAddGroup(true)}
-            className="px-3 py-2 btn-primary text-sm font-medium"
-          >
-            {t("voiceGroups.addGroup")}
-          </button>
+          {canEditPerm("voice_groups") && (
+            <button
+              onClick={() => setShowAddGroup(true)}
+              className="px-3 py-2 btn-primary text-sm font-medium"
+            >
+              {t("voiceGroups.addGroup")}
+            </button>
+          )}
         </div>
 
         {showAddGroup && (

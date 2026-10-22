@@ -9,6 +9,7 @@ import { extractSuggestions } from "../../components/songs/SongFormFields";
 import { SongsTableView } from "../../components/songs/SongsTableView";
 import { useSongs } from "../../hooks/useSongs";
 import { useTranslation } from "../../lib/LanguageContext";
+import { usePermissions } from "../../lib/usePermissions";
 
 export default function SongsPage() {
   const {
@@ -24,6 +25,7 @@ export default function SongsPage() {
   } = useSongs();
 
   const { t } = useTranslation();
+  const { canEdit, canDelete } = usePermissions();
   const suggestions = extractSuggestions(songs);
   const defaultSort = useCallback((a: Song, b: Song) => a.name.localeCompare(b.name), []);
 
@@ -40,15 +42,17 @@ export default function SongsPage() {
           csvFilename="songs.csv"
           className="w-full"
           toolbarAction={
-            <button
-              onClick={() => setShowAdd(true)}
-              className="px-3 py-1.5 btn-primary text-sm font-medium"
-            >
-              {t("songs.addSong")}
-            </button>
+            canEdit("songs") ? (
+              <button
+                onClick={() => setShowAdd(true)}
+                className="px-3 py-1.5 btn-primary text-sm font-medium"
+              >
+                {t("songs.addSong")}
+              </button>
+            ) : undefined
           }
           onRowClick={(s) => setEditingSong(s)}
-          onDelete={(s) => handleDelete(s.id)}
+          onDelete={canDelete("songs") ? (s) => handleDelete(s.id) : undefined}
           noItemsMessage={t("songs.noSongs")}
           noMatchMessage={t("songs.noMatch")}
         />

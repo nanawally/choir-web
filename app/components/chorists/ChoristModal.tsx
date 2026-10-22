@@ -13,6 +13,7 @@ import {
 } from "../../lib/api";
 import { sortVoiceGroups } from "../../lib/voiceGroupSort";
 import { useTranslation } from "../../lib/LanguageContext";
+import { usePermissions } from "../../lib/usePermissions";
 import AccountQrModal from "./AccountQrModal";
 
 type Chorist = {
@@ -51,6 +52,7 @@ export default function ChoristModal({
   onSaved,
 }: ChoristModalProps) {
   const { t } = useTranslation();
+  const { canView, canEdit: canEditPerm } = usePermissions();
   const isAdmin = getTokenRole() === "admin";
   const [editing, setEditing] = useState(mode === "add");
   const [qrData, setQrData] = useState<{ username: string; setupToken: string } | null>(null);
@@ -193,13 +195,15 @@ export default function ChoristModal({
                   <Check size={14} />
                 </span>
               )}
-              <button
-                onClick={() => setEditing(true)}
-                className="text-subtle hover:text-muted"
-                title={t("common.edit")}
-              >
-                <SquarePen size={16} />
-              </button>
+              {canEditPerm("chorists") && (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="text-subtle hover:text-muted"
+                  title={t("common.edit")}
+                >
+                  <SquarePen size={16} />
+                </button>
+              )}
             </div>
           </div>
           {qrData && (
@@ -247,12 +251,14 @@ export default function ChoristModal({
             </div>
 
             {/* Right: notes */}
-            <div className="w-1/3 border-l border-border pl-6">
-              <span className="block text-xs text-muted mb-0.5">{t("chorists.notes")}</span>
-              {current.notes && (
-                <p className="text-sm whitespace-pre-wrap">{current.notes}</p>
-              )}
-            </div>
+            {canView("chorists_notes") && (
+              <div className="w-1/3 border-l border-border pl-6">
+                <span className="block text-xs text-muted mb-0.5">{t("chorists.notes")}</span>
+                {current.notes && (
+                  <p className="text-sm whitespace-pre-wrap">{current.notes}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -295,16 +301,20 @@ export default function ChoristModal({
           {t("chorists.sectionLeader")}
         </label>
 
-        <label className="block text-sm font-medium mb-1">
-          {t("chorists.notes")}
-        </label>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          className="border border-border rounded px-3 py-2 text-sm w-full mb-4"
-          rows={2}
-          placeholder={t("chorists.notesPlaceholder")}
-        />
+        {canEditPerm("chorists_notes") && (
+          <>
+            <label className="block text-sm font-medium mb-1">
+              {t("chorists.notes")}
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="border border-border rounded px-3 py-2 text-sm w-full mb-4"
+              rows={2}
+              placeholder={t("chorists.notesPlaceholder")}
+            />
+          </>
+        )}
 
         <div className="space-y-3 mb-6">
           {sorted.map((group) => (

@@ -40,6 +40,7 @@ type Props = {
   formations: Formation[];
   onFormationsChange: (formations: Formation[]) => void;
   onDeleteOrUnlinkFormation: () => void;
+  canDelete?: boolean;
 };
 
 export default function FormationBar({
@@ -60,6 +61,7 @@ export default function FormationBar({
   formations,
   onFormationsChange,
   onDeleteOrUnlinkFormation,
+  canDelete = true,
 }: Props) {
   const { t } = useTranslation();
   const [showAddModal, setShowAddModal] = useState(false);
@@ -291,12 +293,14 @@ export default function FormationBar({
             >
               {t("formations.copyTo")}
             </button>
-            <button
-              onClick={onDeleteOrUnlinkFormation}
-              className="px-2 py-1 btn-danger text-sm"
-            >
-              {t("common.delete")}
-            </button>
+            {canDelete && (
+              <button
+                onClick={onDeleteOrUnlinkFormation}
+                className="px-2 py-1 btn-danger text-sm"
+              >
+                {t("common.delete")}
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -33,6 +33,7 @@ type Props = {
   activeFormationId: string | null;
   onSelectFormation: (id: string) => void;
   onReorderFormations: (songId: string, newOrder: string[]) => void;
+  canEdit?: boolean;
 };
 
 // Individual sortable formation item (nested under a song)
@@ -87,6 +88,7 @@ export default function SetlistDrawer({
   activeFormationId,
   onSelectFormation,
   onReorderFormations,
+  canEdit = true,
 }: Props) {
   const { t } = useTranslation();
   const sensors = useSensors(
@@ -117,12 +119,14 @@ export default function SetlistDrawer({
     <>
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-bold">{t("concerts.setlist")}</h2>
-        <button
-          onClick={onEditSetlist}
-          className="px-2 py-0.5 btn-primary text-xs"
-        >
-          {t("common.edit")}
-        </button>
+        {canEdit && (
+          <button
+            onClick={onEditSetlist}
+            className="px-2 py-0.5 btn-primary text-xs"
+          >
+            {t("common.edit")}
+          </button>
+        )}
       </div>
       <ul className="space-y-1 mb-4">
         {concertSongs.map((s) => {

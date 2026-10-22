@@ -10,11 +10,13 @@ import {
   deleteFormation,
   renameFormation,
 } from "../../lib/api";
+import { usePermissions } from "../../lib/usePermissions";
 
 type BaseFormation = { id: string; name: string };
 
 export default function BaseFormationsPage() {
   const { t } = useTranslation();
+  const { canEdit, canDelete } = usePermissions();
   const [formations, setFormations] = useState<BaseFormation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -71,12 +73,14 @@ export default function BaseFormationsPage() {
             <span className="text-sm text-muted">
               {t("baseFormations.description")}
             </span>
-            <button
-              onClick={() => setShowAdd(true)}
-              className="px-3 py-2 btn-primary text-sm font-medium shrink-0 ml-4"
-            >
-              {t("baseFormations.newFormation")}
-            </button>
+            {canEdit("base_formations") && (
+              <button
+                onClick={() => setShowAdd(true)}
+                className="px-3 py-2 btn-primary text-sm font-medium shrink-0 ml-4"
+              >
+                {t("baseFormations.newFormation")}
+              </button>
+            )}
           </div>
 
           {showAdd && (
@@ -139,21 +143,25 @@ export default function BaseFormationsPage() {
                   </Link>
                 )}
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      setRenamingId(f.id);
-                      setRenameValue(f.name);
-                    }}
-                    className="text-subtle hover:text-muted text-xs"
-                  >
-                    {t("common.rename")}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(f.id)}
-                    className="text-danger hover:text-danger-hover text-xs"
-                  >
-                    {t("common.delete")}
-                  </button>
+                  {canEdit("base_formations") && (
+                    <button
+                      onClick={() => {
+                        setRenamingId(f.id);
+                        setRenameValue(f.name);
+                      }}
+                      className="text-subtle hover:text-muted text-xs"
+                    >
+                      {t("common.rename")}
+                    </button>
+                  )}
+                  {canDelete("base_formations") && (
+                    <button
+                      onClick={() => handleDelete(f.id)}
+                      className="text-danger hover:text-danger-hover text-xs"
+                    >
+                      {t("common.delete")}
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

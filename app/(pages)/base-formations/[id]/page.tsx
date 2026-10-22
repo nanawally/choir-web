@@ -5,7 +5,8 @@ import { createPortal } from "react-dom";
 import GridCanvas from "../../../components/concert/GridCanvas";
 import VoiceGroupPanel from "../../../components/concert/VoiceGroupPanel";
 import Link from "next/link";
-import { ArrowBigLeft, SquareText, UsersRound, UserRoundGroup } from "lucide-react";
+import { ArrowBigLeft, CirclePile, Shapes, SquareText, UsersRound } from "lucide-react";
+import { usePermissions } from "../../../lib/usePermissions";
 import { shortName } from "../../../lib/choristName";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { sortChoristsByVoicePart } from "../../../lib/voiceGroupSort";
@@ -33,6 +34,7 @@ export default function BaseFormationEditor({
 }) {
   const { id } = use(params);
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
 
   const [chorists, setChorists] = useState<Chorist[]>([]);
   const [placements, setPlacements] = useState<Placement[]>([]);
@@ -107,6 +109,7 @@ export default function BaseFormationEditor({
 
   // Panels
   const [showChorists, setShowChorists] = useState(false);
+  const [showFormationControls, setShowFormationControls] = useState(false);
   const [showVoiceGroups, setShowVoiceGroups] = useState(false);
 
   // Formation name editing
@@ -296,7 +299,7 @@ export default function BaseFormationEditor({
   );
 
   const leftOpen = showChorists;
-  const rightOpen = showVoiceGroups;
+  const rightOpen = showFormationControls || showVoiceGroups;
 
   return (
     <div className="relative h-screen overflow-hidden">
@@ -428,13 +431,23 @@ export default function BaseFormationEditor({
             } } canUndo={false} canRedo={false} autoSaveStatus={"saving"} songName={null}          />
         </div>
 
-        {/* Right toggle button */}
+        {/* Right toggle buttons */}
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
+          {canEdit("base_formations") && (
+            <button
+              className={`rounded-lg shadow p-2 hover:bg-surface-alt ${showFormationControls ? "bg-primary-light" : "bg-surface"}`}
+              onClick={() => { setShowFormationControls(!showFormationControls); setShowVoiceGroups(false); }}
+              title={t("formations.title")}
+            >
+              <CirclePile size={20} />
+            </button>
+          )}
           <button
-            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
-            onClick={() => setShowVoiceGroups(!showVoiceGroups)}
+            className={`rounded-lg shadow p-2 hover:bg-surface-alt ${showVoiceGroups ? "bg-primary-light" : "bg-surface"}`}
+            onClick={() => { setShowVoiceGroups(!showVoiceGroups); setShowFormationControls(false); }}
+            title={t("voiceGroups.title")}
           >
-            <UserRoundGroup size={20} />
+            <Shapes size={20} />
           </button>
         </div>
       </div>
@@ -456,11 +469,13 @@ export default function BaseFormationEditor({
         );
       })()}
 
-      {/* Right drawer — voice groups + controls */}
-      {showVoiceGroups && (
-        <div className="absolute top-0 right-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-10">
-          {/* Formation controls */}
-          <div className="flex flex-col gap-2 p-2 border-b border-border mb-4">
+      {/* Right drawer */}
+      <div
+        className={`absolute top-0 right-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-10 transition-transform duration-300 ease-in-out ${rightOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        {/* Formation controls panel */}
+        {showFormationControls && (
+          <div className="flex flex-col gap-2">
             <h2 className="font-bold mb-1">{t("formations.title")}</h2>
 
             {/* Layout mode */}
@@ -528,7 +543,10 @@ export default function BaseFormationEditor({
               {saving ? t("common.saving") : t("formations.saveFormation")}
             </button>
           </div>
+        )}
 
+        {/* Voice groups panel */}
+        {showVoiceGroups && (
           <VoiceGroupPanel
             activeGroupId={activeGroupId}
             onSelectGroup={handleSelectGroup}
@@ -536,9 +554,10 @@ export default function BaseFormationEditor({
             setVoiceGroups={setVoiceGroups}
             highlightPartId={highlightPartId}
             onHighlightPart={setHighlightPartId}
+            canEdit={canEdit("base_formations")}
           />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

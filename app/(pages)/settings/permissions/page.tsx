@@ -25,10 +25,21 @@ const ALL_FEATURES = [
   "songbooks",
   "songbooks_hidden",
   "concerts",
-  "formations",
   "base_formations",
   "permissions",
 ] as const;
+
+const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[] = [
+  { feature: "chorists", isChild: false },
+  { feature: "chorists_notes", isChild: true },
+  { feature: "voice_groups", isChild: false },
+  { feature: "songs", isChild: false },
+  { feature: "songbooks", isChild: false },
+  { feature: "songbooks_hidden", isChild: true },
+  { feature: "concerts", isChild: false },
+  { feature: "base_formations", isChild: false },
+  { feature: "permissions", isChild: false },
+];
 
 function getPerm(group: PermissionGroup, feature: string): PermissionEntry {
   return (
@@ -84,7 +95,15 @@ export default function PermissionsPage() {
     const group = groups.find((g) => g.id === groupId);
     if (!group) return;
     const current = getPerm(group, feature);
-    const updated = { ...current, [action]: !current[action] };
+    const toggled = !current[action];
+    let updated = { ...current, [action]: toggled };
+
+    // Cascading: edit implies view; delete implies edit+view
+    if (action === "canEdit" && toggled) updated.canView = true;
+    if (action === "canDelete" && toggled) { updated.canView = true; updated.canEdit = true; }
+    // Reverse cascade: unchecking view also clears edit+delete; unchecking edit also clears delete
+    if (action === "canView" && !toggled) { updated.canEdit = false; updated.canDelete = false; }
+    if (action === "canEdit" && !toggled) updated.canDelete = false;
 
     setGroups(
       groups.map((g) =>
@@ -134,7 +153,6 @@ export default function PermissionsPage() {
       songbooks: t("permissions.feature.songbooks"),
       songbooks_hidden: t("permissions.feature.songbooksHidden"),
       concerts: t("permissions.feature.concerts"),
-      formations: t("permissions.feature.formations"),
       base_formations: t("permissions.feature.baseFormations"),
       permissions: t("permissions.feature.permissions"),
     };
@@ -225,11 +243,16 @@ export default function PermissionsPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {ALL_FEATURES.map((feature) => {
+                            {FEATURE_ITEMS.map(({ feature, isChild }, idx) => {
                               const perm = getPerm(group, feature);
                               return (
-                                <tr key={feature} className="border-b border-border last:border-0">
-                                  <td className="py-1.5 pr-4">{featureLabel(feature)}</td>
+                                <tr key={`${feature}-${idx}`} className={`border-b border-border last:border-0 ${isChild ? "bg-surface-alt" : ""}`}>
+                                  <td className={`py-1.5 pr-4 ${isChild ? "pl-5 text-muted text-xs" : ""}`}>
+                                    {isChild && (
+                                      <span className="inline-block mr-1.5 text-subtle">↳</span>
+                                    )}
+                                    {featureLabel(feature)}
+                                  </td>
                                   {(["canView", "canEdit", "canDelete"] as const).map((action) => (
                                     <td key={action} className="text-center py-1.5 px-3">
                                       <input

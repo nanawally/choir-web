@@ -25,7 +25,7 @@ type Props<T extends Song> = {
   csvFilename: string;
   toolbarAction?: ReactNode;
   onRowClick: (song: T) => void;
-  onDelete: (song: T) => void;
+  onDelete?: (song: T) => void;
   noItemsMessage?: string;
   noMatchMessage?: string;
   className?: string;
@@ -394,7 +394,7 @@ export function SongsTableView<T extends Song>({
                   {t(c.labelKey)}
                 </Th>
               ))}
-              <Th compact className="hidden sm:table-cell" />
+              {onDelete && <Th compact className="hidden sm:table-cell" />}
             </TheadRow>
           </Thead>
           <Tbody>
@@ -460,17 +460,19 @@ export function SongsTableView<T extends Song>({
                       </Td>
                     );
                   })}
-                  <Td compact className="hidden sm:table-cell">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(s);
-                      }}
-                      className="text-danger hover:text-danger-hover text-xs"
-                    >
-                      {t("common.delete")}
-                    </button>
-                  </Td>
+                  {onDelete && (
+                    <Td compact className="hidden sm:table-cell">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(s);
+                        }}
+                        className="text-danger hover:text-danger-hover text-xs"
+                      >
+                        {t("common.delete")}
+                      </button>
+                    </Td>
+                  )}
                 </Tr>
                 {expandedSongId === s.id && (
                   <tr className="border-b border-border bg-surface-alt sm:hidden">
@@ -502,11 +504,13 @@ export function SongsTableView<T extends Song>({
                           })}
                         </div>
                       )}
-                      <div className="flex justify-end">
-                        <button onClick={() => onDelete(s)} className="p-2 btn-danger rounded">
-                          <Trash size={16} />
-                        </button>
-                      </div>
+                      {onDelete && (
+                        <div className="flex justify-end">
+                          <button onClick={() => onDelete(s)} className="p-2 btn-danger rounded">
+                            <Trash size={16} />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 )}

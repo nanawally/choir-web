@@ -45,6 +45,7 @@ type Props = {
   setVoiceGroups: (groups: VoiceGroup[]) => void;
   highlightPartId: string | null;
   onHighlightPart: (id: string | null) => void;
+  canEdit?: boolean;
 };
 
 // Default colors for auto-advancing when adding new parts
@@ -75,6 +76,7 @@ function SortablePartItem({
   onStartEdit,
   onHighlight,
   onDelete,
+  canEdit = true,
 }: {
   part: VoicePart;
   isEditing: boolean;
@@ -90,6 +92,7 @@ function SortablePartItem({
   onStartEdit: () => void;
   onHighlight: () => void;
   onDelete: () => void;
+  canEdit?: boolean;
 }) {
   const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -155,38 +158,39 @@ function SortablePartItem({
         >
           <span className="flex items-center gap-1">
             {/* Drag handle */}
-            <span
-              {...attributes}
-              {...listeners}
-              style={{ touchAction: "none" }}
-              className="cursor-grab active:cursor-grabbing select-none text-subtle p-1 -m-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <GripVertical size={16} />
-            </span>
+            {canEdit && (
+              <span
+                {...attributes}
+                {...listeners}
+                style={{ touchAction: "none" }}
+                className="cursor-grab active:cursor-grabbing select-none text-subtle p-1 -m-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <GripVertical size={16} />
+              </span>
+            )}
             <span
               className="w-3 h-3 rounded-full inline-block"
               style={{ backgroundColor: part.color }}
             />
             <span
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                onStartEdit();
-              }}
-              title={t("common.doubleClickToEdit")}
+              onDoubleClick={canEdit ? (e) => { e.stopPropagation(); onStartEdit(); } : undefined}
+              title={canEdit ? t("common.doubleClickToEdit") : undefined}
             >
               {part.name}
             </span>
           </span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="text-danger hover:text-danger-hover text-xs"
-          >
-            X
-          </button>
+          {canEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-danger hover:text-danger-hover text-xs"
+            >
+              X
+            </button>
+          )}
         </div>
       )}
     </li>
@@ -200,6 +204,7 @@ export default function VoiceGroupPanel({
   setVoiceGroups,
   highlightPartId,
   onHighlightPart,
+  canEdit = true,
 }: Props) {
   const { t } = useTranslation();
   const [showAddGroup, setShowAddGroup] = useState(false);
@@ -343,7 +348,7 @@ export default function VoiceGroupPanel({
         ))}
       </select>
 
-      {showAddGroup ? (
+      {canEdit && (showAddGroup ? (
         <div className="flex flex-col gap-1 mb-4">
           <input
             value={newGroupName}
@@ -373,18 +378,20 @@ export default function VoiceGroupPanel({
         >
           {t("voiceGroups.addGroup")}
         </button>
-      )}
+      ))}
 
       {activeGroup && (
         <>
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs text-muted font-medium">{t("voiceGroups.parts")}</h3>
-            <button
-              onClick={handleDeleteGroup}
-              className="text-danger hover:text-danger-hover text-xs"
-            >
-              {t("voiceGroups.deleteGroup")}
-            </button>
+            {canEdit && (
+              <button
+                onClick={handleDeleteGroup}
+                className="text-danger hover:text-danger-hover text-xs"
+              >
+                {t("voiceGroups.deleteGroup")}
+              </button>
+            )}
           </div>
 
           <DndContext
@@ -422,13 +429,14 @@ export default function VoiceGroupPanel({
                       onHighlightPart(highlightPartId === p.id ? null : p.id)
                     }
                     onDelete={() => handleDeletePart(p.id)}
+                    canEdit={canEdit}
                   />
                 ))}
               </ul>
             </SortableContext>
           </DndContext>
 
-          {showAddPart ? (
+          {canEdit && (showAddPart ? (
             <div className="flex flex-col gap-1">
               <input
                 value={newPartName}
@@ -477,7 +485,7 @@ export default function VoiceGroupPanel({
             >
               {t("voiceGroups.addPart")}
             </button>
-          )}
+          ))}
         </>
       )}
     </div>

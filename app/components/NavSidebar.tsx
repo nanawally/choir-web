@@ -6,15 +6,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { clearToken } from "../lib/api";
 import { useTranslation } from "../lib/LanguageContext";
+import { usePermissions } from "../lib/usePermissions";
 import type { TranslationKey } from "../lib/translations";
 
-const NAV_ITEMS: { href: string; labelKey: TranslationKey }[] = [
-  { href: "/concerts", labelKey: "nav.concerts" },
-  { href: "/songs", labelKey: "nav.songs" },
-  { href: "/songbooks", labelKey: "nav.songbooks" },
-  { href: "/chorists", labelKey: "nav.chorists" },
-  { href: "/voice-groups", labelKey: "nav.voiceGroups" },
-  { href: "/base-formations", labelKey: "nav.baseFormations" },
+const NAV_ITEMS: { href: string; labelKey: TranslationKey; feature?: string }[] = [
+  { href: "/concerts", labelKey: "nav.concerts", feature: "concerts" },
+  { href: "/songs", labelKey: "nav.songs", feature: "songs" },
+  { href: "/songbooks", labelKey: "nav.songbooks", feature: "songbooks" },
+  { href: "/chorists", labelKey: "nav.chorists", feature: "chorists" },
+  { href: "/voice-groups", labelKey: "nav.voiceGroups", feature: "voice_groups" },
+  { href: "/base-formations", labelKey: "nav.baseFormations", feature: "base_formations" },
   { href: "/krysslistan", labelKey: "nav.krysslistan" },
   { href: "/term-plan", labelKey: "nav.termPlan" },
   { href: "/settings", labelKey: "nav.settings" },
@@ -24,7 +25,12 @@ export default function NavSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const { canView, loaded } = usePermissions();
   const [open, setOpen] = useState(false);
+
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => !item.feature || !loaded || canView(item.feature),
+  );
 
   const navContent = (
     <>
@@ -36,7 +42,7 @@ export default function NavSidebar() {
         melisma
       </Link>
       <div className="flex flex-col gap-0.5">
-        {NAV_ITEMS.map((item) => (
+        {visibleItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}

@@ -17,6 +17,7 @@ import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
 import { ClefTreble, Upload, Trash } from "lucide-react";
+import { usePermissions } from "../../lib/usePermissions";
 
 type Concert = {
   id: string;
@@ -42,6 +43,7 @@ export default function ConcertsPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
+  const { canEdit, canDelete } = usePermissions();
 
   useEffect(() => {
     listConcerts()
@@ -177,14 +179,16 @@ export default function ConcertsPage() {
         </h1>
 
         <div className="w-full">
-          <div className="flex justify-end mb-6">
-            <button
-              onClick={() => setShowAdd(true)}
-              className="px-3 py-2 btn-primary text-sm font-medium"
-            >
-              {t("concerts.newConcert")}
-            </button>
-          </div>
+          {canEdit("concerts") && (
+            <div className="flex justify-end mb-6">
+              <button
+                onClick={() => setShowAdd(true)}
+                className="px-3 py-2 btn-primary text-sm font-medium"
+              >
+                {t("concerts.newConcert")}
+              </button>
+            </div>
+          )}
 
           {showAdd && (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-6 p-3 border border-border rounded-lg bg-hover-bg">
@@ -332,33 +336,39 @@ export default function ConcertsPage() {
                 </div>
 
                 {/* Action buttons — visible on hover */}
-                {editingId !== c.id && (
+                {editingId !== c.id && (canEdit("concerts") || canDelete("concerts")) && (
                   <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => {
-                        setEditingId(c.id);
-                        setEditName(c.name);
-                        setEditDate(c.date || "");
-                      }}
-                      className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
-                      title={t("common.edit")}
-                    >
-                      {t("common.edit")}
-                    </button>
-                    <button
-                      onClick={() => handleDuplicate(c.id)}
-                      className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
-                      title={t("common.duplicate")}
-                    >
-                      {t("common.copy")}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(c.id)}
-                      className="px-1.5 py-0.5 btn-danger text-xs shadow-sm"
-                      title={t("common.delete")}
-                    >
-                      X
-                    </button>
+                    {canEdit("concerts") && (
+                      <button
+                        onClick={() => {
+                          setEditingId(c.id);
+                          setEditName(c.name);
+                          setEditDate(c.date || "");
+                        }}
+                        className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
+                        title={t("common.edit")}
+                      >
+                        {t("common.edit")}
+                      </button>
+                    )}
+                    {canEdit("concerts") && (
+                      <button
+                        onClick={() => handleDuplicate(c.id)}
+                        className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
+                        title={t("common.duplicate")}
+                      >
+                        {t("common.copy")}
+                      </button>
+                    )}
+                    {canDelete("concerts") && (
+                      <button
+                        onClick={() => handleDelete(c.id)}
+                        className="px-1.5 py-0.5 btn-danger text-xs shadow-sm"
+                        title={t("common.delete")}
+                      >
+                        X
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

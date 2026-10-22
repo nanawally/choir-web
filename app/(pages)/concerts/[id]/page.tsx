@@ -20,6 +20,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import { useTranslation } from "../../../lib/LanguageContext";
+import { usePermissions } from "../../../lib/usePermissions";
 
 const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
 
@@ -30,6 +31,7 @@ export default function ConcertEditor({
 }) {
   const { id } = use(params);
   const { t } = useTranslation();
+  const { canView, canEdit, canDelete } = usePermissions();
   const editor = useConcertEditor(id);
   const leftOpen = editor.showSetlist || editor.showChorists;
   const rightOpen = editor.showFormations || editor.showVoiceGroups;
@@ -97,6 +99,7 @@ export default function ConcertEditor({
               activeFormationId={editor.activeFormationId}
               onSelectFormation={editor.handleSelectFormation}
               onReorderFormations={editor.handleReorderFormations}
+              canEdit={canEdit("concerts")}
             />
           )}
           {editor.showChorists && (
@@ -142,24 +145,28 @@ export default function ConcertEditor({
           >
             <ArrowBigLeft size={20} />
           </Link>
-          <button
-            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
-            onClick={() => {
-              editor.setShowSetlist(!editor.showSetlist);
-              editor.setShowChorists(false);
-            }}
-          >
-            <SquareMenu size={20} />
-          </button>
-          <button
-            className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
-            onClick={() => {
-              editor.setShowChorists(!editor.showChorists);
-              editor.setShowSetlist(false);
-            }}
-          >
-            <UsersRound size={20} />
-          </button>
+          {canView("concerts") && (
+            <button
+              className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
+              onClick={() => {
+                editor.setShowSetlist(!editor.showSetlist);
+                editor.setShowChorists(false);
+              }}
+            >
+              <SquareMenu size={20} />
+            </button>
+          )}
+          {canEdit("concerts") && (
+            <button
+              className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
+              onClick={() => {
+                editor.setShowChorists(!editor.showChorists);
+                editor.setShowSetlist(false);
+              }}
+            >
+              <UsersRound size={20} />
+            </button>
+          )}
         </div>
 
         {/* Canvas container — fills remaining space */}
@@ -205,26 +212,30 @@ export default function ConcertEditor({
 
         {/* Right toggle buttons — sits beside the canvas, not on top */}
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
-          <button
-            className={`rounded-lg shadow p-2 hover:bg-surface-alt ${editor.showFormations ? "bg-primary-light" : "bg-surface"}`}
-            onClick={() => {
-              editor.setShowFormations(!editor.showFormations);
-              editor.setShowVoiceGroups(false);
-            }}
-            title={t("formations.formations")}
-          >
-            <CirclePile size={20} />
-          </button>
-          <button
-            className={`rounded-lg shadow p-2 hover:bg-surface-alt ${editor.showVoiceGroups ? "bg-primary-light" : "bg-surface"}`}
-            onClick={() => {
-              editor.setShowVoiceGroups(!editor.showVoiceGroups);
-              editor.setShowFormations(false);
-            }}
-            title={t("voiceGroups.title")}
-          >
-            <Shapes size={20} />
-          </button>
+          {canEdit("concerts") && (
+            <button
+              className={`rounded-lg shadow p-2 hover:bg-surface-alt ${editor.showFormations ? "bg-primary-light" : "bg-surface"}`}
+              onClick={() => {
+                editor.setShowFormations(!editor.showFormations);
+                editor.setShowVoiceGroups(false);
+              }}
+              title={t("formations.formations")}
+            >
+              <CirclePile size={20} />
+            </button>
+          )}
+          {canView("concerts") && (
+            <button
+              className={`rounded-lg shadow p-2 hover:bg-surface-alt ${editor.showVoiceGroups ? "bg-primary-light" : "bg-surface"}`}
+              onClick={() => {
+                editor.setShowVoiceGroups(!editor.showVoiceGroups);
+                editor.setShowFormations(false);
+              }}
+              title={t("voiceGroups.title")}
+            >
+              <Shapes size={20} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -257,6 +268,7 @@ export default function ConcertEditor({
             formations={editor.formations}
             onFormationsChange={editor.setFormations}
             onDeleteOrUnlinkFormation={editor.handleDeleteOrUnlinkFormation}
+            canDelete={canDelete("concerts")}
           />
         )}
         {editor.showVoiceGroups && (
@@ -267,6 +279,7 @@ export default function ConcertEditor({
             setVoiceGroups={editor.setVoiceGroups}
             highlightPartId={editor.highlightPartId}
             onHighlightPart={editor.setHighlightPartId}
+            canEdit={canEdit("concerts")}
           />
         )}
       </div>
@@ -293,7 +306,7 @@ export default function ConcertEditor({
         </div>
       )}
 
-      {editor.showRosterModal && (
+      {editor.showRosterModal && canEdit("concerts") && (
         <RosterModal
           onClose={() => editor.setShowRosterModal(false)}
           chorists={editor.sortedChorists}
@@ -302,7 +315,7 @@ export default function ConcertEditor({
         />
       )}
 
-      {editor.showEditSetlist && (
+      {editor.showEditSetlist && canEdit("concerts") && (
         <EditSetlistModal
           concertId={id}
           catalogSongs={editor.catalogSongs}

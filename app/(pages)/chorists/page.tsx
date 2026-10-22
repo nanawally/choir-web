@@ -13,6 +13,7 @@ import {
 import NavSidebar from "../../components/NavSidebar";
 import { useChorists } from "../../hooks/useChorists";
 import { useTranslation } from "../../lib/LanguageContext";
+import { usePermissions } from "../../lib/usePermissions";
 import {
   ChevronDown,
   ChevronRight,
@@ -23,6 +24,7 @@ import {
 
 export default function RosterPage() {
   const { t } = useTranslation();
+  const { canEdit } = usePermissions();
   const {
     loading,
     search,
@@ -143,12 +145,14 @@ export default function RosterPage() {
               >
                 {t("chorists.archived")}
               </button>
-              <button
-                onClick={() => setModal({ mode: "add" })}
-                className="px-3 py-2 btn-primary text-sm font-medium"
-              >
-                {t("chorists.addChorist")}
-              </button>
+              {canEdit("chorists") && (
+                <button
+                  onClick={() => setModal({ mode: "add" })}
+                  className="px-3 py-2 btn-primary text-sm font-medium"
+                >
+                  {t("chorists.addChorist")}
+                </button>
+              )}
             </div>
           </div>
 
@@ -328,14 +332,16 @@ export default function RosterPage() {
                               </Td>
                             );
                           })}
-                          <Td compact className="text-center">
-                            <button
-                              onClick={() => handleUnarchive(chorist.id)}
-                              className="text-link hover:text-link text-xs font-medium"
-                            >
-                              {t("chorists.unarchive")}
-                            </button>
-                          </Td>
+                          {canEdit("chorists") && (
+                            <Td compact className="text-center">
+                              <button
+                                onClick={() => handleUnarchive(chorist.id)}
+                                className="text-link hover:text-link text-xs font-medium"
+                              >
+                                {t("chorists.unarchive")}
+                              </button>
+                            </Td>
+                          )}
                         </Tr>
                       );
                     })}
