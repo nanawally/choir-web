@@ -11,12 +11,15 @@ import {
   uploadConcertImage,
   getConcertImageUrl,
   deleteConcertImage,
+  createSongbookFromConcert,
+  uploadSongbookImage,
   getToken,
 } from "../../lib/api";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
-import { ClefTreble, Upload, Trash } from "lucide-react";
+import { ClefTreble, Upload, Trash, BookPlus } from "lucide-react";
 import { usePermissions } from "../../lib/usePermissions";
 
 type Concert = {
@@ -43,7 +46,11 @@ export default function ConcertsPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
-  const { canEdit, canDelete } = usePermissions();
+  const { canView, canEdit, canDelete } = usePermissions();
+  const router = useRouter();
+
+  type SongbookModal = { concert: Concert; name: string; date: string; copyImage: boolean };
+  const [songbookModal, setSongbookModal] = useState<SongbookModal | null>(null);
 
   useEffect(() => {
     listConcerts()
@@ -170,7 +177,21 @@ export default function ConcertsPage() {
     }
   }
 
+  async function handleCreateSongbook() {
+    if (!songbookModal) return;
+    const { concert, name, date, copyImage } = songbookModal;
+    const sb = await createSongbookFromConcert(concert.id, name.trim(), date || null);
+    if (!sb) return;
+    if (copyImage && concert.imageUrl) {
+      const blob = await fetch(concert.imageUrl).then((r) => r.blob());
+      await uploadSongbookImage(sb.id, new File([blob], "cover.jpg", { type: blob.type }));
+    }
+    setSongbookModal(null);
+    router.push(`/songbooks/${sb.id}`);
+  }
+
   return (
+    <>
     <div className="flex min-h-screen">
       <NavSidebar />
       <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
@@ -336,7 +357,7 @@ export default function ConcertsPage() {
                 </div>
 
                 {/* Action buttons — visible on hover */}
-                {editingId !== c.id && (canEdit("concerts") || canDelete("concerts")) && (
+                {editingId !== c.id && (canEdit("concerts") || canDelete("concerts") || (canView("concerts") && canEdit("songbooks"))) && (
                   <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     {canEdit("concerts") && (
                       <button
@@ -358,6 +379,15 @@ export default function ConcertsPage() {
                         title={t("common.duplicate")}
                       >
                         {t("common.copy")}
+                      </button>
+                    )}
+                    {canView("concerts") && canEdit("songbooks") && (
+                      <button
+                        onClick={() => setSongbookModal({ concert: c, name: c.name, date: c.date || "", copyImage: !!c.imageUrl })}
+                        className="px-1.5 py-0.5 bg-surface/90 border border-border rounded text-xs shadow-sm"
+                        title={t("concerts.createSongbook")}
+                      >
+                        <BookPlus size={12} />
                       </button>
                     )}
                     {canDelete("concerts") && (
@@ -383,5 +413,46 @@ export default function ConcertsPage() {
         </div>
       </div>
     </div>
+
+    {songbookModal && (
+      <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={() => setSongbookModal(null)}>
+        <div className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] max-w-sm flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
+          <h2 className="text-base font-semibold">{t("concerts.createSongbookTitle")}</h2>
+          <input
+            value={songbookModal.name}
+            onChange={(e) => setSongbookModal({ ...songbookModal, name: e.target.value })}
+            onKeyDown={(e) => { if (e.key === "Enter") handleCreateSongbook(); if (e.key === "Escape") setSongbookModal(null); }}
+            placeholder={t("concerts.concertName")}
+            className="border border-border rounded px-3 py-2 text-sm"
+            autoFocus
+          />
+          <input
+            type="date"
+            value={songbookModal.date}
+            onChange={(e) => setSongbookModal({ ...songbookModal, date: e.target.value })}
+            className="border border-border rounded px-3 py-2 text-sm"
+          />
+          {songbookModal.concert.imageUrl && (
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={songbookModal.copyImage}
+                onChange={(e) => setSongbookModal({ ...songbookModal, copyImage: e.target.checked })}
+              />
+              {t("concerts.copyImageToSongbook")}
+            </label>
+          )}
+          <div className="flex justify-end gap-2 mt-1">
+            <button onClick={() => setSongbookModal(null)} className="px-3 py-1.5 border border-border rounded text-sm">
+              {t("common.cancel")}
+            </button>
+            <button onClick={handleCreateSongbook} className="px-3 py-1.5 btn-primary text-sm">
+              {t("common.create")}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

@@ -192,6 +192,9 @@ const translations = {
   },
   "concerts.nameForCopy": { en: "Name for the copy:", sv: "Namn för kopian:" },
   "concerts.concertName": { en: "Concert name...", sv: "Konsertnamn..." },
+  "concerts.createSongbook": { en: "Create songbook", sv: "Skapa sångbok" },
+  "concerts.createSongbookTitle": { en: "Create songbook from concert", sv: "Skapa sångbok från konsert" },
+  "concerts.copyImageToSongbook": { en: "Copy concert image to songbook", sv: "Kopiera konsertbild till sångbok" },
   "concerts.backToConcerts": {
     en: "Back to concerts",
     sv: "Tillbaka till konserter",

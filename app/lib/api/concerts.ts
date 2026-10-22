@@ -1,4 +1,5 @@
 import { apiFetch, getToken, API_URL } from "../apiClient";
+import type { Songbook } from "./songbooks";
 
 // Concerts
 
@@ -50,6 +51,14 @@ export async function uploadConcertImage(concertId: string, file: File): Promise
 
 export function getConcertImageUrl(concertId: string): string {
   return `${API_URL}/concerts/${concertId}/image`;
+}
+
+export async function createSongbookFromConcert(concertId: string, name: string, date: string | null): Promise<Songbook | null> {
+  const res = await apiFetch(`/concerts/${concertId}/create-songbook`, {
+    method: "POST",
+    body: JSON.stringify({ name, date }),
+  });
+  return res.ok ? res.json() : null;
 }
 
 export async function deleteConcertImage(concertId: string): Promise<boolean> {
