@@ -424,11 +424,7 @@ export default function BaseFormationEditor({
             canvasHeight={canvasHeight}
             scale={scale}
             virtualWidth={windowSize.width}
-            virtualHeight={windowSize.height} activeFormationId={null} onUndo={function (): void {
-              throw new Error("Function not implemented.");
-            } } onRedo={function (): void {
-              throw new Error("Function not implemented.");
-            } } canUndo={false} canRedo={false} autoSaveStatus={"saving"} songName={null}          />
+            virtualHeight={windowSize.height} activeFormationId={null} onUndo={() => {}} onRedo={() => {}} canUndo={false} canRedo={false} autoSaveStatus={"idle"} songName={null}          />
         </div>
 
         {/* Right toggle buttons */}
