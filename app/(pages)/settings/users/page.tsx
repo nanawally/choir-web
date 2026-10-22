@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import NavSidebar from "../../../components/NavSidebar";
 import { useTranslation } from "../../../lib/LanguageContext";
+import { ChevronLeft } from "lucide-react";
 import {
   listUsers,
   createUser,
@@ -55,6 +57,9 @@ export default function UsersPage() {
     <div className="flex min-h-screen">
       <NavSidebar />
       <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
+        <Link href="/settings" className="flex items-center gap-1 text-sm text-muted hover:text-text mb-4 w-fit">
+          <ChevronLeft size={16} />{t("settings.title")}
+        </Link>
         <h1 className="text-4xl font-bold mb-6 text-center">{t("settings.usersTitle")}</h1>
 
         {qrUrl && (

@@ -7,13 +7,14 @@ export type Songbook = {
   date: string | null;
   imageUrl: string | null;
   isPinned: boolean;
+  isHidden: boolean;
 };
 
 export type SongbookSong = Song & { sortOrder: number };
 
 export async function listSongbooks(): Promise<Songbook[]> {
   const res = await apiFetch("/songbooks");
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function createSongbook(name: string, date?: string | null, isPinned?: boolean): Promise<Songbook | null> {
@@ -63,6 +64,14 @@ export function getSongbookImageUrl(songbookId: string): string {
 
 export async function deleteSongbookImage(songbookId: string): Promise<boolean> {
   const res = await apiFetch(`/songbooks/${songbookId}/image`, { method: "DELETE" });
+  return res.ok;
+}
+
+export async function setSongbookHidden(id: string, isHidden: boolean): Promise<boolean> {
+  const res = await apiFetch(`/songbooks/${id}/hidden`, {
+    method: "PUT",
+    body: JSON.stringify({ isHidden }),
+  });
   return res.ok;
 }
 

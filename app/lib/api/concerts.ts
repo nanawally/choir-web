@@ -4,7 +4,7 @@ import { apiFetch, getToken, API_URL } from "../apiClient";
 
 export async function listConcerts() {
   const res = await apiFetch("/concerts");
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function createConcert(name: string, date?: string | null) {
@@ -61,7 +61,7 @@ export async function deleteConcertImage(concertId: string): Promise<boolean> {
 
 export async function listConcertSongs(concertId: string) {
   const res = await apiFetch(`/concerts/${concertId}/songs`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function addSongToConcert(concertId: string, songId: string) {
@@ -89,7 +89,7 @@ export async function reorderConcertSongs(concertId: string, concertSongIds: str
 
 export async function getHiddenChorists(concertSongId: string): Promise<string[]> {
   const res = await apiFetch(`/concert-songs/${concertSongId}/hidden`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function saveHiddenChorists(concertSongId: string, choristIds: string[]) {
@@ -104,7 +104,7 @@ export async function saveHiddenChorists(concertSongId: string, choristIds: stri
 
 export async function listConcertChorists(concertId: string) {
   const res = await apiFetch(`/concerts/${concertId}/chorists`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function setConcertChorists(concertId: string, choristIds: string[]) {

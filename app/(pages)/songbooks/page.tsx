@@ -12,13 +12,15 @@ import {
   uploadSongbookImage,
   getSongbookImageUrl,
   deleteSongbookImage,
+  setSongbookHidden,
   getToken,
 } from "../../lib/api";
 import type { Songbook } from "../../lib/api";
 import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
-import { ClefTreble, Pin, Upload, Trash } from "lucide-react";
+import { usePermissions } from "../../lib/usePermissions";
+import { ClefTreble, Pin, Upload, Trash, Eye, EyeOff } from "lucide-react";
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-");
@@ -38,6 +40,7 @@ export default function SongbooksPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
+  const { canEdit: canEditPerm } = usePermissions();
 
   useEffect(() => {
     listSongbooks()
@@ -161,6 +164,14 @@ export default function SongbooksPage() {
     }
   }
 
+  async function handleToggleHidden(id: string) {
+    const sb = songbooks.find((s) => s.id === id);
+    if (!sb) return;
+    if (await setSongbookHidden(id, !sb.isHidden)) {
+      setSongbooks(songbooks.map((s) => s.id === id ? { ...s, isHidden: !s.isHidden } : s));
+    }
+  }
+
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
@@ -221,7 +232,7 @@ export default function SongbooksPage() {
             {sorted.map((sb) => (
               <div
                 key={sb.id}
-                className="border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group relative"
+                className={`border border-border rounded-xl overflow-hidden hover:shadow-md transition-shadow group relative ${sb.isHidden ? "opacity-60" : ""}`}
               >
                 {/* Pin toggle — top-left */}
                 <button
@@ -231,6 +242,20 @@ export default function SongbooksPage() {
                 >
                   <Pin size={12} className={sb.isPinned ? "text-primary" : "text-muted"} />
                 </button>
+
+                {/* Hidden toggle — top-left, next to pin */}
+                {canEditPerm("songbooks_hidden") && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); handleToggleHidden(sb.id); }}
+                    className={`absolute top-2 left-9 z-10 bg-surface/90 border border-border rounded p-1 shadow-sm transition-opacity ${sb.isHidden ? "" : "opacity-0 group-hover:opacity-100"}`}
+                    title={t("songbooks.toggleHidden")}
+                  >
+                    {sb.isHidden
+                      ? <EyeOff size={12} className="text-muted" />
+                      : <Eye size={12} className="text-muted" />
+                    }
+                  </button>
+                )}
 
                 {/* Image area */}
                 <Link href={`/songbooks/${sb.id}`}>
@@ -310,6 +335,12 @@ export default function SongbooksPage() {
                       </Link>
                       {sb.date && (
                         <p className="text-xs text-subtle mt-0.5 text-center">{formatDate(sb.date)}</p>
+                      )}
+                      {sb.isHidden && (
+                        <p className="text-xs text-muted mt-0.5 text-center flex items-center justify-center gap-1">
+                          <EyeOff size={10} />
+                          {t("songbooks.hidden")}
+                        </p>
                       )}
                     </>
                   )}

@@ -70,6 +70,15 @@ export default function SettingsPage() {
               <span className="text-sm font-medium">{t("settings.users")}</span>
             </Link>
           )}
+          {/* Permissions — admin only */}
+          {isAdmin && (
+            <Link
+              href="/settings/permissions"
+              className="block border border-border rounded-lg p-4 hover:bg-hover-bg"
+            >
+              <span className="text-sm font-medium">{t("settings.permissions")}</span>
+            </Link>
+          )}
           {/* Language */}
           <div className="border border-border rounded-lg p-4">
             <label className="block text-sm font-medium text-text-muted mb-2">

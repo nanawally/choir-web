@@ -475,6 +475,34 @@ const translations = {
   "qrModal.username": { en: "Username:", sv: "Användarnamn:" },
   "qrModal.copy": { en: "Copy link", sv: "Kopiera länk" },
   "qrModal.copied": { en: "Copied!", sv: "Kopierat!" },
+  
+  // Songbook hidden
+  "songbooks.hidden": { en: "Hidden", sv: "Dold" },
+  "songbooks.toggleHidden": { en: "Toggle visibility", sv: "Ändra synlighet" },
+
+  // Permissions
+  "settings.permissions": { en: "Permissions", sv: "Behörigheter" },
+  "settings.permissionsTitle": { en: "Permission groups", sv: "Behörighetsgrupper" },
+  "permissions.newGroup": { en: "+ New group", sv: "+ Ny grupp" },
+  "permissions.groupName": { en: "Group name...", sv: "Gruppnamn..." },
+  "permissions.canView": { en: "View", sv: "Se" },
+  "permissions.canEdit": { en: "Edit", sv: "Redigera" },
+  "permissions.canDelete": { en: "Delete", sv: "Ta bort" },
+  "permissions.members": { en: "Members", sv: "Medlemmar" },
+  "permissions.addMember": { en: "+ Add member", sv: "+ Lägg till medlem" },
+  "permissions.noGroups": { en: "No permission groups yet.", sv: "Inga behörighetsgrupper ännu." },
+  "permissions.noMembers": { en: "No members.", sv: "Inga medlemmar." },
+  "permissions.confirmDeleteGroup": { en: "Delete group {name}?", sv: "Ta bort grupp {name}?" },
+  "permissions.feature.chorists": { en: "Chorists", sv: "Korister" },
+  "permissions.feature.choristsNotes": { en: "Chorist notes", sv: "Koristanteckningar" },
+  "permissions.feature.voiceGroups": { en: "Voice groups", sv: "Stämdelningar" },
+  "permissions.feature.songs": { en: "Songs", sv: "Stycken" },
+  "permissions.feature.songbooks": { en: "Songbooks", sv: "Sångböcker" },
+  "permissions.feature.songbooksHidden": { en: "Hidden songbooks", sv: "Dolda sångböcker" },
+  "permissions.feature.concerts": { en: "Concerts", sv: "Konserter" },
+  "permissions.feature.formations": { en: "Formations", sv: "Uppställningar" },
+  "permissions.feature.baseFormations": { en: "Base formations", sv: "Grunduppställningar" },
+  "permissions.feature.permissions": { en: "Permissions", sv: "Behörigheter" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

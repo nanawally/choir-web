@@ -6,3 +6,4 @@ export * from "./api/formations";
 export * from "./api/voiceGroups";
 export * from "./api/songbooks";
 export * from "./api/users";
+export * from "./api/permissions";

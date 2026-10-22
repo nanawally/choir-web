@@ -4,7 +4,7 @@ import { apiFetch } from "../apiClient";
 
 export async function listFormations(concertId: string) {
   const res = await apiFetch(`/concerts/${concertId}/formations`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function createFormation(concertId: string, name: string) {
@@ -69,7 +69,7 @@ export async function updateRowSizes(formationId: string, rowSizes: number[]) {
 
 export async function listBaseFormations() {
   const res = await apiFetch("/base-formations");
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function createBaseFormation(name: string) {
@@ -92,7 +92,7 @@ export async function copyBaseIntoConcert(formationId: string, concertId: string
 
 export async function listSongFormations(concertSongId: string) {
   const res = await apiFetch(`/concert-songs/${concertSongId}/formations`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function setSongFormations(concertSongId: string, formationIds: string[]) {

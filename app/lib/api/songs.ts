@@ -23,7 +23,7 @@ export type Song = {
 
 export async function listSongs(): Promise<Song[]> {
   const res = await apiFetch("/songs");
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function createSong(name: string): Promise<Song | null> {
@@ -50,7 +50,7 @@ export async function deleteSong(id: string): Promise<boolean> {
 
 export async function listSongConcerts(songId: string): Promise<{ id: string; name: string }[]> {
   const res = await apiFetch(`/songs/${songId}/concerts`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 // Sheet music
@@ -82,7 +82,7 @@ export type AudioFile = { id: string; voicePartId: string | null; fileName: stri
 
 export async function listAudioFiles(songId: string): Promise<AudioFile[]> {
   const res = await apiFetch(`/songs/${songId}/audio-files`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function uploadAudioFile(songId: string, file: File, voicePartId?: string): Promise<AudioFile | null> {
@@ -113,7 +113,7 @@ export type SongLink = { id: string; url: string; label: string | null };
 
 export async function listSongLinks(songId: string): Promise<SongLink[]> {
   const res = await apiFetch(`/songs/${songId}/links`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function addSongLink(songId: string, url: string, label?: string): Promise<SongLink | null> {

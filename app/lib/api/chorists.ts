@@ -2,7 +2,7 @@ import { apiFetch } from "../apiClient";
 
 export async function listChorists(includeArchived = false) {
   const res = await apiFetch(`/chorists${includeArchived ? "?includeArchived=true" : ""}`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function createChorist(firstName: string, lastName: string, isSectionLeader = false) {

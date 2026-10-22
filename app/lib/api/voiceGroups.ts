@@ -4,7 +4,7 @@ import { apiFetch } from "../apiClient";
 
 export async function listVoiceGroups() {
   const res = await apiFetch("/voice-groups");
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function createVoiceGroup(name: string, isStandard = false) {
@@ -71,7 +71,7 @@ export async function deleteVoicePart(partId: string) {
 
 export async function getAssignments(groupId: string) {
   const res = await apiFetch(`/voice-groups/${groupId}/assignments`);
-  return res.json();
+  return res.ok ? res.json() : [];
 }
 
 export async function assignChorist(choristId: string, voicePartId: string) {
