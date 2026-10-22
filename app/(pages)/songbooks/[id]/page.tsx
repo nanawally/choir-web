@@ -112,7 +112,9 @@ export default function SongbookDetailPage({
   }
 
   async function handleSaveSong(updated: Song) {
-    const { id: songId, ...fields } = updated;
+    // editingSong is SongbookSong (has sortOrder); strip it before sending to the song PUT endpoint
+    const { id: songId, ...fields } = updated as Song & { sortOrder?: unknown };
+    delete (fields as { sortOrder?: unknown }).sortOrder;
     if (await updateSong(songId, fields)) {
       setSbSongs((prev) =>
         prev.map((s) => (s.id === songId ? { ...s, ...updated } : s)),
