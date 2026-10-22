@@ -9,23 +9,7 @@ import { ArrowBigLeft, CirclePile, Shapes, SquareText, UsersRound } from "lucide
 import { usePermissions } from "../../../lib/usePermissions";
 import { shortName } from "../../../lib/choristName";
 import { useTranslation } from "../../../lib/LanguageContext";
-import { sortChoristsByVoicePart } from "../../../lib/voiceGroupSort";
-import {
-  apiFetch,
-  getAssignments,
-  loadFormation,
-  listVoiceGroups,
-  renameFormation,
-  savePlacements,
-  updateRowSizes,
-} from "../../../lib/api";
-
-const CELL_SIZE = 50;
-const WIDTH = 800;
-const HEIGHT = 600;
-
-type Chorist = { id: string; firstName: string; lastName: string; notes: string | null };
-type Placement = { choristId: string; gridX: number; gridY: number };
+import { useBaseFormationEditor } from "../../../hooks/useBaseFormationEditor";
 
 export default function BaseFormationEditor({
   params,
@@ -36,33 +20,13 @@ export default function BaseFormationEditor({
   const { t } = useTranslation();
   const { canEdit } = usePermissions();
 
-  const [chorists, setChorists] = useState<Chorist[]>([]);
-  const [placements, setPlacements] = useState<Placement[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [formationName, setFormationName] = useState<string | null>(null);
-  const [rowSizes, setRowSizes] = useState<number[]>([]);
-  const [saving, setSaving] = useState(false);
+  const editor = useBaseFormationEditor(id);
 
-  // Voice groups
-  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
-  const [assignments, setAssignments] = useState<
-    { choristId: string; voicePartId: string }[]
-  >([]);
-  const [highlightPartId, setHighlightPartId] = useState<string | null>(null);
-  const [voiceGroups, setVoiceGroups] = useState<
-    {
-      id: string;
-      name: string;
-      isStandard: boolean;
-      parts: { id: string; name: string; color: string; shape: string }[];
-    }[]
-  >([]);
+  // Formation name editing (pure UI state)
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
 
-  const [fourPartAssignments, setFourPartAssignments] = useState<
-    { choristId: string; voicePartId: string }[]
-  >([]);
-
-  // Notes popover
+  // Notes popover (pure UI state)
   const [expandedNotes, setExpandedNotes] = useState<string | null>(null);
   const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -83,7 +47,7 @@ export default function BaseFormationEditor({
 
   const iconSize = "1.2vw";
 
-  function notesButton(c: Chorist) {
+  function notesButton(c: { id: string; notes: string | null }) {
     if (!c.notes) return null;
     return (
       <button
@@ -107,63 +71,10 @@ export default function BaseFormationEditor({
     );
   }
 
-  // Panels
-  const [showChorists, setShowChorists] = useState(false);
-  const [showFormationControls, setShowFormationControls] = useState(false);
-  const [showVoiceGroups, setShowVoiceGroups] = useState(false);
-
-  // Formation name editing
-  const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState("");
-
-  const DRAWER_WIDTH = 288;
-
-  useEffect(() => {
-    apiFetch("/chorists")
-      .then((res) => res.json())
-      .then(setChorists);
-  }, []);
-
-  useEffect(() => {
-    listVoiceGroups().then((groups) => {
-      setVoiceGroups(groups);
-      const fourPart = groups.find(
-        (g: { name: string }) =>
-          g.name.includes("4-part") || g.name.includes("4-stäm"),
-      );
-      if (fourPart) getAssignments(fourPart.id).then(setFourPartAssignments);
-    });
-  }, []);
-
-  useEffect(() => {
-    loadFormation(id).then(
-      (
-        data: {
-          name: string;
-          placements: { choristId: string; gridX: number; gridY: number }[];
-          rowSizes: string;
-        } | null,
-      ) => {
-        if (data) {
-          setFormationName(data.name);
-          setPlacements(
-            data.placements.map((p) => ({
-              choristId: p.choristId,
-              gridX: p.gridX,
-              gridY: p.gridY,
-            })),
-          );
-          setRowSizes(JSON.parse(data.rowSizes || "[]"));
-        }
-      },
-    );
-  }, [id]);
-
-  useEffect(() => {
-    if (activeGroupId) {
-      getAssignments(activeGroupId).then(setAssignments);
-    }
-  }, [activeGroupId]);
+  async function handleRenameSubmit() {
+    await editor.handleRename(nameInput);
+    setEditingName(false);
+  }
 
   // Window size tracking
   const [windowSize, setWindowSize] = useState({ width: 1600, height: 734 });
@@ -195,147 +106,42 @@ export default function BaseFormationEditor({
   const canvasHeight = windowSize.height;
   const scale = canvasWidth / windowSize.width;
 
-  const placedIds = new Set(placements.map((p) => p.choristId));
-
-  function handleSelectGroup(groupId: string | null) {
-    setActiveGroupId(groupId);
-    setHighlightPartId(null);
-    if (!groupId) setAssignments([]);
-  }
-
-  function handlePlace(choristId: string) {
-    const occupied = new Set(placements.map((p) => `${p.gridX},${p.gridY}`));
-    if (rowSizes.length > 0) {
-      // Arc mode: only valid arc spots
-      for (let gridY = 0; gridY < rowSizes.length; gridY++) {
-        for (let gridX = 0; gridX < rowSizes[gridY]; gridX++) {
-          if (!occupied.has(`${gridX},${gridY}`)) {
-            setPlacements([...placements, { choristId, gridX, gridY }]);
-            return;
-          }
-        }
-      }
-    } else {
-      // Rectangular grid
-      for (let gridY = 1; gridY < HEIGHT / CELL_SIZE; gridY++) {
-        for (let gridX = 1; gridX < WIDTH / CELL_SIZE; gridX++) {
-          if (!occupied.has(`${gridX},${gridY}`)) {
-            setPlacements([...placements, { choristId, gridX, gridY }]);
-            return;
-          }
-        }
-      }
-    }
-    // No empty spot — chorist stays unplaced
-  }
-
-  function handleRemove(choristId: string) {
-    setPlacements(placements.filter((p) => p.choristId !== choristId));
-  }
-
-  async function handleSave() {
-    setSaving(true);
-    await savePlacements(
-      id,
-      placements.map((p) => ({
-        choristId: p.choristId,
-        gridX: p.gridX,
-        gridY: p.gridY,
-      })),
-    );
-    setSaving(false);
-  }
-
-  async function handleRename() {
-    if (!nameInput.trim()) return;
-    const trimmed = nameInput.trim();
-    if (trimmed === formationName) {
-      setEditingName(false);
-      return;
-    }
-    await renameFormation(id, trimmed);
-    setFormationName(trimmed);
-    setEditingName(false);
-  }
-
-  const isArcMode = rowSizes.length > 0;
-
-  function handleSetArcMode(arc: boolean) {
-    if (arc && rowSizes.length === 0) {
-      const next = [10];
-      setRowSizes(next);
-      updateRowSizes(id, next);
-    } else if (!arc) {
-      setRowSizes([]);
-      updateRowSizes(id, []);
-    }
-  }
-
-  function handleClampPlacements(rowIndex: number, newSize: number) {
-    const onRow = placements.filter((p) => p.gridY === rowIndex);
-    const notOnRow = placements.filter((p) => p.gridY !== rowIndex);
-    const valid = onRow.filter((p) => p.gridX < newSize);
-    const overflow = onRow.filter((p) => p.gridX >= newSize);
-    const taken = new Set(valid.map((p) => p.gridX));
-    const clamped = overflow.map((p) => {
-      for (let x = newSize - 1; x >= 0; x--) {
-        if (!taken.has(x)) {
-          taken.add(x);
-          return { ...p, gridX: x };
-        }
-      }
-      return p;
-    });
-    setPlacements([...notOnRow, ...valid, ...clamped]);
-  }
-
-  const fourPartGroup = voiceGroups.find(
-    (g) => g.name.includes("4-part") || g.name.includes("4-stäm"),
-  );
-  const sortedChorists = sortChoristsByVoicePart(
-    chorists,
-    fourPartGroup,
-    fourPartAssignments,
-  );
-
-  const leftOpen = showChorists;
-  const rightOpen = showFormationControls || showVoiceGroups;
+  const DRAWER_WIDTH = 288;
+  const leftOpen = editor.showChorists;
+  const rightOpen = editor.showFormationControls || editor.showVoiceGroups;
+  const isArcMode = editor.rowSizes.length > 0;
 
   return (
     <div className="relative h-screen overflow-hidden">
       {/* Left drawer — chorist list */}
-      {showChorists && (
+      {editor.showChorists && (
         <div className="absolute top-0 left-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-10">
           <h2 className="font-bold mb-3">{t("baseFormations.chorists")}</h2>
           <div className="space-y-1">
-            {sortedChorists
-              .filter((c) => !placedIds.has(c.id))
+            {editor.sortedChorists
+              .filter((c) => !editor.placedIds.has(c.id))
               .map((c) => (
                 <div
                   key={c.id}
                   className="flex items-center text-[1.1vw] py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer"
-                  onClick={() => handlePlace(c.id)}
+                  onClick={() => editor.handlePlace(c.id)}
                 >
-                  <span className="flex-1 truncate">{shortName(c, chorists)}</span>
+                  <span className="flex-1 truncate">{shortName(c, editor.chorists)}</span>
                   {notesButton(c)}
                 </div>
               ))}
           </div>
-          {chorists.filter((c) => !placedIds.has(c.id)).length === 0 && (
-            <p className="text-subtle text-sm mt-2">
-              {t("baseFormations.allPlaced")}
-            </p>
+          {editor.chorists.filter((c) => !editor.placedIds.has(c.id)).length === 0 && (
+            <p className="text-subtle text-sm mt-2">{t("baseFormations.allPlaced")}</p>
           )}
-          {chorists.filter((c) => placedIds.has(c.id)).length > 0 && (
+          {editor.chorists.filter((c) => editor.placedIds.has(c.id)).length > 0 && (
             <>
-              <h3 className="text-xs font-medium text-muted mt-4 mb-1">
-                {t("baseFormations.placed")}
-              </h3>
-              {sortedChorists
-                .filter((c) => placedIds.has(c.id))
+              <h3 className="text-xs font-medium text-muted mt-4 mb-1">{t("baseFormations.placed")}</h3>
+              {editor.sortedChorists
+                .filter((c) => editor.placedIds.has(c.id))
                 .map((c) => (
                   <div key={c.id} className="flex items-center text-[1.1vw] py-0.5 px-2 text-subtle">
-                    <span className="flex-1 truncate">{shortName(c, chorists)}</span>
+                    <span className="flex-1 truncate">{shortName(c, editor.chorists)}</span>
                     {notesButton(c)}
                   </div>
                 ))}
@@ -365,27 +171,24 @@ export default function BaseFormationEditor({
           </Link>
           <button
             className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
-            onClick={() => setShowChorists(!showChorists)}
+            onClick={() => editor.setShowChorists(!editor.showChorists)}
           >
             <UsersRound size={20} />
           </button>
         </div>
 
         {/* Canvas */}
-        <div
-          ref={canvasContainerRef}
-          className="flex-1 min-w-0 overflow-hidden relative"
-        >
+        <div ref={canvasContainerRef} className="flex-1 min-w-0 overflow-hidden relative">
           {/* Formation name */}
-          {formationName && (
+          {editor.formationName && (
             <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10 text-sm font-medium text-muted">
               {editingName ? (
                 <input
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
-                  onBlur={handleRename}
+                  onBlur={handleRenameSubmit}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleRename();
+                    if (e.key === "Enter") handleRenameSubmit();
                     if (e.key === "Escape") setEditingName(false);
                   }}
                   className="border-b border-border-strong outline-none bg-transparent text-center"
@@ -395,52 +198,60 @@ export default function BaseFormationEditor({
                 <span
                   className="cursor-pointer hover:underline"
                   onClick={() => {
-                    setNameInput(formationName);
+                    setNameInput(editor.formationName!);
                     setEditingName(true);
                   }}
                   title={t("common.clickToRename")}
                 >
-                  {formationName}
+                  {editor.formationName}
                 </span>
               )}
             </div>
           )}
           <GridCanvas
-            chorists={chorists}
-            allChorists={chorists}
-            placements={placements}
-            setPlacements={setPlacements}
-            selectedIds={selectedIds}
-            setSelectedIds={setSelectedIds}
-            activeGroupId={activeGroupId}
-            voiceGroups={voiceGroups}
-            assignments={assignments}
-            highlightPartId={highlightPartId}
-            onRemove={handleRemove}
-            formationName={formationName}
+            chorists={editor.chorists}
+            allChorists={editor.chorists}
+            placements={editor.placements}
+            setPlacements={editor.setPlacements}
+            selectedIds={editor.selectedIds}
+            setSelectedIds={editor.setSelectedIds}
+            activeGroupId={editor.activeGroupId}
+            voiceGroups={editor.voiceGroups}
+            assignments={editor.assignments}
+            highlightPartId={editor.highlightPartId}
+            onRemove={editor.handleRemove}
+            formationName={editor.formationName}
             hiddenIds={new Set()}
-            rowSizes={rowSizes}
+            rowSizes={editor.rowSizes}
             canvasWidth={canvasWidth}
             canvasHeight={canvasHeight}
             scale={scale}
             virtualWidth={windowSize.width}
-            virtualHeight={windowSize.height} activeFormationId={null} onUndo={() => {}} onRedo={() => {}} canUndo={false} canRedo={false} autoSaveStatus={"idle"} songName={null}          />
+            virtualHeight={windowSize.height}
+            activeFormationId={null}
+            onUndo={editor.undo}
+            onRedo={editor.redo}
+            canUndo={editor.canUndo}
+            canRedo={editor.canRedo}
+            autoSaveStatus={editor.autoSaveStatus}
+            songName={null}
+          />
         </div>
 
         {/* Right toggle buttons */}
         <div className="flex flex-col gap-2 p-2 pt-4 shrink-0">
           {canEdit("base_formations") && (
             <button
-              className={`rounded-lg shadow p-2 hover:bg-surface-alt ${showFormationControls ? "bg-primary-light" : "bg-surface"}`}
-              onClick={() => { setShowFormationControls(!showFormationControls); setShowVoiceGroups(false); }}
+              className={`rounded-lg shadow p-2 hover:bg-surface-alt ${editor.showFormationControls ? "bg-primary-light" : "bg-surface"}`}
+              onClick={() => { editor.setShowFormationControls(!editor.showFormationControls); editor.setShowVoiceGroups(false); }}
               title={t("formations.title")}
             >
               <CirclePile size={20} />
             </button>
           )}
           <button
-            className={`rounded-lg shadow p-2 hover:bg-surface-alt ${showVoiceGroups ? "bg-primary-light" : "bg-surface"}`}
-            onClick={() => { setShowVoiceGroups(!showVoiceGroups); setShowFormationControls(false); }}
+            className={`rounded-lg shadow p-2 hover:bg-surface-alt ${editor.showVoiceGroups ? "bg-primary-light" : "bg-surface"}`}
+            onClick={() => { editor.setShowVoiceGroups(!editor.showVoiceGroups); editor.setShowFormationControls(false); }}
             title={t("voiceGroups.title")}
           >
             <Shapes size={20} />
@@ -450,7 +261,7 @@ export default function BaseFormationEditor({
 
       {/* Notes popover */}
       {expandedNotes && popoverPos && (() => {
-        const c = chorists.find((ch) => ch.id === expandedNotes);
+        const c = editor.chorists.find((ch) => ch.id === expandedNotes);
         if (!c?.notes) return null;
         return createPortal(
           <div
@@ -470,48 +281,34 @@ export default function BaseFormationEditor({
         className={`absolute top-0 right-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-10 transition-transform duration-300 ease-in-out ${rightOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Formation controls panel */}
-        {showFormationControls && (
+        {editor.showFormationControls && (
           <div className="flex flex-col gap-2">
             <h2 className="font-bold mb-1">{t("formations.title")}</h2>
 
-            {/* Layout mode */}
             <select
               value={isArcMode ? "arc" : "grid"}
-              onChange={(e) => handleSetArcMode(e.target.value === "arc")}
+              onChange={(e) => editor.handleSetArcMode(e.target.value === "arc")}
               className="border border-border rounded px-2 py-1.5 text-sm w-fit"
             >
               <option value="arc">{t("formations.arc")}</option>
               <option value="grid">{t("formations.grid")}</option>
             </select>
 
-            {/* Arc rows */}
             {isArcMode && (
               <div className="mt-1">
-                <h4 className="text-xs font-medium mb-1 text-muted">
-                  {t("formations.arcRowsShort")}
-                </h4>
-                {rowSizes.map((size, i) => (
+                <h4 className="text-xs font-medium mb-1 text-muted">{t("formations.arcRowsShort")}</h4>
+                {editor.rowSizes.map((size, i) => (
                   <div key={i} className="flex items-center gap-1 mb-1">
                     <span className="text-xs w-12">{`${t("formations.row")} ${i + 1}:`}</span>
                     <input
                       type="number"
                       value={size}
-                      min={placements.filter((p) => p.gridY === i).length || 1}
-                      onChange={(e) => {
-                        const next = [...rowSizes];
-                        next[i] = parseInt(e.target.value) || 1;
-                        setRowSizes(next);
-                        handleClampPlacements(i, next[i]);
-                        updateRowSizes(id, next);
-                      }}
+                      min={editor.placements.filter((p) => p.gridY === i).length || 1}
+                      onChange={(e) => editor.handleUpdateRowSize(i, parseInt(e.target.value) || 1)}
                       className="border border-border rounded px-1 py-0.5 text-sm w-16"
                     />
                     <button
-                      onClick={() => {
-                        const next = rowSizes.filter((_, j) => j !== i);
-                        setRowSizes(next);
-                        updateRowSizes(id, next);
-                      }}
+                      onClick={() => editor.handleRemoveRow(i)}
                       className="text-danger hover:text-danger-hover text-xs"
                     >
                       X
@@ -519,11 +316,7 @@ export default function BaseFormationEditor({
                   </div>
                 ))}
                 <button
-                  onClick={() => {
-                    const next = [...rowSizes, 10];
-                    setRowSizes(next);
-                    updateRowSizes(id, next);
-                  }}
+                  onClick={editor.handleAddRow}
                   className="text-xs text-link hover:underline"
                 >
                   {t("formations.addRow")}
@@ -532,24 +325,24 @@ export default function BaseFormationEditor({
             )}
 
             <button
-              onClick={handleSave}
-              disabled={saving}
+              onClick={editor.handleSave}
+              disabled={editor.autoSaveStatus === "saving"}
               className="px-3 py-1.5 btn-success text-sm w-fit font-medium"
             >
-              {saving ? t("common.saving") : t("formations.saveFormation")}
+              {editor.autoSaveStatus === "saving" ? t("common.saving") : t("formations.saveFormation")}
             </button>
           </div>
         )}
 
         {/* Voice groups panel */}
-        {showVoiceGroups && (
+        {editor.showVoiceGroups && (
           <VoiceGroupPanel
-            activeGroupId={activeGroupId}
-            onSelectGroup={handleSelectGroup}
-            voiceGroups={voiceGroups}
-            setVoiceGroups={setVoiceGroups}
-            highlightPartId={highlightPartId}
-            onHighlightPart={setHighlightPartId}
+            activeGroupId={editor.activeGroupId}
+            onSelectGroup={editor.handleSelectGroup}
+            voiceGroups={editor.voiceGroups}
+            setVoiceGroups={editor.setVoiceGroups}
+            highlightPartId={editor.highlightPartId}
+            onHighlightPart={editor.setHighlightPartId}
             canEdit={canEdit("base_formations")}
           />
         )}
