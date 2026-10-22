@@ -38,7 +38,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  --primary: #3b82f6;
+  --primary: /*#3b82f6;*/ #5D0F95;
   --primary-hover: #2563eb;
   --danger: #ef4444;
   --danger-hover: #dc2626;
