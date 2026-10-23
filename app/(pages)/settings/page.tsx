@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
-import { getTokenRole } from "../../lib/api";
+import { getTokenRole, clearToken } from "../../lib/apiClient";
+import { getMe, changePassword, deleteMyAccount } from "../../lib/api/me";
+import { useRouter } from "next/navigation";
 
 type Theme = "system" | "light" | "dark";
 
@@ -32,6 +34,7 @@ function applyTheme(theme: Theme) {
 
 export default function SettingsPage() {
   const { lang, setLang, t } = useTranslation();
+  const router = useRouter();
   const isAdmin = useSyncExternalStore(
     () => () => {},
     () => getTokenRole() === "admin",
@@ -43,6 +46,66 @@ export default function SettingsPage() {
     getInitialTheme,
     () => "system" as Theme,
   );
+
+  const [username, setUsername] = useState<string | null>(null);
+
+  // Change password modal state
+  const [showChangePw, setShowChangePw] = useState(false);
+  const [oldPw, setOldPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwSuccess, setPwSuccess] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
+
+  // Delete account modal state
+  const [showDelete, setShowDelete] = useState(false);
+  const [deletePw, setDeletePw] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  useEffect(() => {
+    getMe().then((me) => { if (me) setUsername(me.username); });
+  }, []);
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPwError(null);
+    if (newPw !== confirmPw) { setPwError(t("settings.passwordMismatch")); return; }
+    setPwLoading(true);
+    const result = await changePassword(oldPw, newPw);
+    setPwLoading(false);
+    if (result === true) {
+      setPwSuccess(true);
+      setOldPw(""); setNewPw(""); setConfirmPw("");
+    } else if (result === "wrong_password") {
+      setPwError(t("settings.wrongPassword"));
+    } else {
+      setPwError("Error");
+    }
+  }
+
+  function closePwModal() {
+    setShowChangePw(false);
+    setOldPw(""); setNewPw(""); setConfirmPw("");
+    setPwError(null); setPwSuccess(false);
+  }
+
+  async function handleDeleteAccount(e: React.FormEvent) {
+    e.preventDefault();
+    setDeleteError(null);
+    setDeleteLoading(true);
+    const result = await deleteMyAccount(deletePw);
+    setDeleteLoading(false);
+    if (result === true) {
+      clearToken();
+      router.push("/login");
+    } else if (result === "wrong_password") {
+      setDeleteError(t("settings.wrongPassword"));
+    } else {
+      setDeleteError("Error");
+    }
+  }
 
   function handleThemeChange(next: Theme) {
     applyTheme(next);
@@ -60,7 +123,65 @@ export default function SettingsPage() {
           {t("settings.title")}
         </h1>
 
+        {/* Change password modal */}
+        {showChangePw && (
+          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={closePwModal}>
+            <div className="bg-surface rounded-lg shadow-lg p-6 max-w-sm w-[calc(100%-2rem)] flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-lg font-semibold">{t("settings.changePassword")}</h2>
+              {pwSuccess ? (
+                <>
+                  <p className="text-sm text-success">{t("settings.passwordChanged")}</p>
+                  <button onClick={closePwModal} className="px-4 py-2 btn-primary text-sm">{t("common.close")}</button>
+                </>
+              ) : (
+                <form onSubmit={handleChangePassword} className="flex flex-col gap-3">
+                  <input type="password" value={oldPw} onChange={(e) => setOldPw(e.target.value)} placeholder={t("settings.currentPassword")} required className="border border-border rounded px-3 py-2 text-sm bg-surface" />
+                  <input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder={t("settings.newPassword")} required className="border border-border rounded px-3 py-2 text-sm bg-surface" />
+                  <input type="password" value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} placeholder={t("settings.confirmNewPassword")} required className="border border-border rounded px-3 py-2 text-sm bg-surface" />
+                  {pwError && <p className="text-sm text-danger">{pwError}</p>}
+                  <div className="flex gap-2">
+                    <button type="submit" disabled={pwLoading} className="flex-1 px-4 py-2 btn-primary text-sm">{t("common.save")}</button>
+                    <button type="button" onClick={closePwModal} className="flex-1 px-4 py-2 border border-border rounded text-sm hover:bg-hover-bg">{t("common.cancel")}</button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Delete account modal */}
+        {showDelete && (
+          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={() => setShowDelete(false)}>
+            <div className="bg-surface rounded-lg shadow-lg p-6 max-w-sm w-[calc(100%-2rem)] flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-lg font-semibold text-danger">{t("settings.deleteAccount")}</h2>
+              <p className="text-sm text-text-muted">{t("settings.deleteAccountConfirm")}</p>
+              <form onSubmit={handleDeleteAccount} className="flex flex-col gap-3">
+                <input type="password" value={deletePw} onChange={(e) => setDeletePw(e.target.value)} placeholder={t("settings.currentPassword")} required className="border border-border rounded px-3 py-2 text-sm bg-surface" />
+                {deleteError && <p className="text-sm text-danger">{deleteError}</p>}
+                <div className="flex gap-2">
+                  <button type="submit" disabled={deleteLoading} className="flex-1 px-4 py-2 bg-danger text-white rounded text-sm font-medium hover:opacity-90">{t("settings.deleteAccount")}</button>
+                  <button type="button" onClick={() => { setShowDelete(false); setDeletePw(""); setDeleteError(null); }} className="flex-1 px-4 py-2 border border-border rounded text-sm hover:bg-hover-bg">{t("common.cancel")}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         <div className="mx-auto w-full max-w-md space-y-4">
+          {/* Account */}
+          <div className="border border-border rounded-lg p-4">
+            <p className="text-sm font-medium text-text-muted mb-3">{t("settings.account")}</p>
+            {username && <p className="text-sm font-mono mb-3">{username}</p>}
+            <div className="flex gap-2 flex-wrap">
+              <button onClick={() => setShowChangePw(true)} className="px-3 py-1.5 text-sm border border-border rounded hover:bg-hover-bg">
+                {t("settings.changePassword")}
+              </button>
+              <button onClick={() => setShowDelete(true)} className="px-3 py-1.5 text-sm border border-danger text-danger rounded hover:bg-hover-bg">
+                {t("settings.deleteAccount")}
+              </button>
+            </div>
+          </div>
+
           {/* User management — admin only */}
           {isAdmin && (
             <Link
