@@ -16,6 +16,7 @@ import {
   type User,
 } from "../../../lib/api";
 import { QRCodeSVG } from "qrcode.react";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 export default function UsersPage() {
   const { t } = useTranslation();
@@ -94,7 +95,7 @@ export default function UsersPage() {
         )}
 
         {loading ? (
-          <p className="text-muted">{t("setup.loading")}</p>
+          <div className="flex justify-center mt-16"><LoadingSpinner /></div>
         ) : users.length === 0 ? (
           <p className="text-muted">{t("settings.noUsers")}</p>
         ) : (

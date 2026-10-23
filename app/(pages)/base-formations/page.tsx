@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "../../lib/LanguageContext";
 import NavSidebar from "../../components/NavSidebar";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   listBaseFormations,
   createBaseFormation,
@@ -67,6 +68,8 @@ export default function BaseFormationsPage() {
         <h1 className="text-4xl font-bold mb-6 text-center">
           {t("baseFormations.title")}
         </h1>
+
+        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
 
         <div className="w-full">
           <div className="flex items-center justify-between mb-4">

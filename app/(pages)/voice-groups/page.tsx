@@ -8,6 +8,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import NavSidebar from "../../components/NavSidebar";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useTranslation } from "../../lib/LanguageContext";
 import { usePermissions } from "../../lib/usePermissions";
 import {
@@ -423,6 +424,8 @@ export default function VoiceGroupsPage() {
         <p className="text-sm text-muted text-center mb-6">
           {t("voiceGroups.description")}
         </p>
+
+        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
 
         <div className="flex justify-center mb-6">
           {canEditPerm("voice_groups") && (

@@ -7,6 +7,7 @@ import { ALL_COLUMNS, FILTER_COLUMNS, type ActiveFilter, type YearRange } from "
 import { useTableSort } from "../../lib/useTableSort";
 import { useTranslation } from "../../lib/LanguageContext";
 import { Table, Thead, TheadRow, Th, Tbody, Tr, Td } from "../StyledTable";
+import LoadingSpinner from "../LoadingSpinner";
 import {
   ChevronDown,
   ChevronRight,
@@ -207,6 +208,10 @@ export function SongsTableView<T extends Song>({
     a.download = csvFilename;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  if (loading) {
+    return <div className="flex justify-center mt-16"><LoadingSpinner /></div>;
   }
 
   return (

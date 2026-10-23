@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "../../lib/apiClient";
 import { useTranslation } from "../../lib/LanguageContext";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 function SetupForm() {
   const { t } = useTranslation();
@@ -57,7 +58,7 @@ function SetupForm() {
   if (loading) {
     return (
       <div className={wrapper}>
-        <p className="text-muted">{t("setup.loading")}</p>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -131,7 +132,7 @@ function SetupForm() {
 export default function SetupPage() {
   const { t } = useTranslation();
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><p className="text-muted">{t("setup.loading")}</p></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><LoadingSpinner /></div>}>
       <SetupForm />
     </Suspense>
   );

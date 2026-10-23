@@ -11,6 +11,7 @@ import {
   Td,
 } from "../../components/StyledTable";
 import NavSidebar from "../../components/NavSidebar";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useChorists } from "../../hooks/useChorists";
 import { useTranslation } from "../../lib/LanguageContext";
 import { usePermissions } from "../../lib/usePermissions";
@@ -64,6 +65,8 @@ export default function RosterPage() {
         <h1 className="text-4xl font-bold mb-6 text-center">
           {t("chorists.title")}
         </h1>
+
+        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
 
         <div className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">

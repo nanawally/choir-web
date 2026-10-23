@@ -5,6 +5,7 @@ import Link from "next/link";
 import NavSidebar from "../../../components/NavSidebar";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { ChevronDown, ChevronLeft, Trash2 } from "lucide-react";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 import {
   listPermissionGroups,
   createPermissionGroup,
@@ -181,7 +182,7 @@ export default function PermissionsPage() {
         </form>
 
         {loading ? (
-          <p className="text-muted text-center">{t("common.loading")}</p>
+          <div className="flex justify-center mt-16"><LoadingSpinner /></div>
         ) : groups.length === 0 ? (
           <p className="text-muted text-center">{t("permissions.noGroups")}</p>
         ) : (

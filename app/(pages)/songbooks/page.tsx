@@ -19,6 +19,7 @@ import type { Songbook } from "../../lib/api";
 import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { usePermissions } from "../../lib/usePermissions";
 import { ClefTreble, Pin, Upload, Trash, Eye, EyeOff } from "lucide-react";
 
@@ -177,6 +178,8 @@ export default function SongbooksPage() {
       <NavSidebar />
       <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
         <h1 className="text-4xl font-bold mb-6 text-center">{t("songbooks.title")}</h1>
+
+        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
 
         <div className="w-full">
           {canEditPerm("songbooks") && (

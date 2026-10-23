@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NavSidebar from "../../components/NavSidebar";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { useTranslation } from "../../lib/LanguageContext";
 import { ClefTreble, Upload, Trash, BookPlus } from "lucide-react";
 import { usePermissions } from "../../lib/usePermissions";
@@ -198,6 +199,8 @@ export default function ConcertsPage() {
         <h1 className="text-4xl font-bold mb-6 text-center">
           {t("concerts.title")}
         </h1>
+
+        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
 
         <div className="w-full">
           {canEdit("concerts") && (
