@@ -1,13 +1,12 @@
 "use client";
 
 import { use, useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import GridCanvas from "../../../components/concert/GridCanvas";
+import RosterPanel from "../../../components/concert/RosterPanel";
 import VoiceGroupPanel from "../../../components/concert/VoiceGroupPanel";
 import Link from "next/link";
-import { ArrowBigLeft, CirclePile, Shapes, SquareText, UsersRound } from "lucide-react";
+import { ArrowBigLeft, CirclePile, Shapes, UsersRound } from "lucide-react";
 import { usePermissions } from "../../../lib/usePermissions";
-import { shortName } from "../../../lib/choristName";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { useBaseFormationEditor } from "../../../hooks/useBaseFormationEditor";
 
@@ -25,51 +24,6 @@ export default function BaseFormationEditor({
   // Formation name editing (pure UI state)
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
-
-  // Notes popover (pure UI state)
-  const [expandedNotes, setExpandedNotes] = useState<string | null>(null);
-  const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
-  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const popoverRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!expandedNotes) return;
-    function handleClick(e: MouseEvent) {
-      const target = e.target as Node;
-      if (popoverRef.current?.contains(target)) return;
-      if (buttonRefs.current[expandedNotes!]?.contains(target)) return;
-      setExpandedNotes(null);
-      setPopoverPos(null);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [expandedNotes]);
-
-  const iconSize = "1.2vw";
-
-  function notesButton(c: { id: string; notes: string | null }) {
-    if (!c.notes) return null;
-    return (
-      <button
-        ref={(el) => { buttonRefs.current[c.id] = el; }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (expandedNotes === c.id) {
-            setExpandedNotes(null);
-            setPopoverPos(null);
-          } else {
-            const rect = buttonRefs.current[c.id]?.getBoundingClientRect();
-            if (rect) setPopoverPos({ top: rect.top, left: rect.right + 8 });
-            setExpandedNotes(c.id);
-          }
-        }}
-        className={`ml-auto pl-2 ${expandedNotes === c.id ? "text-muted" : "text-subtle hover:text-muted"}`}
-        title={t("chorists.notes")}
-      >
-        <SquareText style={{ width: iconSize, height: iconSize }} />
-      </button>
-    );
-  }
 
   async function handleRenameSubmit() {
     await editor.handleRename(nameInput);
@@ -115,38 +69,14 @@ export default function BaseFormationEditor({
     <div className="relative h-screen overflow-hidden">
       {/* Left drawer — chorist list */}
       {editor.showChorists && (
-        <div className="absolute top-0 left-0 w-72 h-full bg-surface shadow-lg p-4 overflow-y-auto z-10">
-          <h2 className="font-bold mb-3">{t("baseFormations.chorists")}</h2>
-          <div className="space-y-1">
-            {editor.sortedChorists
-              .filter((c) => !editor.placedIds.has(c.id))
-              .map((c) => (
-                <div
-                  key={c.id}
-                  className="flex items-center text-[1.1vw] py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer"
-                  onClick={() => editor.handlePlace(c.id)}
-                >
-                  <span className="flex-1 truncate">{shortName(c, editor.chorists)}</span>
-                  {notesButton(c)}
-                </div>
-              ))}
-          </div>
-          {editor.chorists.filter((c) => !editor.placedIds.has(c.id)).length === 0 && (
-            <p className="text-subtle text-sm mt-2">{t("baseFormations.allPlaced")}</p>
-          )}
-          {editor.chorists.filter((c) => editor.placedIds.has(c.id)).length > 0 && (
-            <>
-              <h3 className="text-xs font-medium text-muted mt-4 mb-1">{t("baseFormations.placed")}</h3>
-              {editor.sortedChorists
-                .filter((c) => editor.placedIds.has(c.id))
-                .map((c) => (
-                  <div key={c.id} className="flex items-center text-[1.1vw] py-0.5 px-2 text-subtle">
-                    <span className="flex-1 truncate">{shortName(c, editor.chorists)}</span>
-                    {notesButton(c)}
-                  </div>
-                ))}
-            </>
-          )}
+        <div className="absolute top-0 left-0 w-72 h-full bg-surface shadow-lg p-4 z-10">
+          <RosterPanel
+            chorists={editor.sortedChorists}
+            allChorists={editor.chorists}
+            placedIds={editor.placedIds}
+            onPlace={editor.handlePlace}
+            onRemove={editor.handleRemove}
+          />
         </div>
       )}
 
@@ -258,23 +188,6 @@ export default function BaseFormationEditor({
           </button>
         </div>
       </div>
-
-      {/* Notes popover */}
-      {expandedNotes && popoverPos && (() => {
-        const c = editor.chorists.find((ch) => ch.id === expandedNotes);
-        if (!c?.notes) return null;
-        return createPortal(
-          <div
-            ref={popoverRef}
-            className="fixed w-64 p-4 bg-surface border border-border rounded-lg shadow-lg z-50"
-            style={{ top: popoverPos.top, left: popoverPos.left }}
-          >
-            <h4 className="font-medium mb-1">{t("chorists.notes")}</h4>
-            <p className="text-sm text-muted whitespace-pre-wrap">{c.notes}</p>
-          </div>,
-          document.body,
-        );
-      })()}
 
       {/* Right drawer */}
       <div

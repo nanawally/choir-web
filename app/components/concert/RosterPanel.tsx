@@ -14,9 +14,9 @@ type Props = {
   placedIds: Set<string>;
   onPlace: (id: string) => void;
   onRemove: (id: string) => void;
-  hiddenIds: Set<string>;
-  onToggleHidden: (ids: Set<string>) => void;
-  onEditRoster: () => void;
+  hiddenIds?: Set<string>;
+  onToggleHidden?: (ids: Set<string>) => void;
+  onEditRoster?: () => void;
 };
 
 export default function RosterPanel({
@@ -25,7 +25,7 @@ export default function RosterPanel({
   placedIds,
   onPlace,
   onRemove,
-  hiddenIds,
+  hiddenIds = new Set(),
   onToggleHidden,
   onEditRoster,
 }: Props) {
@@ -51,6 +51,7 @@ export default function RosterPanel({
   const placed = chorists.filter((c) => placedIds.has(c.id));
 
   function toggleHidden(choristId: string) {
+    if (!onToggleHidden) return;
     const next = new Set(hiddenIds);
     if (next.has(choristId)) {
       next.delete(choristId);
@@ -87,12 +88,14 @@ export default function RosterPanel({
   return (<>
     <div className="overflow-y-auto h-full">
       <h2 className="font-bold mb-3">{t("chorists.title")}</h2>
-      <button
-        onClick={() => onEditRoster()}
-        className="m-4 px-3 py-1 btn-primary text-sm"
-      >
-        {t("roster.editRoster")}
-      </button>
+      {onEditRoster && (
+        <button
+          onClick={() => onEditRoster()}
+          className="m-4 px-3 py-1 btn-primary text-sm"
+        >
+          {t("roster.editRoster")}
+        </button>
+      )}
 
       {unplaced.length > 0 && (
         <>
@@ -125,21 +128,23 @@ export default function RosterPanel({
                 <div
                   className={`flex items-center text-sm py-0.5 px-2 rounded ${hiddenIds.has(c.id) ? "opacity-40" : ""}`}
                 >
-                  <button
-                    onClick={() => toggleHidden(c.id)}
-                    className="mr-1"
-                    title={
-                      hiddenIds.has(c.id)
-                        ? t("roster.showOnGrid")
-                        : t("roster.hideFromGrid")
-                    }
-                  >
-                    {hiddenIds.has(c.id) ? (
-                      <EyeOff size={14} />
-                    ) : (
-                      <Eye size={14} />
-                    )}
-                  </button>
+                  {onToggleHidden && (
+                    <button
+                      onClick={() => toggleHidden(c.id)}
+                      className="mr-1"
+                      title={
+                        hiddenIds.has(c.id)
+                          ? t("roster.showOnGrid")
+                          : t("roster.hideFromGrid")
+                      }
+                    >
+                      {hiddenIds.has(c.id) ? (
+                        <EyeOff size={14} />
+                      ) : (
+                        <Eye size={14} />
+                      )}
+                    </button>
+                  )}
                   <span
                     className="flex-1 truncate cursor-pointer hover:line-through hover:text-muted"
                     onClick={() => onRemove(c.id)}
