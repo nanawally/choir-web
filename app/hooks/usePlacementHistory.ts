@@ -19,6 +19,8 @@ export function usePlacementHistory({ formationId, onAfterSave }: Options) {
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Set to true before syncing placements from the server to suppress the next autosave trigger
   const isSyncingRef = useRef(false);
+  // False until the first syncPlacements call — prevents autosave from firing before server data arrives
+  const isInitializedRef = useRef(false);
   // Stable refs for use inside timer callbacks and saveImmediately
   const latestPlacementsRef = useRef(placements);
   const latestFormationIdRef = useRef(formationId);
@@ -26,6 +28,8 @@ export function usePlacementHistory({ formationId, onAfterSave }: Options) {
 
   useEffect(() => { latestPlacementsRef.current = placements; }, [placements]);
   useEffect(() => { latestFormationIdRef.current = formationId; }, [formationId]);
+  // Reset initialized state when formationId changes so a new formation waits for its syncPlacements
+  useEffect(() => { isInitializedRef.current = false; }, [formationId]);
   useEffect(() => { onAfterSaveRef.current = onAfterSave; }, [onAfterSave]);
 
   // Auto-save placements 500ms after the last change
@@ -34,6 +38,7 @@ export function usePlacementHistory({ formationId, onAfterSave }: Options) {
       isSyncingRef.current = false;
       return;
     }
+    if (!isInitializedRef.current) return;
     if (!formationId) return;
 
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
@@ -65,6 +70,7 @@ export function usePlacementHistory({ formationId, onAfterSave }: Options) {
   // Load placements from server: suppress autosave, clear history
   function syncPlacements(newPlacements: Placement[]) {
     isSyncingRef.current = true;
+    isInitializedRef.current = true;
     setPastPlacements([]);
     setFuturePlacements([]);
     setPlacementsInternal(newPlacements);
