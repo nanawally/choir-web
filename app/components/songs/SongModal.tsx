@@ -181,7 +181,7 @@ export default function SongModal({
           />
         )}
         {tab === "lyrics" && <SongLyricsTab lyrics={current.lyrics} />}
-        {tab === "listening" && <SongListeningTab songId={current.id} />}
+        {tab === "listening" && <SongListeningTab songId={current.id} canEdit={canEdit} />}
       </div>
     </div>
   );

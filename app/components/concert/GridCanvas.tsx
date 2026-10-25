@@ -48,6 +48,7 @@ type Props = {
   canUndo: boolean;
   canRedo: boolean;
   autoSaveStatus: "idle" | "saving" | "saved";
+  canEdit?: boolean;
 };
 
 function snapToGrid(value: number): number {
@@ -101,6 +102,7 @@ export default function GridCanvas({
   canUndo,
   canRedo,
   autoSaveStatus,
+  canEdit = true,
 }: Props) {
   const { t } = useTranslation();
 
@@ -536,7 +538,7 @@ export default function GridCanvas({
                   y={pos.y}
                   offsetX={offset.x}
                   offsetY={offset.y}
-                  draggable
+                  draggable={canEdit}
                   onDragStart={(e) => {
                     // Cancel any in-progress animation so drag coordinates are clean
                     if (animCancelRef.current) {
@@ -676,7 +678,7 @@ export default function GridCanvas({
                   }}
                   onContextMenu={(e) => {
                     e.evt.preventDefault();
-                    onRemove(p.choristId);
+                    if (canEdit) onRemove(p.choristId);
                   }}
                   onClick={(e) => {
                     if (e.evt.shiftKey) {

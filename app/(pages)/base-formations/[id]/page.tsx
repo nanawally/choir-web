@@ -10,6 +10,8 @@ import { usePermissions } from "../../../lib/usePermissions";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { useBaseFormationEditor } from "../../../hooks/useBaseFormationEditor";
 import NotFound from "../../../components/NotFound";
+import AccessDenied from "../../../components/AccessDenied";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 export default function BaseFormationEditor({
   params,
@@ -18,7 +20,7 @@ export default function BaseFormationEditor({
 }) {
   const { id } = use(params);
   const { t } = useTranslation();
-  const { canEdit } = usePermissions();
+  const { canEdit, canView, loaded } = usePermissions();
 
   const editor = useBaseFormationEditor(id);
 
@@ -66,6 +68,9 @@ export default function BaseFormationEditor({
   const rightOpen = editor.showFormationControls || editor.showVoiceGroups;
   const isArcMode = editor.rowSizes.length > 0;
 
+  if (!loaded) return <div className="relative h-screen flex items-center justify-center"><LoadingSpinner /></div>;
+  if (!canView("base_formations")) return <div className="flex min-h-screen"><AccessDenied /></div>;
+
   if (editor.notFound) {
     return (
       <div className="flex min-h-screen">
@@ -108,12 +113,14 @@ export default function BaseFormationEditor({
           >
             <ArrowBigLeft size={20} />
           </Link>
+          {canEdit("base_formations") && (
           <button
             className="bg-surface rounded-lg shadow p-2 hover:bg-surface-alt"
             onClick={() => editor.setShowChorists(!editor.showChorists)}
           >
             <UsersRound size={20} />
           </button>
+          )}
         </div>
 
         {/* Canvas */}
@@ -135,12 +142,9 @@ export default function BaseFormationEditor({
                 />
               ) : (
                 <span
-                  className="cursor-pointer hover:underline"
-                  onClick={() => {
-                    setNameInput(editor.formationName!);
-                    setEditingName(true);
-                  }}
-                  title={t("common.clickToRename")}
+                  className={canEdit("base_formations") ? "cursor-pointer hover:underline" : ""}
+                  onClick={canEdit("base_formations") ? () => { setNameInput(editor.formationName!); setEditingName(true); } : undefined}
+                  title={canEdit("base_formations") ? t("common.clickToRename") : undefined}
                 >
                   {editor.formationName}
                 </span>
@@ -174,6 +178,7 @@ export default function BaseFormationEditor({
             canRedo={editor.canRedo}
             autoSaveStatus={editor.autoSaveStatus}
             songName={null}
+            canEdit={canEdit("base_formations")}
           />
         </div>
 

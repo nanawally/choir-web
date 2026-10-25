@@ -22,6 +22,8 @@ import {
 import { useTranslation } from "../../../lib/LanguageContext";
 import { usePermissions } from "../../../lib/usePermissions";
 import NotFound from "../../../components/NotFound";
+import AccessDenied from "../../../components/AccessDenied";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
 
@@ -32,7 +34,7 @@ export default function ConcertEditor({
 }) {
   const { id } = use(params);
   const { t } = useTranslation();
-  const { canView, canEdit, canDelete } = usePermissions();
+  const { canView, canEdit, canDelete, loaded } = usePermissions();
   const editor = useConcertEditor(id);
   const leftOpen = editor.showSetlist || editor.showChorists;
   const rightOpen = editor.showFormations || editor.showVoiceGroups;
@@ -73,6 +75,9 @@ export default function ConcertEditor({
 
   // Scale factor: how much to shrink the virtual space to fit
   const scale = canvasWidth / windowSize.width;
+
+  if (!loaded) return <div className="relative h-screen flex items-center justify-center"><LoadingSpinner /></div>;
+  if (!canView("concerts")) return <div className="flex min-h-screen"><AccessDenied /></div>;
 
   if (editor.notFound) {
     return (
@@ -216,6 +221,7 @@ export default function ConcertEditor({
             canUndo={editor.canUndo}
             canRedo={editor.canRedo}
             autoSaveStatus={editor.autoSaveStatus}
+            canEdit={canEdit("concerts")}
           />
         </div>
 

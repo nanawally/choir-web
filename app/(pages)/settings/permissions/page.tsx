@@ -30,6 +30,7 @@ const ALL_FEATURES = [
   "concerts",
   "base_formations",
   "permissions",
+  "users",
 ] as const;
 
 const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[] = [
@@ -42,6 +43,7 @@ const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[
   { feature: "concerts", isChild: false },
   { feature: "base_formations", isChild: false },
   { feature: "permissions", isChild: false },
+  { feature: "users", isChild: false },
 ];
 
 function getPerm(group: PermissionGroup, feature: string): PermissionEntry {
@@ -159,6 +161,7 @@ export default function PermissionsPage() {
       concerts: t("permissions.feature.concerts"),
       base_formations: t("permissions.feature.baseFormations"),
       permissions: t("permissions.feature.permissions"),
+      users: t("permissions.feature.users"),
     };
     return map[feature] ?? feature;
   }

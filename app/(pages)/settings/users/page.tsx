@@ -17,9 +17,12 @@ import {
 } from "../../../lib/api";
 import { QRCodeSVG } from "qrcode.react";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import { usePermissions } from "../../../lib/usePermissions";
+import AccessDenied from "../../../components/AccessDenied";
 
 export default function UsersPage() {
   const { t } = useTranslation();
+  const { canView, canEdit: canEditPerm, canDelete: canDeletePerm, loaded } = usePermissions();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [newUsername, setNewUsername] = useState("");
@@ -94,8 +97,10 @@ export default function UsersPage() {
           </div>
         )}
 
-        {loading ? (
+        {(loading || !loaded) ? (
           <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>
+        ) : !canView("users") ? (
+          <AccessDenied />
         ) : (
           <>
           {users.length === 0 ? (
@@ -120,8 +125,9 @@ export default function UsersPage() {
                       <td className="p-2">
                         <select
                           value={user.role}
-                          onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                          className="border border-border rounded px-2 py-1 bg-surface text-sm"
+                          onChange={(e) => canEditPerm("users") && handleRoleChange(user.id, e.target.value)}
+                          disabled={!canEditPerm("users")}
+                          className="border border-border rounded px-2 py-1 bg-surface text-sm disabled:opacity-50"
                         >
                           <option value="user">user</option>
                           <option value="admin">admin</option>
@@ -132,13 +138,15 @@ export default function UsersPage() {
                       </td>
                       <td className="p-2">
                         <div className="flex gap-2 justify-end">
+                          {canEditPerm("users") && (
                           <button
                             onClick={() => handleReset(user.id)}
                             className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
                           >
                             {user.isPending ? t("settings.showSetupQr") : t("settings.resetAccount")}
                           </button>
-                          {user.isArchived ? (
+                          )}
+                          {canEditPerm("users") && (user.isArchived ? (
                             <button
                               onClick={async () => { await unarchiveUser(user.id); load(); }}
                               className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
@@ -152,7 +160,8 @@ export default function UsersPage() {
                             >
                               {t("chorists.archive")}
                             </button>
-                          )}
+                          ))}
+                          {canDeletePerm("users") && (
                           <button
                             onClick={async () => {
                               if (window.confirm(`Delete ${user.username}?`)) {
@@ -163,6 +172,7 @@ export default function UsersPage() {
                           >
                             {t("common.delete")}
                           </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -184,21 +194,24 @@ export default function UsersPage() {
                     </span>
                     <select
                       value={user.role}
-                      onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                      className="border border-border rounded px-2 py-1 bg-surface text-sm shrink-0"
+                      onChange={(e) => canEditPerm("users") && handleRoleChange(user.id, e.target.value)}
+                      disabled={!canEditPerm("users")}
+                      className="border border-border rounded px-2 py-1 bg-surface text-sm shrink-0 disabled:opacity-50"
                     >
                       <option value="user">user</option>
                       <option value="admin">admin</option>
                     </select>
                   </div>
                   <div className="flex gap-2 flex-wrap">
+                    {canEditPerm("users") && (
                     <button
                       onClick={() => handleReset(user.id)}
                       className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
                     >
                       {user.isPending ? t("settings.showSetupQr") : t("settings.resetAccount")}
                     </button>
-                    {user.isArchived ? (
+                    )}
+                    {canEditPerm("users") && (user.isArchived ? (
                       <button
                         onClick={async () => { await unarchiveUser(user.id); load(); }}
                         className="text-xs px-2 py-1 border border-border rounded hover:bg-hover-bg"
@@ -212,7 +225,8 @@ export default function UsersPage() {
                       >
                         {t("chorists.archive")}
                       </button>
-                    )}
+                    ))}
+                    {canDeletePerm("users") && (
                     <button
                       onClick={async () => {
                         if (window.confirm(`Delete ${user.username}?`)) {
@@ -223,12 +237,14 @@ export default function UsersPage() {
                     >
                       {t("common.delete")}
                     </button>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
             </>
           )}
+          {canEditPerm("users") && (
           <div className="max-w-sm">
             <h2 className="text-lg font-semibold mb-3">{t("settings.createUser")}</h2>
             <form onSubmit={handleCreate} className="flex flex-col gap-2">
@@ -251,6 +267,7 @@ export default function UsersPage() {
               </button>
             </form>
           </div>
+          )}
           </>
         )}
       </div>

@@ -16,7 +16,7 @@ import {
 import { Trash, Upload, Plus } from "lucide-react";
 import { useTranslation } from "../../lib/LanguageContext";
 
-export default function SongListeningTab({ songId }: { songId: string }) {
+export default function SongListeningTab({ songId, canEdit = false }: { songId: string; canEdit?: boolean }) {
   const { t } = useTranslation();
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
   const [songLinks, setSongLinks] = useState<SongLink[]>([]);
@@ -62,6 +62,7 @@ export default function SongListeningTab({ songId }: { songId: string }) {
                     <span className="text-sm truncate block">{af.fileName}</span>
                   </div>
                   <audio src={streamUrl} controls preload="none" className="h-8 w-32 sm:w-40" />
+                  {canEdit && (
                   <button
                     onClick={async () => {
                       if (!window.confirm(t("songs.confirmDeleteAudio"))) return;
@@ -73,11 +74,13 @@ export default function SongListeningTab({ songId }: { songId: string }) {
                   >
                     <Trash size={14} />
                   </button>
+                  )}
                 </div>
               );
             })}
           </div>
         )}
+        {canEdit && (
         <div className="flex items-center gap-2 mt-3">
           <select
             value={selectedVoicePart}
@@ -119,6 +122,7 @@ export default function SongListeningTab({ songId }: { songId: string }) {
             {uploadingAudio ? t("common.uploading") : t("songs.uploadAudio")}
           </button>
         </div>
+        )}
       </div>
 
       {/* Links */}
@@ -138,6 +142,7 @@ export default function SongListeningTab({ songId }: { songId: string }) {
                 >
                   {link.label || link.url}
                 </a>
+                {canEdit && (
                 <button
                   onClick={async () => {
                     if (await deleteSongLink(link.id)) {
@@ -148,10 +153,12 @@ export default function SongListeningTab({ songId }: { songId: string }) {
                 >
                   <Trash size={14} />
                 </button>
+                )}
               </div>
             ))}
           </div>
         )}
+        {canEdit && (
         <div className="flex flex-wrap items-center gap-2 mt-3">
           <input
             value={newLinkUrl}
@@ -185,6 +192,7 @@ export default function SongListeningTab({ songId }: { songId: string }) {
             {t("songs.addLink")}
           </button>
         </div>
+        )}
       </div>
     </div>
   );

@@ -516,6 +516,7 @@ const translations = {
   "permissions.feature.formations": { en: "Formations", sv: "Uppställningar" },
   "permissions.feature.baseFormations": { en: "Base formations", sv: "Grunduppställningar" },
   "permissions.feature.permissions": { en: "Permissions", sv: "Behörigheter" },
+  "permissions.feature.users": { en: "Users", sv: "Användare" },
 
   // Errors
   "error.accessDenied": { en: "Access Denied", sv: "Åtkomst nekad" },

@@ -21,6 +21,8 @@ import { SongsTableView } from "../../../components/songs/SongsTableView";
 import { extractSuggestions } from "../../../components/songs/SongFormFields";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { usePermissions } from "../../../lib/usePermissions";
+import AccessDenied from "../../../components/AccessDenied";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 import { ArrowLeft } from "lucide-react";
 
 function formatDate(iso: string): string {
@@ -76,7 +78,7 @@ export default function SongbookDetailPage({
 }) {
   const { id } = use(params);
   const { t } = useTranslation();
-  const { canEdit, canDelete } = usePermissions();
+  const { canEdit, canDelete, canView, loaded } = usePermissions();
 
   const [songbook, setSongbook] = useState<Songbook | null>(null);
   const [sbSongs, setSbSongs] = useState<SongbookSong[]>([]);
@@ -138,6 +140,19 @@ export default function SongbookDetailPage({
       </div>
     );
   }
+
+  if (!loaded) return (
+    <div className="flex min-h-screen">
+      <NavSidebar />
+      <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>
+    </div>
+  );
+  if (!canView("songbooks")) return (
+    <div className="flex min-h-screen">
+      <NavSidebar />
+      <AccessDenied />
+    </div>
+  );
 
   return (
     <div className="flex h-dvh">
