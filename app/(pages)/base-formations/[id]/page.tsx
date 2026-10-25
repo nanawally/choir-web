@@ -9,6 +9,7 @@ import { ArrowBigLeft, CirclePile, Shapes, UsersRound } from "lucide-react";
 import { usePermissions } from "../../../lib/usePermissions";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { useBaseFormationEditor } from "../../../hooks/useBaseFormationEditor";
+import NotFound from "../../../components/NotFound";
 
 export default function BaseFormationEditor({
   params,
@@ -64,6 +65,14 @@ export default function BaseFormationEditor({
   const leftOpen = editor.showChorists;
   const rightOpen = editor.showFormationControls || editor.showVoiceGroups;
   const isArcMode = editor.rowSizes.length > 0;
+
+  if (editor.notFound) {
+    return (
+      <div className="flex min-h-screen">
+        <NotFound />
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-screen overflow-hidden">

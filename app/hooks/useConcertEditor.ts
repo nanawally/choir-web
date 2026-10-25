@@ -26,6 +26,7 @@ export function useConcertEditor(concertId: string) {
   const { t } = useTranslation();
 
   const [concertName, setConcertName] = useState<string>("");
+  const [notFound, setNotFound] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [formationName, setFormationName] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
@@ -88,6 +89,7 @@ export function useConcertEditor(concertId: string) {
     listConcerts().then((concerts: { id: string; name: string }[]) => {
       const concert = concerts.find((c) => c.id === concertId);
       if (concert) setConcertName(concert.name);
+      else setNotFound(true);
     });
   }, [concertId]);
 
@@ -400,6 +402,8 @@ export function useConcertEditor(concertId: string) {
   const rosterChorists = data.sortedChorists.filter((c) => rosterIds.has(c.id));
 
   return {
+    notFound,
+
     // From shared data hook
     chorists: data.chorists,
     sortedChorists: data.sortedChorists,

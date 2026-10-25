@@ -14,6 +14,7 @@ import {
   type SongbookSong,
 } from "../../../lib/api";
 import NavSidebar from "../../../components/NavSidebar";
+import NotFound from "../../../components/NotFound";
 import SongModal from "../../../components/songs/SongModal";
 import EditSongbookModal from "../../../components/songbooks/EditSongbookModal";
 import { SongsTableView } from "../../../components/songs/SongsTableView";
@@ -126,6 +127,15 @@ export default function SongbookDetailPage({
   }
 
   const suggestions = extractSuggestions(catalogSongs);
+
+  if (!loading && songbook === null) {
+    return (
+      <div className="flex min-h-screen">
+        <NavSidebar />
+        <NotFound />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-dvh">

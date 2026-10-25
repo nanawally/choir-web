@@ -20,6 +20,7 @@ import Link from "next/link";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import AccessDenied from "../../components/AccessDenied";
 import { usePermissions } from "../../lib/usePermissions";
 import { ClefTreble, Pin, Upload, Trash, Eye, EyeOff } from "lucide-react";
 
@@ -41,7 +42,7 @@ export default function SongbooksPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
-  const { canEdit: canEditPerm, canDelete: canDeletePerm } = usePermissions();
+  const { canView, canEdit: canEditPerm, canDelete: canDeletePerm, loaded } = usePermissions();
 
   useEffect(() => {
     listSongbooks()
@@ -178,10 +179,12 @@ export default function SongbooksPage() {
       <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
         <h1 className="text-4xl font-bold mb-6 text-center">{t("songbooks.title")}</h1>
 
-        {loading ? (
+        {(loading || !loaded) ? (
           <div className="flex-1 flex items-center justify-center">
             <LoadingSpinner />
           </div>
+        ) : !canView("songbooks") ? (
+          <AccessDenied />
         ) : (
           <div className="w-full">
           {canEditPerm("songbooks") && (

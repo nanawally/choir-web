@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import NavSidebar from "../../components/NavSidebar";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import AccessDenied from "../../components/AccessDenied";
 import { useTranslation } from "../../lib/LanguageContext";
 import { usePermissions } from "../../lib/usePermissions";
 import {
@@ -356,7 +357,7 @@ function VoiceGroupCard({
 
 export default function VoiceGroupsPage() {
   const { t } = useTranslation();
-  const { canEdit: canEditPerm, canDelete: canDeletePerm } = usePermissions();
+  const { canView, canEdit: canEditPerm, canDelete: canDeletePerm, loaded } = usePermissions();
   const {
     groups,
     loading,
@@ -425,10 +426,12 @@ export default function VoiceGroupsPage() {
           {t("voiceGroups.description")}
         </p>
 
-        {loading ? (
+        {(loading || !loaded) ? (
           <div className="flex-1 flex items-center justify-center">
             <LoadingSpinner />
           </div>
+        ) : !canView("voice_groups") ? (
+          <AccessDenied />
         ) : (<>
         <div className="flex justify-center mb-6">
           {canEditPerm("voice_groups") && (

@@ -12,6 +12,7 @@ import {
 } from "../../components/StyledTable";
 import NavSidebar from "../../components/NavSidebar";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import AccessDenied from "../../components/AccessDenied";
 import { useChorists } from "../../hooks/useChorists";
 import { useTranslation } from "../../lib/LanguageContext";
 import { usePermissions } from "../../lib/usePermissions";
@@ -25,7 +26,7 @@ import {
 
 export default function RosterPage() {
   const { t } = useTranslation();
-  const { canEdit } = usePermissions();
+  const { canView, canEdit, loaded } = usePermissions();
   const {
     loading,
     search,
@@ -66,10 +67,12 @@ export default function RosterPage() {
           {t("chorists.title")}
         </h1>
 
-        {loading ? (
+        {(loading || !loaded) ? (
           <div className="flex-1 flex items-center justify-center">
             <LoadingSpinner />
           </div>
+        ) : !canView("chorists") ? (
+          <AccessDenied />
         ) : (
           <div className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">

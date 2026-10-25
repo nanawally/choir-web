@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslation } from "../../lib/LanguageContext";
 import NavSidebar from "../../components/NavSidebar";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import AccessDenied from "../../components/AccessDenied";
 import {
   listBaseFormations,
   createBaseFormation,
@@ -17,7 +18,7 @@ type BaseFormation = { id: string; name: string };
 
 export default function BaseFormationsPage() {
   const { t } = useTranslation();
-  const { canEdit, canDelete } = usePermissions();
+  const { canView, canEdit, canDelete, loaded } = usePermissions();
   const [formations, setFormations] = useState<BaseFormation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -69,10 +70,12 @@ export default function BaseFormationsPage() {
           {t("baseFormations.title")}
         </h1>
 
-        {loading ? (
+        {(loading || !loaded) ? (
           <div className="flex-1 flex items-center justify-center">
             <LoadingSpinner />
           </div>
+        ) : !canView("base_formations") ? (
+          <AccessDenied />
         ) : (
           <div className="w-full">
           <div className="flex items-center justify-between mb-4">

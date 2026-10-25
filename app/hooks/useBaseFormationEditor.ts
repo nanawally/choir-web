@@ -12,6 +12,7 @@ export function useBaseFormationEditor(formationId: string) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [formationName, setFormationName] = useState<string | null>(null);
   const [rowSizes, setRowSizes] = useState<number[]>([]);
+  const [notFound, setNotFound] = useState(false);
 
   // Panels
   const [showChorists, setShowChorists] = useState(false);
@@ -26,6 +27,8 @@ export function useBaseFormationEditor(formationId: string) {
         history.syncPlacements(
           d.placements.map((p: Placement) => ({ choristId: p.choristId, gridX: p.gridX, gridY: p.gridY })),
         );
+      } else {
+        setNotFound(true);
       }
     });
   }, [formationId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -138,6 +141,7 @@ export function useBaseFormationEditor(formationId: string) {
     selectedIds,
     setSelectedIds,
     formationName,
+    notFound,
     rowSizes,
     showChorists,
     setShowChorists,

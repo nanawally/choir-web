@@ -516,6 +516,24 @@ const translations = {
   "permissions.feature.formations": { en: "Formations", sv: "Uppställningar" },
   "permissions.feature.baseFormations": { en: "Base formations", sv: "Grunduppställningar" },
   "permissions.feature.permissions": { en: "Permissions", sv: "Behörigheter" },
+
+  // Errors
+  "error.accessDenied": { en: "Access Denied", sv: "Åtkomst nekad" },
+  "error.accessDeniedDetail": {
+    en: "You don't have permission to view this page.",
+    sv: "Du har inte behörighet att se den här sidan.",
+  },
+  "error.notFound": { en: "Not Found", sv: "Hittades inte" },
+  "error.notFoundDetail": {
+    en: "This page doesn't exist or has been removed.",
+    sv: "Den här sidan finns inte eller har tagits bort.",
+  },
+  "error.pageNotFound": { en: "Page Not Found", sv: "Sidan hittades inte" },
+  "error.pageNotFoundDetail": {
+    en: "The page you're looking for doesn't exist.",
+    sv: "Sidan du letar efter finns inte.",
+  },
+  "error.goHome": { en: "Go to home", sv: "Gå till startsidan" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

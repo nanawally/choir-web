@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NavSidebar from "../../components/NavSidebar";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import AccessDenied from "../../components/AccessDenied";
 import { useTranslation } from "../../lib/LanguageContext";
 import { ClefTreble, Upload, Trash, BookPlus } from "lucide-react";
 import { usePermissions } from "../../lib/usePermissions";
@@ -47,7 +48,7 @@ export default function ConcertsPage() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
-  const { canView, canEdit, canDelete } = usePermissions();
+  const { canView, canEdit, canDelete, loaded } = usePermissions();
   const router = useRouter();
 
   type SongbookModal = { concert: Concert; name: string; date: string; copyImage: boolean };
@@ -199,10 +200,12 @@ export default function ConcertsPage() {
           {t("concerts.title")}
         </h1>
 
-        {loading ? (
+        {(loading || !loaded) ? (
           <div className="flex-1 flex items-center justify-center">
             <LoadingSpinner />
           </div>
+        ) : !canView("concerts") ? (
+          <AccessDenied />
         ) : (
           <div className="w-full">
           {canEdit("concerts") && (

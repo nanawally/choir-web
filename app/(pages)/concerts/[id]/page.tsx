@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { usePermissions } from "../../../lib/usePermissions";
+import NotFound from "../../../components/NotFound";
 
 const DRAWER_WIDTH = 288; // w-72 = 18rem = 288px
 
@@ -72,6 +73,14 @@ export default function ConcertEditor({
 
   // Scale factor: how much to shrink the virtual space to fit
   const scale = canvasWidth / windowSize.width;
+
+  if (editor.notFound) {
+    return (
+      <div className="flex min-h-screen">
+        <NotFound />
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-screen overflow-hidden">
