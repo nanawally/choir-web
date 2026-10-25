@@ -31,26 +31,26 @@
  *   warning-text      Text on warning-bg backgrounds
  *   success-bg        Light green background for success badges
  *   success-text      Text on success-bg backgrounds
- *   primary-light     Light blue highlights (filter tags, active states)
+ *   primary-light     Light purple highlights (filter tags, active states)
  *   primary-light-text Text on primary-light backgrounds
  */
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-  --primary: /*#3b82f6;*/ #5D0F95;
-  --primary-hover: #2563eb;
+  --foreground: #3a0a5c;
+  --primary: #5d0f95;
+  --primary-hover: #e2c2f9;
   --danger: #ef4444;
   --danger-hover: #dc2626;
 
   --surface: #ffffff;
-  --surface-alt: #f3f4f6;
+  --surface-alt: rgba(226, 194, 249, 0.3);
   --hover-bg: #f9fafb;
-  --border: #d1d5db;
-  --border-strong: #9ca3af;
+  --border: rgba(193, 125, 242, 0.4);
+  --border-strong: rgba(193, 125, 242, 0.7);
   --text-muted: #6b7280;
   --text-subtle: #9ca3af;
-  --link: #3b82f6;
+  --link: #5d0f95;
   --overlay: rgba(0, 0, 0, 0.3);
 
   --success: #22c55e;
@@ -58,26 +58,26 @@
   --warning-text: #854d0e;
   --success-bg: #dcfce7;
   --success-text: #166534;
-  --primary-light: #dbeafe;
-  --primary-light-text: #1e40af;
+  --primary-light: rgba(193, 125, 242, 0.2);
+  --primary-light-text: #3a0a5c;
 }
 
 [data-theme="dark"] {
   --background: #0a0a0a;
-  --foreground: #ededed;
-  --primary: #3b82f6;
-  --primary-hover: #60a5fa;
+  --foreground: #ffffff;
+  --primary: #e2c2f9;
+  --primary-hover: #5d0f95;
   --danger: #ef4444;
   --danger-hover: #f87171;
 
   --surface: #1f2937;
-  --surface-alt: #374151;
-  --hover-bg: #1f2937;
-  --border: #4b5563;
-  --border-strong: #6b7280;
+  --surface-alt: rgba(58, 10, 92, 0.3);
+  --hover-bg: rgba(193, 125, 242, 0.15);
+  --border: rgba(193, 125, 242, 0.3);
+  --border-strong: rgba(193, 125, 242, 0.55);
   --text-muted: #9ca3af;
   --text-subtle: #6b7280;
-  --link: #60a5fa;
+  --link: #e2c2f9;
   --overlay: rgba(0, 0, 0, 0.5);
 
   --success: #22c55e;
@@ -85,8 +85,8 @@
   --warning-text: #fef08a;
   --success-bg: #052e16;
   --success-text: #86efac;
-  --primary-light: rgba(59, 130, 246, 0.2);
-  --primary-light-text: #93c5fd;
+  --primary-light: rgba(193, 125, 242, 0.2);
+  --primary-light-text: #ffffff;
 }
 
 @theme inline {
@@ -115,14 +115,24 @@
   --color-primary-light: var(--primary-light);
   --color-primary-light-text: var(--primary-light-text);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-montserrat);
+  --font-heading: var(--font-work-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-work-sans), sans-serif;
 }
 
 input[type="checkbox"] {
@@ -137,9 +147,17 @@ input[type="checkbox"] {
 }
 .btn-primary:hover {
   background: var(--primary-hover);
+  color: #3a0a5c;
 }
 .btn-primary:disabled {
   opacity: 0.5;
+}
+
+[data-theme="dark"] .btn-primary {
+  color: #3a0a5c;
+}
+[data-theme="dark"] .btn-primary:hover {
+  color: #ffffff;
 }
 
 .btn-danger {

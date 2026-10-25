@@ -195,9 +195,9 @@ export default function RosterPage() {
               <Thead>
                 <TheadRow>
                   {fourPartGroup && (
-                    <Th className="sticky left-0 z-10 bg-surface w-[min(12vw,3rem)] whitespace-nowrap" />
+                    <Th className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap" />
                   )}
-                  <Th className={`sticky z-10 bg-surface ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
+                  <Th className={`sticky z-10 ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
                     {t("common.name")}
                   </Th>
                   {otherStandardGroups.map((g) => (
@@ -216,7 +216,7 @@ export default function RosterPage() {
                     : -1;
                   const isAltRow = fourPartIndex % 2 === 1;
                   const stickyBg = isAltRow
-                    ? "bg-surface-alt group-hover:bg-hover-bg"
+                    ? "group-hover:bg-hover-bg"
                     : "bg-background group-hover:bg-hover-bg";
 
                   return (
@@ -305,9 +305,9 @@ export default function RosterPage() {
                   <Thead>
                     <TheadRow>
                       {fourPartGroup && (
-                        <Th className="sticky left-0 z-10 bg-surface w-[min(12vw,3rem)] whitespace-nowrap" />
+                        <Th className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap" />
                       )}
-                      <Th className={`sticky z-10 bg-surface ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
+                      <Th className={`sticky z-10 ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
                         {t("common.name")}
                       </Th>
                       {otherStandardGroups.map((g) => (
