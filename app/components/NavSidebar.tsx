@@ -36,18 +36,18 @@ export default function NavSidebar() {
     <>
       <Link
         href="/"
-        className="text-lg font-bold mb-6 px-3"
+        className="text-lg md:text-[clamp(1rem,1.3vw,1.35rem)] font-bold mb-6 px-3"
         onClick={() => setOpen(false)}
       >
         melisma
       </Link>
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-0.5 min-w-0">
         {visibleItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             onClick={() => setOpen(false)}
-            className={`px-3 py-2 rounded text-sm ${
+            className={`px-3 py-2 rounded text-sm md:text-[clamp(0.875rem,1vw,1.1rem)] ${
               pathname === item.href
                 ? "bg-primary-light text-primary font-medium"
                 : "text-muted hover:bg-hover-bg"
@@ -86,7 +86,7 @@ export default function NavSidebar() {
             className="absolute inset-0 bg-overlay"
             onClick={() => setOpen(false)}
           />
-          <nav className="relative w-56 h-full bg-surface py-8 px-4 flex flex-col shadow-lg">
+          <nav className="relative w-56 h-full bg-surface py-8 px-4 flex flex-col shadow-lg overflow-hidden">
             <button
               onClick={() => setOpen(false)}
               className="absolute top-4 right-4 text-subtle hover:text-muted"
@@ -99,7 +99,7 @@ export default function NavSidebar() {
       )}
 
       {/* Desktop sidebar */}
-      <nav className="hidden md:flex w-[16.67vw] shrink-0 border-r border-border py-8 px-4 flex-col min-h-screen">
+      <nav className="hidden md:flex w-[16.67vw] shrink-0 border-r border-border py-8 px-4 flex-col min-h-screen overflow-hidden">
         {navContent}
       </nav>
     </>
