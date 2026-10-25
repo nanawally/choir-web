@@ -1,12 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
+import { getToken } from "../../lib/api";
 
 const SHEET_ID = process.env.NEXT_PUBLIC_TERM_PLAN_SHEET_ID;
 
 export default function TermPlanPage() {
   const { t } = useTranslation();
+  const router = useRouter();
+  const [hasToken] = useState(() => !!getToken());
+
+  useEffect(() => {
+    if (!hasToken) router.push("/login");
+  }, [hasToken, router]);
+
+  if (!hasToken) return null;
+
   return (
     <div className="flex min-h-screen">
       <NavSidebar />

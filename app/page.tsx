@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getToken } from "./lib/api";
@@ -10,12 +10,13 @@ import { useTranslation } from "./lib/LanguageContext";
 export default function Home() {
   const router = useRouter();
   const { t } = useTranslation();
+  const [hasToken] = useState(() => !!getToken());
 
   useEffect(() => {
-    if (!getToken()) {
-      router.push("/login");
-    }
-  }, [router]);
+    if (!hasToken) router.push("/login");
+  }, [hasToken, router]);
+
+  if (!hasToken) return null;
 
   return (
     <div className="flex min-h-screen">
