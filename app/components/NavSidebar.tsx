@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { clearToken } from "../lib/api";
@@ -36,10 +37,17 @@ export default function NavSidebar() {
     <>
       <Link
         href="/"
-        className="text-lg md:text-[clamp(1rem,1.3vw,1.35rem)] font-bold mb-6 px-3"
+        className="mb-6 px-3"
         onClick={() => setOpen(false)}
       >
-        melisma
+        <Image
+          src="/melisma-logo.png"
+          alt="melisma"
+          width={160}
+          height={48}
+          className="h-[clamp(1.4rem,1.7vw,1.9rem)] w-auto max-w-full"
+          priority
+        />
       </Link>
       <div className="flex flex-col gap-0.5 min-w-0">
         {visibleItems.map((item) => (

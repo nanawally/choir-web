@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getToken } from "./lib/api";
 import NavSidebar from "./components/NavSidebar";
 import { useTranslation } from "./lib/LanguageContext";
@@ -22,7 +23,14 @@ export default function Home() {
     <div className="flex min-h-screen">
       <NavSidebar />
       <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-24">
-        <h1 className="text-4xl font-bold">melisma</h1>
+        <Image
+          src="/melisma-logo.png"
+          alt="melisma"
+          width={480}
+          height={144}
+          className="h-16 w-auto mb-2"
+          priority
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 w-full max-w-4xl">
           <Link
             href="/concerts"
