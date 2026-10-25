@@ -256,7 +256,7 @@ export default function SongbooksPage() {
                 )}
 
                 {/* Hidden toggle — top-left, next to pin */}
-                {canEditPerm("songbooks_hidden") && (
+                {canEditPerm("songbooks") && (
                   <button
                     onClick={(e) => { e.preventDefault(); handleToggleHidden(sb.id); }}
                     className={`absolute top-2 left-9 z-10 bg-surface/90 border border-border rounded p-1 shadow-sm transition-opacity ${sb.isHidden ? "" : "opacity-0 group-hover:opacity-100"}`}

@@ -15,11 +15,13 @@ export default function SongModal({
   onClose,
   onSave,
   suggestions,
+  canEdit = false,
 }: {
   song: Song;
   onClose: () => void;
   onSave: (updated: Song) => void;
   suggestions: Suggestions;
+  canEdit?: boolean;
 }) {
   const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
@@ -127,6 +129,7 @@ export default function SongModal({
               <p className="text-sm text-muted">{current.composer}</p>
             )}
           </div>
+          {canEdit && (
           <button
             onClick={() => {
               setForm({ ...current });
@@ -137,6 +140,7 @@ export default function SongModal({
           >
             <SquarePen size={16} />
           </button>
+          )}
         </div>
 
         {/* Tabs */}
@@ -173,6 +177,7 @@ export default function SongModal({
             pdfUrl={pdfUrl}
             onViewPdf={handleViewPdf}
             onSheetMusicChange={handleSheetMusicChange}
+            canEdit={canEdit}
           />
         )}
         {tab === "lyrics" && <SongLyricsTab lyrics={current.lyrics} />}

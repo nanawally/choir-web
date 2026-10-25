@@ -20,6 +20,7 @@ import EditSongbookModal from "../../../components/songbooks/EditSongbookModal";
 import { SongsTableView } from "../../../components/songs/SongsTableView";
 import { extractSuggestions } from "../../../components/songs/SongFormFields";
 import { useTranslation } from "../../../lib/LanguageContext";
+import { usePermissions } from "../../../lib/usePermissions";
 import { ArrowLeft } from "lucide-react";
 
 function formatDate(iso: string): string {
@@ -75,6 +76,7 @@ export default function SongbookDetailPage({
 }) {
   const { id } = use(params);
   const { t } = useTranslation();
+  const { canEdit, canDelete } = usePermissions();
 
   const [songbook, setSongbook] = useState<Songbook | null>(null);
   const [sbSongs, setSbSongs] = useState<SongbookSong[]>([]);
@@ -164,15 +166,17 @@ export default function SongbookDetailPage({
             defaultSort={defaultSort}
             csvFilename={`${songbook?.name ?? "songbook"}.csv`}
             toolbarAction={
+              canEdit("songbooks") ? (
               <button
                 onClick={() => setEditingModalOpen(true)}
                 className="px-3 py-1.5 btn-primary text-sm font-medium"
               >
                 {t("songbooks.editSongbook")}
               </button>
+              ) : undefined
             }
             onRowClick={(s) => setEditingSong(s)}
-            onDelete={(s) => setDeletingTarget(s)}
+            onDelete={canDelete("songs") ? (s) => setDeletingTarget(s) : undefined}
             noItemsMessage={t("songbooks.noSongs")}
             noMatchMessage={t("songs.noMatch")}
           />
@@ -198,6 +202,7 @@ export default function SongbookDetailPage({
           onClose={() => setEditingSong(null)}
           onSave={handleSaveSong}
           suggestions={suggestions}
+          canEdit={canEdit("songs")}
         />
       )}
 

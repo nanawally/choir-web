@@ -14,12 +14,14 @@ export default function SongSheetMusicTab({
   pdfUrl,
   onViewPdf,
   onSheetMusicChange,
+  canEdit = false,
 }: {
   songId: string;
   hasSheetMusicFile: boolean;
   pdfUrl: string | null;
   onViewPdf: () => void;
   onSheetMusicChange: (hasFile: boolean) => void;
+  canEdit?: boolean;
 }) {
   const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
@@ -53,6 +55,7 @@ export default function SongSheetMusicTab({
             <FileText size={16} />
             {t("songs.viewFullPdf")}
           </button>
+          {canEdit && (
           <button
             onClick={handleDelete}
             className="flex items-center gap-1 text-sm text-danger hover:text-danger-hover"
@@ -60,6 +63,7 @@ export default function SongSheetMusicTab({
             <Trash size={14} />
             {t("common.delete")}
           </button>
+          )}
         </div>
       </div>
     );
@@ -67,6 +71,8 @@ export default function SongSheetMusicTab({
 
   return (
     <div>
+      {canEdit && (
+      <>
       <input
         ref={fileInputRef}
         type="file"
@@ -85,6 +91,8 @@ export default function SongSheetMusicTab({
         <Upload size={16} />
         {uploading ? t("common.uploading") : t("songs.uploadPdf")}
       </button>
+      </>
+      )}
     </div>
   );
 }

@@ -25,6 +25,8 @@ interface Props {
   onRename: (id: string, newName: string) => void;
   onToggleStandard: (id: string, current: boolean) => void;
   onDelete: (id: string) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 export default function VoiceGroupDetailModal({
@@ -33,6 +35,8 @@ export default function VoiceGroupDetailModal({
   onRename,
   onToggleStandard,
   onDelete,
+  canEdit = false,
+  canDelete = false,
 }: Props) {
   const { t } = useTranslation();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -107,7 +111,7 @@ export default function VoiceGroupDetailModal({
         {/* Header */}
         <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            {renaming ? (
+            {canEdit && renaming ? (
               <input
                 value={renameValue}
                 onChange={(e) => setRenameValue(e.target.value)}
@@ -124,32 +128,32 @@ export default function VoiceGroupDetailModal({
               />
             ) : (
               <h2
-                className="text-lg font-semibold cursor-pointer hover:text-link truncate"
-                title={t("common.clickToRename")}
-                onClick={() => {
-                  setRenameValue(group.name);
-                  setRenaming(true);
-                }}
+                className={`text-lg font-semibold truncate ${canEdit ? "cursor-pointer hover:text-link" : ""}`}
+                title={canEdit ? t("common.clickToRename") : undefined}
+                onClick={canEdit ? () => { setRenameValue(group.name); setRenaming(true); } : undefined}
               >
                 {group.name}
               </h2>
             )}
-            <label className="flex items-center gap-1 text-xs text-muted cursor-pointer shrink-0">
+            <label className={`flex items-center gap-1 text-xs text-muted shrink-0 ${canEdit ? "cursor-pointer" : "opacity-60"}`}>
               <input
                 type="checkbox"
                 checked={group.isStandard}
-                onChange={() => onToggleStandard(group.id, group.isStandard)}
+                onChange={() => canEdit && onToggleStandard(group.id, group.isStandard)}
+                disabled={!canEdit}
               />
               {t("common.standard")}
             </label>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {canDelete && (
             <button
               onClick={() => onDelete(group.id)}
               className="text-danger hover:text-danger-hover text-xs px-2 py-1 border border-danger rounded"
             >
               {t("common.delete")}
             </button>
+            )}
             <button onClick={onClose} className="text-subtle hover:text-muted">
               <X size={18} />
             </button>
@@ -194,18 +198,21 @@ export default function VoiceGroupDetailModal({
                           <span>
                             {c.firstName} {c.lastName}
                           </span>
-                          <button
-                            onClick={() => handleUnassign(c.id)}
-                            className="text-xs text-muted hover:text-danger"
-                          >
-                            {t("voiceGroups.unassign")}
-                          </button>
+                          {canEdit && (
+                            <button
+                              onClick={() => handleUnassign(c.id)}
+                              className="text-xs text-muted hover:text-danger"
+                            >
+                              {t("voiceGroups.unassign")}
+                            </button>
+                          )}
                         </li>
                       ))}
                     </ul>
                   )}
 
                   {/* Assign row */}
+                  {canEdit && (
                   <div className="px-3 py-2 border-t border-border">
                     {isAdding ? (
                       <div className="flex items-center gap-2">
@@ -252,6 +259,7 @@ export default function VoiceGroupDetailModal({
                       </button>
                     )}
                   </div>
+                  )}
                 </div>
               );
             })

@@ -52,7 +52,7 @@ export default function ChoristModal({
   onSaved,
 }: ChoristModalProps) {
   const { t } = useTranslation();
-  const { canView, canEdit: canEditPerm } = usePermissions();
+  const { canView, canEdit: canEditPerm, canDelete: canDeletePerm } = usePermissions();
   const isAdmin = getTokenRole() === "admin";
   const [editing, setEditing] = useState(mode === "add");
   const [qrData, setQrData] = useState<{ username: string; setupToken: string } | null>(null);
@@ -342,7 +342,7 @@ export default function ChoristModal({
 
         <div className="flex items-center justify-between">
           <div>
-            {mode === "view" && (
+            {mode === "view" && canDeletePerm("chorists") && (
               <button
                 onClick={handleArchive}
                 className="text-sm text-danger hover:text-danger-hover"

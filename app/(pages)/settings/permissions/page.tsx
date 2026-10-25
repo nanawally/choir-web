@@ -6,6 +6,8 @@ import NavSidebar from "../../../components/NavSidebar";
 import { useTranslation } from "../../../lib/LanguageContext";
 import { ChevronDown, ChevronLeft, Trash2 } from "lucide-react";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import AccessDenied from "../../../components/AccessDenied";
+import { usePermissions } from "../../../lib/usePermissions";
 import {
   listPermissionGroups,
   createPermissionGroup,
@@ -55,6 +57,7 @@ function getPerm(group: PermissionGroup, feature: string): PermissionEntry {
 
 export default function PermissionsPage() {
   const { t } = useTranslation();
+  const { canView, canEdit: canEditPerm, loaded } = usePermissions();
   const [groups, setGroups] = useState<PermissionGroup[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -169,10 +172,13 @@ export default function PermissionsPage() {
         </Link>
         <h1 className="text-4xl font-bold mb-6 text-center">{t("settings.permissionsTitle")}</h1>
 
-        {loading ? (
+        {(loading || !loaded) ? (
           <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>
+        ) : !canView("permissions") ? (
+          <AccessDenied />
         ) : (
           <>
+          {canEditPerm("permissions") && (
           <form onSubmit={handleCreate} className="flex gap-2 mb-6 max-w-2xl mx-auto w-full">
             <input
               value={newGroupName}
@@ -184,6 +190,7 @@ export default function PermissionsPage() {
               {t("permissions.newGroup")}
             </button>
           </form>
+          )}
           {groups.length === 0 ? (
             <p className="text-muted text-center">{t("permissions.noGroups")}</p>
           ) : (
@@ -207,7 +214,7 @@ export default function PermissionsPage() {
                     <span className="text-xs text-muted">
                       {group.memberIds.length} {t("permissions.members").toLowerCase()}
                     </span>
-                    {!group.isAdmin && (
+                    {!group.isAdmin && canEditPerm("permissions") && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -255,16 +262,20 @@ export default function PermissionsPage() {
                                     )}
                                     {featureLabel(feature)}
                                   </td>
-                                  {(["canView", "canEdit", "canDelete"] as const).map((action) => (
+                                  {(["canView", "canEdit", "canDelete"] as const).map((action) => {
+                                    const disabled = group.isAdmin || !canEditPerm("permissions");
+                                    return (
                                     <td key={action} className="text-center py-1.5 px-3">
                                       <input
                                         type="checkbox"
                                         checked={perm[action]}
-                                        onChange={() => handlePermToggle(group.id, feature, action)}
-                                        className="cursor-pointer w-4 h-4"
+                                        onChange={() => !disabled && handlePermToggle(group.id, feature, action)}
+                                        disabled={disabled}
+                                        className={`w-4 h-4 ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                                       />
                                     </td>
-                                  ))}
+                                    );
+                                  })}
                                 </tr>
                               );
                             })}
@@ -287,6 +298,7 @@ export default function PermissionsPage() {
                                   className="flex items-center gap-1 text-xs border border-border rounded-full px-2.5 py-0.5 bg-surface"
                                 >
                                   <span className="font-mono">{user?.username ?? uid}</span>
+                                  {canEditPerm("permissions") && (
                                   <button
                                     onClick={() => handleRemoveMember(group.id, uid)}
                                     className="text-muted hover:text-danger leading-none"
@@ -294,12 +306,13 @@ export default function PermissionsPage() {
                                   >
                                     ×
                                   </button>
+                                  )}
                                 </span>
                               );
                             })}
                           </div>
                         )}
-                        {nonMembers.length > 0 && (
+                        {nonMembers.length > 0 && canEditPerm("permissions") && (
                           <select
                             value=""
                             onChange={(e) => {

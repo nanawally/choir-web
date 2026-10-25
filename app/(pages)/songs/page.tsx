@@ -70,6 +70,7 @@ export default function SongsPage() {
             onClose={() => setEditingSong(null)}
             onSave={handleSave}
             suggestions={suggestions}
+            canEdit={canEdit("songs")}
           />
         )}
       </div>

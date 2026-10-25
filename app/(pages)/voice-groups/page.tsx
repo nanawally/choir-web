@@ -529,6 +529,8 @@ export default function VoiceGroupsPage() {
           onRename={handleRenameGroup}
           onToggleStandard={handleToggleStandard}
           onDelete={handleDeleteGroup}
+          canEdit={canEditPerm("voice_groups")}
+          canDelete={canDeletePerm("voice_groups")}
         />
       )}
     </div>
