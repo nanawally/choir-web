@@ -425,8 +425,11 @@ export default function VoiceGroupsPage() {
           {t("voiceGroups.description")}
         </p>
 
-        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
-
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <LoadingSpinner />
+          </div>
+        ) : (<>
         <div className="flex justify-center mb-6">
           {canEditPerm("voice_groups") && (
             <button
@@ -508,13 +511,12 @@ export default function VoiceGroupsPage() {
           </>
         )}
 
-        {!loading &&
-          standardGroups.length === 0 &&
-          otherGroups.length === 0 && (
-            <p className="text-subtle text-sm text-center mt-8">
-              {t("voiceGroups.noGroups")}
-            </p>
-          )}
+        {standardGroups.length === 0 && otherGroups.length === 0 && (
+          <p className="text-subtle text-sm text-center mt-8">
+            {t("voiceGroups.noGroups")}
+          </p>
+        )}
+        </>)}
       </div>
 
       {detailGroup && (

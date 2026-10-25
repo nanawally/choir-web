@@ -3,7 +3,7 @@ import { Lottie, type LottieHandle } from "lottie-react";
 import animationData from "./loading-animation.json";
 import { useRef, useState } from "react";
 
-export default function LoadingSpinner({ className = "w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56" }: { className?: string }) {
+export default function LoadingSpinner({ className = "w-full max-w-[80vh] mx-auto aspect-square" }: { className?: string }) {
   const lottieRef = useRef<LottieHandle>(null);
   const [paused, setPaused] = useState(
     () =>

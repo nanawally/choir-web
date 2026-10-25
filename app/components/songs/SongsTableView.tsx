@@ -211,7 +211,7 @@ export function SongsTableView<T extends Song>({
   }
 
   if (loading) {
-    return <div className="flex justify-center mt-16"><LoadingSpinner /></div>;
+    return <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>;
   }
 
   return (

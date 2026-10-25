@@ -95,11 +95,13 @@ export default function UsersPage() {
         )}
 
         {loading ? (
-          <div className="flex justify-center mt-16"><LoadingSpinner /></div>
-        ) : users.length === 0 ? (
-          <p className="text-muted">{t("settings.noUsers")}</p>
+          <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>
         ) : (
           <>
+          {users.length === 0 ? (
+            <p className="text-muted">{t("settings.noUsers")}</p>
+          ) : (
+            <>
             {/* Desktop table */}
             <div className="hidden sm:block overflow-x-auto mb-8">
               <table className="w-full border-collapse text-sm">
@@ -225,31 +227,32 @@ export default function UsersPage() {
                 </div>
               ))}
             </div>
+            </>
+          )}
+          <div className="max-w-sm">
+            <h2 className="text-lg font-semibold mb-3">{t("settings.createUser")}</h2>
+            <form onSubmit={handleCreate} className="flex flex-col gap-2">
+              <input
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+                placeholder={t("settings.username")}
+                className="border border-border rounded px-3 py-2 text-sm bg-surface"
+              />
+              <select
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value)}
+                className="border border-border rounded px-3 py-2 text-sm bg-surface"
+              >
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+              </select>
+              <button type="submit" className="px-4 py-2 btn-primary text-sm font-medium">
+                {t("settings.createUser")}
+              </button>
+            </form>
+          </div>
           </>
         )}
-
-        <div className="max-w-sm">
-          <h2 className="text-lg font-semibold mb-3">{t("settings.createUser")}</h2>
-          <form onSubmit={handleCreate} className="flex flex-col gap-2">
-            <input
-              value={newUsername}
-              onChange={(e) => setNewUsername(e.target.value)}
-              placeholder={t("settings.username")}
-              className="border border-border rounded px-3 py-2 text-sm bg-surface"
-            />
-            <select
-              value={newRole}
-              onChange={(e) => setNewRole(e.target.value)}
-              className="border border-border rounded px-3 py-2 text-sm bg-surface"
-            >
-              <option value="user">user</option>
-              <option value="admin">admin</option>
-            </select>
-            <button type="submit" className="px-4 py-2 btn-primary text-sm font-medium">
-              {t("settings.createUser")}
-            </button>
-          </form>
-        </div>
       </div>
     </div>
   );

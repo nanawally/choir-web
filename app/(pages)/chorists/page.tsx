@@ -66,9 +66,12 @@ export default function RosterPage() {
           {t("chorists.title")}
         </h1>
 
-        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
-
-        <div className="w-full">
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <div className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <input
@@ -250,12 +253,13 @@ export default function RosterPage() {
             </Table>
           </div>
 
-          {!loading && filteredChorists.length === 0 && (
+          {filteredChorists.length === 0 && (
             <p className="text-subtle text-sm mt-4 text-center">
               {search ? t("chorists.noMatch") : t("chorists.noChorists")}
             </p>
           )}
         </div>
+        )}
 
         {modal.mode !== "closed" && (
           <ChoristModal

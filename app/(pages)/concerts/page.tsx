@@ -56,8 +56,6 @@ export default function ConcertsPage() {
   useEffect(() => {
     listConcerts()
       .then(async (data: Concert[]) => {
-        setConcerts(data);
-        setLoading(false);
         // Fetch images with auth and convert to blob URLs
         const token = getToken();
         const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
@@ -75,6 +73,7 @@ export default function ConcertsPage() {
           }),
         );
         setConcerts(withImages);
+        setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
@@ -200,9 +199,12 @@ export default function ConcertsPage() {
           {t("concerts.title")}
         </h1>
 
-        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
-
-        <div className="w-full">
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <div className="w-full">
           {canEdit("concerts") && (
             <div className="flex justify-end mb-6">
               <button
@@ -408,12 +410,13 @@ export default function ConcertsPage() {
             ))}
           </div>
 
-          {!loading && concerts.length === 0 && !showAdd && (
+          {concerts.length === 0 && !showAdd && (
             <p className="text-subtle text-sm text-center mt-8">
               {t("concerts.noConcerts")}
             </p>
           )}
         </div>
+        )}
       </div>
     </div>
 

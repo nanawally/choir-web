@@ -60,8 +60,6 @@ export default function RosterPanel({
     onToggleHidden(next);
   }
 
-  const iconSize = "1.2vw";
-
   function notesButton(c: Chorist) {
     if (!c.notes) return null;
     return (
@@ -81,7 +79,7 @@ export default function RosterPanel({
         className={`ml-auto pl-2 ${expandedNotes === c.id ? "text-muted" : "text-subtle hover:text-muted"}`}
         title={t("chorists.notes")}
       >
-        <SquareText style={{ width: iconSize, height: iconSize }} />
+        <SquareText size={14} />
       </button>
     );
   }
@@ -98,14 +96,14 @@ export default function RosterPanel({
 
       {unplaced.length > 0 && (
         <>
-          <h3 className="text-[0.9vw] text-muted font-medium mb-1">
+          <h3 className="text-xs text-muted font-medium mb-1">
             {t("roster.unplaced")}
           </h3>
           <ul className="space-y-1 mb-4">
             {unplaced.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center text-[1.1vw] py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer"
+                className="flex items-center text-sm py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer"
                 onClick={() => onPlace(c.id)}
               >
                 <span className="flex-1 truncate">{shortName(c, allChorists)}</span>
@@ -118,14 +116,14 @@ export default function RosterPanel({
 
       {placed.length > 0 && (
         <>
-          <h3 className="text-[0.9vw] text-muted font-medium mb-1">
+          <h3 className="text-xs text-muted font-medium mb-1">
             {t("roster.placed")}
           </h3>
           <ul className="space-y-1 mb-4">
             {placed.map((c) => (
               <li key={c.id}>
                 <div
-                  className={`flex items-center text-[1.1vw] py-0.5 px-2 rounded ${hiddenIds.has(c.id) ? "opacity-40" : ""}`}
+                  className={`flex items-center text-sm py-0.5 px-2 rounded ${hiddenIds.has(c.id) ? "opacity-40" : ""}`}
                 >
                   <button
                     onClick={() => toggleHidden(c.id)}
@@ -137,9 +135,9 @@ export default function RosterPanel({
                     }
                   >
                     {hiddenIds.has(c.id) ? (
-                      <EyeOff style={{ width: iconSize, height: iconSize }} />
+                      <EyeOff size={14} />
                     ) : (
-                      <Eye style={{ width: iconSize, height: iconSize }} />
+                      <Eye size={14} />
                     )}
                   </button>
                   <span

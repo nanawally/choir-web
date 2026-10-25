@@ -69,9 +69,12 @@ export default function BaseFormationsPage() {
           {t("baseFormations.title")}
         </h1>
 
-        {loading && <div className="flex justify-center mt-16"><LoadingSpinner /></div>}
-
-        <div className="w-full">
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <div className="w-full">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-muted">
               {t("baseFormations.description")}
@@ -170,12 +173,13 @@ export default function BaseFormationsPage() {
             ))}
           </div>
 
-          {!loading && formations.length === 0 && !showAdd && (
+          {formations.length === 0 && !showAdd && (
             <p className="text-subtle text-sm text-center mt-8">
               {t("baseFormations.noFormations")}
             </p>
           )}
         </div>
+        )}
       </div>
     </div>
   );

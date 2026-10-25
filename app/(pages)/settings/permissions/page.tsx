@@ -169,23 +169,24 @@ export default function PermissionsPage() {
         </Link>
         <h1 className="text-4xl font-bold mb-6 text-center">{t("settings.permissionsTitle")}</h1>
 
-        <form onSubmit={handleCreate} className="flex gap-2 mb-6 max-w-2xl mx-auto w-full">
-          <input
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-            placeholder={t("permissions.groupName")}
-            className="flex-1 border border-border rounded px-3 py-2 text-sm bg-surface"
-          />
-          <button type="submit" className="px-4 py-2 btn-primary text-sm font-medium whitespace-nowrap">
-            {t("permissions.newGroup")}
-          </button>
-        </form>
-
         {loading ? (
-          <div className="flex justify-center mt-16"><LoadingSpinner /></div>
-        ) : groups.length === 0 ? (
-          <p className="text-muted text-center">{t("permissions.noGroups")}</p>
+          <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>
         ) : (
+          <>
+          <form onSubmit={handleCreate} className="flex gap-2 mb-6 max-w-2xl mx-auto w-full">
+            <input
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              placeholder={t("permissions.groupName")}
+              className="flex-1 border border-border rounded px-3 py-2 text-sm bg-surface"
+            />
+            <button type="submit" className="px-4 py-2 btn-primary text-sm font-medium whitespace-nowrap">
+              {t("permissions.newGroup")}
+            </button>
+          </form>
+          {groups.length === 0 ? (
+            <p className="text-muted text-center">{t("permissions.noGroups")}</p>
+          ) : (
           <div className="space-y-2 max-w-2xl mx-auto w-full">
             {groups.map((group) => {
               const isExpanded = expandedId === group.id;
@@ -321,6 +322,8 @@ export default function PermissionsPage() {
               );
             })}
           </div>
+          )}
+          </>
         )}
       </div>
     </div>
