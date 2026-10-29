@@ -69,7 +69,7 @@ export default function ConcertEditor({
     ro.observe(el);
     updateCanvasWidth(); // measure immediately
     return () => ro.disconnect();
-  }, [updateCanvasWidth]);
+  }, [updateCanvasWidth, loaded]);
 
   const canvasHeight = windowSize.height;
 
