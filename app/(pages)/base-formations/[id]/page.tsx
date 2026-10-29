@@ -58,7 +58,7 @@ export default function BaseFormationEditor({
     ro.observe(el);
     updateCanvasWidth();
     return () => ro.disconnect();
-  }, [updateCanvasWidth]);
+  }, [updateCanvasWidth, loaded]);
 
   const canvasHeight = windowSize.height;
   const scale = canvasWidth / windowSize.width;
