@@ -28,8 +28,6 @@ export function usePlacementHistory({ formationId, onAfterSave }: Options) {
 
   useEffect(() => { latestPlacementsRef.current = placements; }, [placements]);
   useEffect(() => { latestFormationIdRef.current = formationId; }, [formationId]);
-  // Reset initialized state when formationId changes so a new formation waits for its syncPlacements
-  useEffect(() => { isInitializedRef.current = false; }, [formationId]);
   useEffect(() => { onAfterSaveRef.current = onAfterSave; }, [onAfterSave]);
 
   // Auto-save placements 500ms after the last change
