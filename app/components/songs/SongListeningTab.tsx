@@ -16,6 +16,31 @@ import {
 import { Trash, Upload, Plus } from "lucide-react";
 import { useTranslation } from "../../lib/LanguageContext";
 
+function getYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    let videoId: string | null = null;
+    if (u.hostname === "youtu.be") {
+      videoId = u.pathname.slice(1).split("?")[0];
+    } else if (u.hostname === "www.youtube.com" || u.hostname === "youtube.com") {
+      if (u.pathname === "/watch") videoId = u.searchParams.get("v");
+      else if (u.pathname.startsWith("/shorts/")) videoId = u.pathname.slice(8);
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+  } catch { return null; }
+}
+
+function getSpotifyEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname !== "open.spotify.com") return null;
+    const parts = u.pathname.split("/").filter(Boolean);
+    if (parts.length < 2) return null;
+    if (!["track", "album", "playlist", "episode"].includes(parts[0])) return null;
+    return `https://open.spotify.com/embed/${parts[0]}/${parts[1]}`;
+  } catch { return null; }
+}
+
 export default function SongListeningTab({ songId, canEdit = false }: { songId: string; canEdit?: boolean }) {
   const { t } = useTranslation();
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
@@ -132,30 +157,56 @@ export default function SongListeningTab({ songId, canEdit = false }: { songId: 
           <p className="text-sm text-subtle">{t("songs.noLinks")}</p>
         ) : (
           <div className="space-y-2">
-            {songLinks.map((link) => (
-              <div key={link.id} className="flex items-center gap-3 p-2 bg-hover-bg rounded">
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-link hover:underline truncate flex-1 min-w-0"
-                >
-                  {link.label || link.url}
-                </a>
-                {canEdit && (
-                <button
-                  onClick={async () => {
-                    if (await deleteSongLink(link.id)) {
-                      setSongLinks((prev) => prev.filter((l) => l.id !== link.id));
-                    }
-                  }}
-                  className="text-danger hover:text-danger-hover"
-                >
-                  <Trash size={14} />
-                </button>
-                )}
-              </div>
-            ))}
+            {songLinks.map((link) => {
+              const ytEmbed = getYouTubeEmbedUrl(link.url);
+              const spEmbed = getSpotifyEmbedUrl(link.url);
+              const spHeight = spEmbed?.includes("/track/") || spEmbed?.includes("/episode/") ? 80 : 352;
+              return (
+                <div key={link.id} className="bg-hover-bg rounded overflow-hidden">
+                  <div className="flex items-center gap-3 p-2">
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-link hover:underline truncate flex-1 min-w-0"
+                    >
+                      {link.label || link.url}
+                    </a>
+                    {canEdit && (
+                    <button
+                      onClick={async () => {
+                        if (await deleteSongLink(link.id)) {
+                          setSongLinks((prev) => prev.filter((l) => l.id !== link.id));
+                        }
+                      }}
+                      className="text-danger hover:text-danger-hover"
+                    >
+                      <Trash size={14} />
+                    </button>
+                    )}
+                  </div>
+                  {ytEmbed && (
+                    <div className="aspect-video">
+                      <iframe
+                        src={ytEmbed}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  )}
+                  {spEmbed && (
+                    <iframe
+                      src={spEmbed}
+                      height={spHeight}
+                      className="w-full"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
         {canEdit && (
