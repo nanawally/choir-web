@@ -234,6 +234,10 @@ export function useConcertEditor(concertId: string) {
 
     if (formationIds.length > 0) {
       await handleSelectFormation(formationIds[0], isLinkedToCurrent);
+    } else if (!isLinkedToCurrent && activeFormationId) {
+      // Destination has no formations but an unlinked formation is active (just duplicated).
+      // Save now (new song is already active) so onAfterSave links it to this song.
+      await history.saveImmediately();
     } else {
       history.syncPlacements([]);
       setActiveFormationId(null);
@@ -388,6 +392,8 @@ export function useConcertEditor(concertId: string) {
     }
     if (stop.formationId) {
       await handleSelectFormation(stop.formationId, isLinkedToCurrent);
+    } else if (!isLinkedToCurrent && activeFormationId) {
+      await history.saveImmediately();
     } else {
       setActiveFormationId(null);
       history.syncPlacements([]);
