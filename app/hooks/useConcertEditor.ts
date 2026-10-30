@@ -221,8 +221,11 @@ export function useConcertEditor(concertId: string) {
   }
 
   async function handleSelectConcertSong(concertSongId: string) {
-    // Save for the current song/formation BEFORE refs update to the new song
-    await history.saveImmediately();
+    // Pre-save only when the active formation is already linked to the current song.
+    // If it's unlinked (e.g. just duplicated), skip the pre-save so onAfterSave fires
+    // with the destination song active and links the formation there instead.
+    const isLinkedToCurrent = activeFormationId != null && songFormationIds.has(activeFormationId);
+    if (isLinkedToCurrent) await history.saveImmediately();
     setActiveConcertSongId(concertSongId);
     const hidden = await getHiddenChorists(concertSongId);
     setHiddenIds(new Set(hidden));
@@ -230,7 +233,7 @@ export function useConcertEditor(concertId: string) {
     setSongFormationIds(new Set(formationIds));
 
     if (formationIds.length > 0) {
-      await handleSelectFormation(formationIds[0], true);
+      await handleSelectFormation(formationIds[0], isLinkedToCurrent);
     } else {
       history.syncPlacements([]);
       setActiveFormationId(null);
@@ -373,15 +376,18 @@ export function useConcertEditor(concertId: string) {
   const hasNextFormation = activeNavIdx >= 0 && activeNavIdx < navStops.length - 1;
 
   async function navigateToStop(stop: { songId: string; formationId: string | null }) {
-    // Save BEFORE changing the active song so onAfterSave sees the old song
-    await history.saveImmediately();
+    // Same logic as handleSelectConcertSong: only pre-save if the active formation
+    // is already linked to the current song, so unlinked (duplicated) formations
+    // get linked to the destination song via onAfterSave instead.
+    const isLinkedToCurrent = activeFormationId != null && songFormationIds.has(activeFormationId);
+    if (isLinkedToCurrent) await history.saveImmediately();
     if (stop.songId !== activeConcertSongId) {
       setActiveConcertSongId(stop.songId);
       const formationIds = await listSongFormations(stop.songId);
       setSongFormationIds(new Set(formationIds));
     }
     if (stop.formationId) {
-      await handleSelectFormation(stop.formationId, true);
+      await handleSelectFormation(stop.formationId, isLinkedToCurrent);
     } else {
       setActiveFormationId(null);
       history.syncPlacements([]);
