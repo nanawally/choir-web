@@ -221,6 +221,8 @@ export function useConcertEditor(concertId: string) {
   }
 
   async function handleSelectConcertSong(concertSongId: string) {
+    // Save for the current song/formation BEFORE refs update to the new song
+    await history.saveImmediately();
     setActiveConcertSongId(concertSongId);
     const hidden = await getHiddenChorists(concertSongId);
     setHiddenIds(new Set(hidden));
@@ -228,9 +230,8 @@ export function useConcertEditor(concertId: string) {
     setSongFormationIds(new Set(formationIds));
 
     if (formationIds.length > 0) {
-      await handleSelectFormation(formationIds[0]);
+      await handleSelectFormation(formationIds[0], true);
     } else {
-      await history.saveImmediately();
       history.syncPlacements([]);
       setActiveFormationId(null);
       setRowSizes([]);
@@ -238,8 +239,8 @@ export function useConcertEditor(concertId: string) {
     }
   }
 
-  async function handleSelectFormation(formationId: string) {
-    await history.saveImmediately();
+  async function handleSelectFormation(formationId: string, skipInitialSave = false) {
+    if (!skipInitialSave) await history.saveImmediately();
     const cached = formationCacheRef.current.get(formationId);
     if (cached) {
       setActiveFormationId(formationId);
@@ -372,15 +373,16 @@ export function useConcertEditor(concertId: string) {
   const hasNextFormation = activeNavIdx >= 0 && activeNavIdx < navStops.length - 1;
 
   async function navigateToStop(stop: { songId: string; formationId: string | null }) {
+    // Save BEFORE changing the active song so onAfterSave sees the old song
+    await history.saveImmediately();
     if (stop.songId !== activeConcertSongId) {
       setActiveConcertSongId(stop.songId);
       const formationIds = await listSongFormations(stop.songId);
       setSongFormationIds(new Set(formationIds));
     }
     if (stop.formationId) {
-      await handleSelectFormation(stop.formationId);
+      await handleSelectFormation(stop.formationId, true);
     } else {
-      await history.saveImmediately();
       setActiveFormationId(null);
       history.syncPlacements([]);
       setRowSizes([]);
