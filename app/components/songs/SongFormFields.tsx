@@ -3,6 +3,12 @@
 import type { Song } from "../../lib/api";
 import { useTranslation } from "../../lib/LanguageContext";
 
+function lastWordOf(value: string | null | undefined): string {
+  if (!value?.trim()) return "";
+  const words = value.trim().split(/\s+/);
+  return words[words.length - 1] ?? "";
+}
+
 export type Suggestions = {
   composer: string[];
   arranger: string[];
@@ -66,6 +72,14 @@ export function SongFormFields({
           datalistId="dl-composer"
         />
       </Field>
+      <Field label={t("songs.composerSortKey")}>
+        <input
+          value={form.composerSortKey ?? ""}
+          onChange={(e) => set("composerSortKey", e.target.value || null)}
+          placeholder={lastWordOf(form.composer)}
+          className="w-full border border-border rounded px-2 py-1 text-sm"
+        />
+      </Field>
       <Field label={t("songs.arranger")}>
         <MultiValueInput
           value={form.arranger}
@@ -74,12 +88,28 @@ export function SongFormFields({
           datalistId="dl-arranger"
         />
       </Field>
+      <Field label={t("songs.arrangerSortKey")}>
+        <input
+          value={form.arrangerSortKey ?? ""}
+          onChange={(e) => set("arrangerSortKey", e.target.value || null)}
+          placeholder={lastWordOf(form.arranger)}
+          className="w-full border border-border rounded px-2 py-1 text-sm"
+        />
+      </Field>
       <Field label={t("songs.lyricist")}>
         <MultiValueInput
           value={form.lyricist}
           onChange={(v) => set("lyricist", v)}
           suggestions={suggestions?.lyricist ?? []}
           datalistId="dl-lyricist"
+        />
+      </Field>
+      <Field label={t("songs.lyricistSortKey")}>
+        <input
+          value={form.lyricistSortKey ?? ""}
+          onChange={(e) => set("lyricistSortKey", e.target.value || null)}
+          placeholder={lastWordOf(form.lyricist)}
+          className="w-full border border-border rounded px-2 py-1 text-sm"
         />
       </Field>
       <Field label={t("songs.delning")}>

@@ -112,8 +112,11 @@ const translations = {
     sv: "Ta bort detta stycke och ta bort den från alla konserter?",
   },
   "songs.composer": { en: "Composer", sv: "Kompositör" },
+  "songs.composerSortKey": { en: "Sort name (optional)", sv: "Sorteringsnamn (valfritt)" },
   "songs.arranger": { en: "Arranger", sv: "Arrangör" },
+  "songs.arrangerSortKey": { en: "Sort name (optional)", sv: "Sorteringsnamn (valfritt)" },
   "songs.lyricist": { en: "Lyricist", sv: "Textförfattare" },
+  "songs.lyricistSortKey": { en: "Sort name (optional)", sv: "Sorteringsnamn (valfritt)" },
   "songs.delning": { en: "Delning", sv: "Delning" },
   "songs.languages": { en: "Languages", sv: "Språk" },
   "songs.languagesHint": {

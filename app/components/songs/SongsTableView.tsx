@@ -18,6 +18,13 @@ import {
   X,
 } from "lucide-react";
 
+function sortKeyOrLastWord(sortKey: string | null | undefined, value: string | null | undefined): string {
+  if (sortKey?.trim()) return sortKey.trim();
+  if (!value?.trim()) return "";
+  const words = value.trim().split(/\s+/);
+  return words[words.length - 1] ?? "";
+}
+
 type Props<T extends Song> = {
   songs: T[];
   loading: boolean;
@@ -179,7 +186,15 @@ export function SongsTableView<T extends Song>({
     });
   }, [songs, search, matchesFilters]);
 
-  const { sorted: filtered, sortKey, sortDir, cycleSort } = useTableSort(searched, defaultSort);
+  const getSortValue = useCallback((item: T, key: keyof T): unknown => {
+    const song = item as Song;
+    if (key === "composer") return sortKeyOrLastWord(song.composerSortKey, song.composer);
+    if (key === "arranger") return sortKeyOrLastWord(song.arrangerSortKey, song.arranger);
+    if (key === "lyricist") return sortKeyOrLastWord(song.lyricistSortKey, song.lyricist);
+    return item[key];
+  }, []);
+
+  const { sorted: filtered, sortKey, sortDir, cycleSort } = useTableSort(searched, defaultSort, getSortValue);
   const columns = ALL_COLUMNS.filter((c) => visibleColumns.includes(c.key));
   const expandableColumns = columns.filter((c) => c.key !== "name" && c.key !== "composer");
 

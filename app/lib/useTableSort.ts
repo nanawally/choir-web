@@ -5,6 +5,7 @@ type SortDir = "asc" | "desc" | null;
 export function useTableSort<T>(
   data: T[],
   defaultSort: (a: T, b: T) => number,
+  getValue?: (item: T, key: keyof T) => unknown,
 ) {
   const [sortKey, setSortKey] = useState<keyof T | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>(null);
@@ -25,8 +26,8 @@ export function useTableSort<T>(
     const result = [...data];
     if (sortKey && sortDir) {
       result.sort((a, b) => {
-        const av = a[sortKey];
-        const bv = b[sortKey];
+        const av = getValue ? getValue(a, sortKey) : a[sortKey];
+        const bv = getValue ? getValue(b, sortKey) : b[sortKey];
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
@@ -42,7 +43,7 @@ export function useTableSort<T>(
       result.sort(defaultSort);
     }
     return result;
-  }, [data, sortKey, sortDir, defaultSort]);
+  }, [data, sortKey, sortDir, defaultSort, getValue]);
 
   return { sorted, sortKey, sortDir, cycleSort };
 }

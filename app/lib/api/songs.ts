@@ -4,8 +4,11 @@ export type Song = {
   id: string;
   name: string;
   composer: string | null;
+  composerSortKey: string | null;
   arranger: string | null;
+  arrangerSortKey: string | null;
   lyricist: string | null;
+  lyricistSortKey: string | null;
   delning: string | null;
   languages: string | null;
   length: string | null;
