@@ -62,8 +62,8 @@ export default function RosterPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw] min-w-0">
-        <h1 className="text-4xl font-bold mb-6 text-center">
+      <div className="flex-1 flex flex-col pt-4 pb-8 md:pt-8 px-4 md:px-[5.56vw] min-w-0">
+        <h1 className="text-2xl md:text-4xl font-bold mb-6 text-center">
           {t("chorists.title")}
         </h1>
 
@@ -195,9 +195,9 @@ export default function RosterPage() {
               <Thead>
                 <TheadRow>
                   {fourPartGroup && (
-                    <Th className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap" />
+                    <Th className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap bg-surface-alt-solid" />
                   )}
-                  <Th className={`sticky z-10 ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
+                  <Th className={`sticky z-10 bg-surface-alt-solid ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
                     {t("common.name")}
                   </Th>
                   {otherStandardGroups.map((g) => (
@@ -216,7 +216,7 @@ export default function RosterPage() {
                     : -1;
                   const isAltRow = fourPartIndex % 2 === 1;
                   const stickyBg = isAltRow
-                    ? "group-hover:bg-hover-bg"
+                    ? "bg-surface-alt-solid group-hover:bg-hover-bg"
                     : "bg-background group-hover:bg-hover-bg";
 
                   return (

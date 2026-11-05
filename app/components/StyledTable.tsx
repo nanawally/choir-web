@@ -44,7 +44,7 @@ export function Th({
 }: ThProps) {
   return (
     <th
-      className={`py-2 px-3 font-semibold border-r border-border last:border-r-0 ${compact ? "w-0 whitespace-nowrap" : "text-left"} ${onSort ? "cursor-pointer select-none" : ""} ${className}`}
+      className={`py-2 px-3 font-semibold border-r border-border last:border-r-0 overflow-hidden ${compact ? "w-0 whitespace-nowrap" : "text-left"} ${onSort ? "cursor-pointer select-none" : ""} ${className}`}
       style={style}
       onClick={onSort}
     >

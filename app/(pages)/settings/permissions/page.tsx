@@ -169,11 +169,11 @@ export default function PermissionsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
+      <div className="flex-1 flex flex-col pt-4 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
         <Link href="/settings" className="flex items-center gap-1 text-sm text-muted hover:text-text mb-4 w-fit">
           <ChevronLeft size={16} />{t("settings.title")}
         </Link>
-        <h1 className="text-4xl font-bold mb-6 text-center">{t("settings.permissionsTitle")}</h1>
+        <h1 className="text-2xl md:text-4xl font-bold mb-6 text-center">{t("settings.permissionsTitle")}</h1>
 
         {(loading || !loaded) ? (
           <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>

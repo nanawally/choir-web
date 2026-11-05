@@ -22,8 +22,8 @@ export default function TermPlanPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
-        <h1 className="text-4xl font-bold mb-6 text-center">
+      <div className="flex-1 flex flex-col pt-4 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
+        <h1 className="text-2xl md:text-4xl font-bold mb-6 text-center">
           {t("termPlan.title")}
         </h1>
         {SHEET_ID ? (

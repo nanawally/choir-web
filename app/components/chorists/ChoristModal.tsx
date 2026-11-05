@@ -214,8 +214,8 @@ export default function ChoristModal({
             />
           )}
 
-          <div className="flex gap-6">
-            {/* Left: voice groups */}
+          {/* Desktop: two-column layout */}
+          <div className="hidden md:flex gap-6">
             <div className="flex-1 min-w-0">
               {fourPartGroup && (
                 <div className="mb-3">
@@ -223,7 +223,6 @@ export default function ChoristModal({
                   <span className="text-sm font-medium">{getPartName(fourPartGroup.id)}</span>
                 </div>
               )}
-
               {otherStandardGroups.length > 0 && (
                 <div className="grid grid-cols-3 gap-x-4 gap-y-2 mb-3">
                   {otherStandardGroups.map((group) => (
@@ -234,7 +233,6 @@ export default function ChoristModal({
                   ))}
                 </div>
               )}
-
               {nonStandardGroups.length > 0 && (
                 <>
                   <hr className="border-border my-3" />
@@ -249,8 +247,6 @@ export default function ChoristModal({
                 </>
               )}
             </div>
-
-            {/* Right: notes */}
             {canView("chorists_notes") && (
               <div className="w-1/3 border-l border-border pl-6">
                 <span className="block text-xs text-muted mb-0.5">{t("chorists.notes")}</span>
@@ -258,6 +254,48 @@ export default function ChoristModal({
                   <p className="text-sm whitespace-pre-wrap">{current.notes}</p>
                 )}
               </div>
+            )}
+          </div>
+
+          {/* Mobile: single-column, notes between standard and non-standard groups */}
+          <div className="md:hidden">
+            {fourPartGroup && (
+              <div className="mb-3">
+                <span className="block text-xs text-muted mb-0.5">{fourPartGroup.name}</span>
+                <span className="text-sm font-medium">{getPartName(fourPartGroup.id)}</span>
+              </div>
+            )}
+            {otherStandardGroups.length > 0 && (
+              <div className="grid grid-cols-3 gap-x-4 gap-y-2 mb-3">
+                {otherStandardGroups.map((group) => (
+                  <div key={group.id}>
+                    <span className="block text-xs text-muted mb-0.5">{group.name}</span>
+                    <span className="text-sm font-medium">{getPartName(group.id)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {canView("chorists_notes") && current.notes && (
+              <>
+                <hr className="border-border my-3" />
+                <div>
+                  <span className="block text-xs text-muted mb-0.5">{t("chorists.notes")}</span>
+                  <p className="text-sm whitespace-pre-wrap">{current.notes}</p>
+                </div>
+              </>
+            )}
+            {nonStandardGroups.length > 0 && (
+              <>
+                <hr className="border-border my-3" />
+                <div className="space-y-2">
+                  {nonStandardGroups.map((group) => (
+                    <div key={group.id}>
+                      <span className="block text-xs text-muted mb-0.5">{group.name}</span>
+                      <span className="text-sm">{getPartName(group.id)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>

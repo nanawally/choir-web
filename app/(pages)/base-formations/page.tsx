@@ -65,8 +65,8 @@ export default function BaseFormationsPage() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <div className="flex-1 flex flex-col pt-16 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
-        <h1 className="text-4xl font-bold mb-6 text-center">
+      <div className="flex-1 flex flex-col pt-4 pb-8 md:pt-8 px-4 md:px-[5.56vw]">
+        <h1 className="text-2xl md:text-4xl font-bold mb-6 text-center">
           {t("baseFormations.title")}
         </h1>
 
@@ -78,14 +78,14 @@ export default function BaseFormationsPage() {
           <AccessDenied />
         ) : (
           <div className="w-full">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-muted">
+          <div className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+            <span className="text-sm text-muted text-center sm:text-left">
               {t("baseFormations.description")}
             </span>
             {canEdit("base_formations") && (
               <button
                 onClick={() => setShowAdd(true)}
-                className="px-3 py-2 btn-primary text-sm font-medium shrink-0 ml-4"
+                className="px-3 py-2 btn-primary text-sm font-medium shrink-0 sm:ml-4"
               >
                 {t("baseFormations.newFormation")}
               </button>

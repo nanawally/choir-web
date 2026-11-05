@@ -400,10 +400,10 @@ export function SongsTableView<T extends Song>({
               {columns.map((c) => (
                 <Th
                   key={c.key}
-                  className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : c.key === "name" ? "w-2/3 sm:w-auto" : "w-1/3 sm:w-auto"}
+                  className={c.key !== "name" && c.key !== "composer" ? "hidden sm:table-cell" : c.key === "name" ? "w-2/3 sm:w-auto sm:min-w-[250px]" : "w-1/3 sm:w-auto"}
                   style={
                     c.key === "name"
-                      ? { minWidth: "250px" }
+                      ? {}
                       : c.key === "composer"
                         ? {}
                         : { width: c.width, minWidth: c.width }
