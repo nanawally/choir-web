@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-24">
+      <main className="flex-1 flex flex-col items-center justify-start pt-16 pb-6 px-6 md:justify-center md:p-24">
         <Image
           src="/melisma-logo.png"
           alt="melisma"
@@ -71,7 +71,7 @@ export default function Home() {
             href="/base-formations"
             className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
-            <h2 className="text-lg font-semibold">{t("nav.baseFormations")}</h2>
+            <h2 className="text-lg font-semibold break-words">{t("nav.baseFormations")}</h2>
             <p className="text-sm text-muted">
               {t("home.manageBaseFormations")}
             </p>

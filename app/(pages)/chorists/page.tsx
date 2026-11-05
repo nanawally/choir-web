@@ -305,9 +305,9 @@ export default function RosterPage() {
                   <Thead>
                     <TheadRow>
                       {fourPartGroup && (
-                        <Th className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap" />
+                        <Th className="sticky left-0 z-10 w-[min(12vw,3rem)] whitespace-nowrap bg-surface-alt-solid" />
                       )}
-                      <Th className={`sticky z-10 ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
+                      <Th className={`sticky z-10 bg-surface-alt-solid ${fourPartGroup ? "left-[min(12vw,3rem)]" : "left-0"}`}>
                         {t("common.name")}
                       </Th>
                       {otherStandardGroups.map((g) => (

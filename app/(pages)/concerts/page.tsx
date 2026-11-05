@@ -209,7 +209,7 @@ export default function ConcertsPage() {
         ) : (
           <div className="w-full">
           {canEdit("concerts") && (
-            <div className="flex justify-end mb-6">
+            <div className="flex justify-center sm:justify-end mb-6">
               <button
                 onClick={() => setShowAdd(true)}
                 className="px-3 py-2 btn-primary text-sm font-medium"
