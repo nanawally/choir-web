@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,12 +11,16 @@ import { useTranslation } from "./lib/LanguageContext";
 export default function Home() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [hasToken] = useState(() => !!getToken());
+  const hasToken = useSyncExternalStore(
+    () => () => {},
+    () => !!getToken(),
+    () => false,
+  );
 
   useEffect(() => {
     if (!hasToken) router.push("/login");
   }, [hasToken, router]);
-
+  
   if (!hasToken) return null;
 
   return (
@@ -71,7 +75,7 @@ export default function Home() {
             href="/base-formations"
             className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
           >
-            <h2 className="text-lg font-semibold break-words">{t("nav.baseFormations")}</h2>
+            <h2 className="text-lg font-semibold wrap-break-word">{t("nav.baseFormations")}</h2>
             <p className="text-sm text-muted">
               {t("home.manageBaseFormations")}
             </p>
