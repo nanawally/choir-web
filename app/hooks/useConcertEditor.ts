@@ -20,7 +20,8 @@ import { usePlacementHistory } from "./usePlacementHistory";
 import { useEditorData } from "./useEditorData";
 
 type Formation = { id: string; name: string; sortOrder: number };
-type CachedFormation = { placements: Placement[]; rowSizes: number[]; name: string };
+type GhostChorist = { id: string; firstName: string; lastName: string; isGhost: true };
+type CachedFormation = { placements: Placement[]; rowSizes: number[]; name: string; ghostChorists: GhostChorist[] };
 
 export function useConcertEditor(concertId: string) {
   const { t } = useTranslation();
@@ -29,6 +30,7 @@ export function useConcertEditor(concertId: string) {
   const [notFound, setNotFound] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [formationName, setFormationName] = useState<string | null>(null);
+  const [ghostChorists, setGhostChorists] = useState<GhostChorist[]>([]);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
   const [showSetlist, setShowSetlist] = useState(false);
   const [showChorists, setShowChorists] = useState(false);
@@ -65,10 +67,12 @@ export function useConcertEditor(concertId: string) {
   const history = usePlacementHistory({
     formationId: activeFormationId,
     onAfterSave: async (placements, fId) => {
+      const existing = formationCacheRef.current.get(fId);
       formationCacheRef.current.set(fId, {
         placements,
-        rowSizes: latestRowSizesRef.current,
-        name: latestFormationNameRef.current ?? "",
+        rowSizes: existing?.rowSizes ?? latestRowSizesRef.current,
+        name: existing?.name ?? latestFormationNameRef.current ?? "",
+        ghostChorists: existing?.ghostChorists ?? [],
       });
       const songId = latestActiveConcertSongIdRef.current;
       const fIds = latestSongFormationIdsRef.current;
@@ -121,6 +125,9 @@ export function useConcertEditor(concertId: string) {
           placements: d.placements.map((p: Placement) => ({ choristId: p.choristId, gridX: p.gridX, gridY: p.gridY })),
           rowSizes: JSON.parse(d.rowSizes || "[]"),
           name: d.name,
+          ghostChorists: (d.ghostChorists || []).map((g: { id: string; firstName: string; lastName: string }) => ({
+            id: g.id, firstName: g.firstName, lastName: g.lastName, isGhost: true as const,
+          })),
         });
       });
     });
@@ -201,6 +208,7 @@ export function useConcertEditor(concertId: string) {
         placements: normalized,
         rowSizes: loadedRowSizes,
         name: formationName ?? "",
+        ghostChorists: ghostChorists,
       });
     }
   }
@@ -254,14 +262,19 @@ export function useConcertEditor(concertId: string) {
       history.syncPlacements(cached.placements);
       setRowSizes(cached.rowSizes);
       setFormationName(cached.name);
+      setGhostChorists(cached.ghostChorists);
       return;
     }
     const d = await loadFormation(formationId);
     if (d) {
+      const ghosts: GhostChorist[] = (d.ghostChorists || []).map((g: { id: string; firstName: string; lastName: string }) => ({
+        id: g.id, firstName: g.firstName, lastName: g.lastName, isGhost: true as const,
+      }));
       const entry: CachedFormation = {
         placements: d.placements.map((p: Placement) => ({ choristId: p.choristId, gridX: p.gridX, gridY: p.gridY })),
         rowSizes: JSON.parse(d.rowSizes || "[]"),
         name: d.name,
+        ghostChorists: ghosts,
       };
       formationCacheRef.current.set(formationId, entry);
       setActiveFormationId(formationId);
@@ -269,6 +282,7 @@ export function useConcertEditor(concertId: string) {
       setHiddenIds(new Set(d.hiddenChoristIds || []));
       setRowSizes(entry.rowSizes);
       setFormationName(entry.name);
+      setGhostChorists(ghosts);
     }
   }
 
@@ -414,6 +428,15 @@ export function useConcertEditor(concertId: string) {
 
   const placedIds = new Set(history.placements.map((p) => p.choristId));
   const rosterChorists = data.sortedChorists.filter((c) => rosterIds.has(c.id));
+  // Merge ghost chorists not already present in the resolved chorist lists.
+  // Check against rosterChorists (not rosterIds) because an archived chorist may
+  // still be in concert_chorists but absent from the API's chorist list.
+  const rosterChoristIds = new Set(rosterChorists.map((c) => c.id));
+  const allChoristIds = new Set(data.chorists.map((c) => c.id));
+  const ghostsForRoster = ghostChorists.filter((g) => !rosterChoristIds.has(g.id));
+  const ghostsForAll = ghostChorists.filter((g) => !allChoristIds.has(g.id));
+  const rosterWithGhosts = [...rosterChorists, ...ghostsForRoster.map((g) => ({ ...g, notes: null }))];
+  const allChoristsWithGhosts = [...data.chorists, ...ghostsForAll.map((g) => ({ ...g, notes: null }))];
 
   return {
     notFound,
@@ -471,8 +494,8 @@ export function useConcertEditor(concertId: string) {
     formations,
     setFormations,
     placedIds,
-    allChorists: data.chorists,
-    rosterChorists,
+    allChorists: allChoristsWithGhosts,
+    rosterChorists: rosterWithGhosts,
     getFormationsForSong,
     hasPrevFormation,
     hasNextFormation,

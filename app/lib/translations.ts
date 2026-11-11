@@ -245,6 +245,38 @@ const translations = {
     en: "Archive {name}?",
     sv: "Arkivera {name}?",
   },
+  "chorists.alsoDeleteUser": {
+    en: "Also delete user account \"{name}\"?",
+    sv: "Ta även bort användarkontot \"{name}\"?",
+  },
+  "chorists.confirmDeleteBoth": {
+    en: "Are you sure you wish to permanently delete chorist {choristName} and user {username}? This cannot be undone.",
+    sv: "Är du säker på att du vill permanent ta bort korist {choristName} och användare {username}? Detta kan inte ångras.",
+  },
+  "chorists.confirmDeleteOnly": {
+    en: "Are you sure you wish to delete chorist {choristName}? This will not delete user {username}. This deletion cannot be undone.",
+    sv: "Är du säker på att du vill ta bort korist {choristName}? Användarkontot {username} behålls. Denna borttagning kan inte ångras.",
+  },
+  "chorists.confirmDeleteNoUser": {
+    en: "Are you sure you wish to permanently delete chorist {name}? This cannot be undone.",
+    sv: "Är du säker på att du vill permanent ta bort korist {name}? Detta kan inte ångras.",
+  },
+  "settings.alsoDeleteChorist": {
+    en: "Also delete chorist \"{name}\" from the choir?",
+    sv: "Ta även bort koristen \"{name}\" från kören?",
+  },
+  "settings.confirmDeleteUserAndChorist": {
+    en: "Are you sure you wish to permanently delete user {username} and chorist {choristName}? This cannot be undone.",
+    sv: "Är du säker på att du vill permanent ta bort användare {username} och korist {choristName}? Detta kan inte ångras.",
+  },
+  "settings.confirmDeleteUserOnly": {
+    en: "Are you sure you wish to delete user {username}? This will not delete chorist {choristName}. This deletion cannot be undone.",
+    sv: "Är du säker på att du vill ta bort användare {username}? Koristen {choristName} behålls. Denna borttagning kan inte ångras.",
+  },
+  "settings.confirmDeleteUserNoChorist": {
+    en: "Are you sure you wish to permanently delete user {username}? This cannot be undone.",
+    sv: "Är du säker på att du vill permanent ta bort användare {username}? Detta kan inte ångras.",
+  },
   "chorists.sectionLeaderTooltip": {
     en: "Section leader",
     sv: "Stämfiskal",

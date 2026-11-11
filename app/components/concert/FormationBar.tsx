@@ -94,9 +94,7 @@ export default function FormationBar({
     const formation = await createFormation(concertId, name.trim());
     if (formation) {
       onFormationsChange([...formations, formation]);
-      onActiveFormationIdChange(formation.id);
-      onFormationNameChange(formation.name);
-      onLoad([], [], []);
+      await onSelectFormation(formation.id);
       if (activeConcertSongId) {
         const updatedIds = [...songFormationIds, formation.id];
         await setSongFormations(activeConcertSongId, updatedIds);

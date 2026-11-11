@@ -19,6 +19,7 @@ import { QRCodeSVG } from "qrcode.react";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { usePermissions } from "../../../lib/usePermissions";
 import AccessDenied from "../../../components/AccessDenied";
+import DeleteLinkedModal from "../../../components/DeleteLinkedModal";
 
 export default function UsersPage() {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ export default function UsersPage() {
   const [newUsername, setNewUsername] = useState("");
   const [newRole, setNewRole] = useState("user");
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
   async function load() {
     setUsers(await listUsers());
@@ -50,6 +52,13 @@ export default function UsersPage() {
   async function handleReset(id: string) {
     const data = await resetUserAccount(id);
     if (data) showQr(data.setupToken);
+  }
+
+  async function executeDeleteUser(alsoDeleteChorist: boolean) {
+    if (!deletingUser) return;
+    await deleteUser(deletingUser.id, alsoDeleteChorist);
+    setDeletingUser(null);
+    load();
   }
 
   async function handleRoleChange(id: string, role: string) {
@@ -163,11 +172,7 @@ export default function UsersPage() {
                           ))}
                           {canDeletePerm("users") && (
                           <button
-                            onClick={async () => {
-                              if (window.confirm(`Delete ${user.username}?`)) {
-                                await deleteUser(user.id); load();
-                              }
-                            }}
+                            onClick={() => setDeletingUser(user)}
                             className="text-xs px-2 py-1 text-danger border border-danger rounded hover:bg-hover-bg"
                           >
                             {t("common.delete")}
@@ -269,6 +274,17 @@ export default function UsersPage() {
           </div>
           )}
           </>
+        )}
+        {deletingUser && (
+          <DeleteLinkedModal
+            hasLinked={!!deletingUser.choristId && !!deletingUser.choristName}
+            askMessage={t("settings.alsoDeleteChorist").replace("{name}", deletingUser.choristName ?? "")}
+            confirmBothMessage={t("settings.confirmDeleteUserAndChorist").replace("{username}", deletingUser.username).replace("{choristName}", deletingUser.choristName ?? "")}
+            confirmOnlyMessage={t("settings.confirmDeleteUserOnly").replace("{username}", deletingUser.username).replace("{choristName}", deletingUser.choristName ?? "")}
+            confirmNoLinkedMessage={t("settings.confirmDeleteUserNoChorist").replace("{username}", deletingUser.username)}
+            onConfirm={(alsoDelete) => executeDeleteUser(alsoDelete)}
+            onCancel={() => setDeletingUser(null)}
+          />
         )}
       </div>
     </div>

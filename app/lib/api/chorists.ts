@@ -31,8 +31,8 @@ export async function unarchiveChorist(id: string) {
   return res.ok;
 }
 
-export async function deleteChorist(id: string) {
-  const res = await apiFetch(`/chorists/${id}`, { method: "DELETE" });
+export async function deleteChorist(id: string, deleteUser = true) {
+  const res = await apiFetch(`/chorists/${id}?deleteUser=${deleteUser}`, { method: "DELETE" });
   return res.ok;
 }
 

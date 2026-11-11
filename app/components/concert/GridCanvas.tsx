@@ -12,7 +12,7 @@ const ARC_PADDING = 40; // pixels of padding around the outermost arc
 const GRID_VIRTUAL_WIDTH = 1400;
 const GRID_VIRTUAL_HEIGHT = 800;
 
-type Chorist = { id: string; firstName: string; lastName: string };
+type Chorist = { id: string; firstName: string; lastName: string; isGhost?: boolean };
 type Placement = { choristId: string; gridX: number; gridY: number };
 type VoiceGroup = {
   id: string;
@@ -519,16 +519,21 @@ export default function GridCanvas({
         </Layer>
         <Layer scaleX={effectiveScale} scaleY={effectiveScale} x={gridLayerX} y={gridLayerY}>
           {placements
-            .filter((p) => !hiddenIds.has(p.choristId))
+            .filter((p, i, arr) => !hiddenIds.has(p.choristId) && arr.findIndex((q) => q.choristId === p.choristId) === i)
             .map((p) => {
-              const chorist = chorists.find((c) => c.id === p.choristId);
+              const chorist = chorists.find((c) => c.id === p.choristId)
+                ?? allChorists.find((c) => c.id === p.choristId);
               if (!chorist) return null;
-              const { color, shape } = getChoristVisuals(p.choristId);
+              const isGhost = chorist.isGhost ?? false;
+              const { color, shape } = isGhost
+                ? { color: "#ccc", shape: "circle" }
+                : getChoristVisuals(p.choristId);
               const dimmed =
+                !isGhost &&
                 highlightPartId != null &&
                 assignments.find((a) => a.choristId === p.choristId)
                   ?.voicePartId !== highlightPartId;
-              const opacity = dimmed ? 0.2 : 1;
+              const opacity = isGhost ? 0.35 : dimmed ? 0.2 : 1;
               const pos = currentPixelPos.get(p.choristId) ?? toPixel(p.gridX, p.gridY);
               const offset = animOffset.get(p.choristId) ?? { x: 0, y: 0 };
               return (

@@ -8,6 +8,7 @@ import {
   assignChorist,
   unassignChorist,
   archiveChorist,
+  deleteChorist,
   createChoristAccount,
   getTokenRole,
 } from "../../lib/api";
@@ -15,6 +16,7 @@ import { sortVoiceGroups } from "../../lib/voiceGroupSort";
 import { useTranslation } from "../../lib/LanguageContext";
 import { usePermissions } from "../../lib/usePermissions";
 import AccountQrModal from "./AccountQrModal";
+import DeleteLinkedModal from "../DeleteLinkedModal";
 
 type Chorist = {
   id: string;
@@ -24,6 +26,7 @@ type Chorist = {
   isArchived: boolean;
   notes: string | null;
   accountStatus: "none" | "pending" | "active" | null;
+  username: string | null;
 };
 
 type VoicePart = { id: string; name: string; color: string; shape: string };
@@ -55,6 +58,7 @@ export default function ChoristModal({
   const { canView, canEdit: canEditPerm, canDelete: canDeletePerm } = usePermissions();
   const isAdmin = getTokenRole() === "admin";
   const [editing, setEditing] = useState(mode === "add");
+  const [showDelete, setShowDelete] = useState(false);
   const [qrData, setQrData] = useState<{ username: string; setupToken: string } | null>(null);
   const [firstName, setFirstName] = useState(chorist?.firstName ?? "");
   const [lastName, setLastName] = useState(chorist?.lastName ?? "");
@@ -137,6 +141,12 @@ export default function ChoristModal({
   async function handleArchive() {
     if (!chorist || !window.confirm(t("chorists.confirmArchive").replace("{name}", `${chorist.firstName} ${chorist.lastName}`))) return;
     await archiveChorist(chorist.id);
+    onSaved();
+  }
+
+  async function executeDelete(alsoDeleteUser: boolean) {
+    if (!chorist) return;
+    await deleteChorist(chorist.id, alsoDeleteUser);
     onSaved();
   }
 
@@ -379,13 +389,21 @@ export default function ChoristModal({
         </div>
 
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex gap-3">
             {mode === "view" && canDeletePerm("chorists") && (
               <button
                 onClick={handleArchive}
                 className="text-sm text-danger hover:text-danger-hover"
               >
                 {t("chorists.archive")}
+              </button>
+            )}
+            {mode === "view" && canDeletePerm("chorists") && (
+              <button
+                onClick={() => setShowDelete(true)}
+                className="text-sm text-danger hover:text-danger-hover"
+              >
+                {t("common.delete")}
               </button>
             )}
           </div>
@@ -405,6 +423,20 @@ export default function ChoristModal({
           </div>
         </div>
       </div>
+      {showDelete && chorist && (() => {
+        const choristName = `${chorist.firstName} ${chorist.lastName}`;
+        return (
+          <DeleteLinkedModal
+            hasLinked={!!chorist.username}
+            askMessage={t("chorists.alsoDeleteUser").replace("{name}", chorist.username ?? "")}
+            confirmBothMessage={t("chorists.confirmDeleteBoth").replace("{choristName}", choristName).replace("{username}", chorist.username ?? "")}
+            confirmOnlyMessage={t("chorists.confirmDeleteOnly").replace("{choristName}", choristName).replace("{username}", chorist.username ?? "")}
+            confirmNoLinkedMessage={t("chorists.confirmDeleteNoUser").replace("{name}", choristName)}
+            onConfirm={(alsoDelete) => executeDelete(alsoDelete)}
+            onCancel={() => setShowDelete(false)}
+          />
+        );
+      })()}
     </div>
   );
 }

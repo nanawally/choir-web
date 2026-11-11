@@ -6,7 +6,7 @@ import { Eye, EyeOff, SquareText } from "lucide-react";
 import { shortName } from "../../lib/choristName";
 import { useTranslation } from "../../lib/LanguageContext";
 
-type Chorist = { id: string; firstName: string; lastName: string; notes: string | null };
+type Chorist = { id: string; firstName: string; lastName: string; notes: string | null; isGhost?: boolean };
 
 type Props = {
   chorists: Chorist[];
@@ -47,7 +47,9 @@ export default function RosterPanel({
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [expandedNotes]);
-  const unplaced = chorists.filter((c) => !placedIds.has(c.id));
+  const unplacedRegular = chorists.filter((c) => !placedIds.has(c.id) && !c.isGhost);
+  const unplacedGhosts = chorists.filter((c) => !placedIds.has(c.id) && c.isGhost);
+  const unplaced = [...unplacedRegular, ...unplacedGhosts];
   const placed = chorists.filter((c) => placedIds.has(c.id));
 
   function toggleHidden(choristId: string) {
@@ -106,11 +108,11 @@ export default function RosterPanel({
             {unplaced.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center text-sm py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer"
+                className={`flex items-center text-sm py-0.5 px-2 rounded hover:bg-surface-alt cursor-pointer ${c.isGhost ? "opacity-40" : ""}`}
                 onClick={() => onPlace(c.id)}
               >
                 <span className="flex-1 truncate">{shortName(c, allChorists)}</span>
-                {notesButton(c)}
+                {!c.isGhost && notesButton(c)}
               </li>
             ))}
           </ul>
@@ -126,9 +128,9 @@ export default function RosterPanel({
             {placed.map((c) => (
               <li key={c.id}>
                 <div
-                  className={`flex items-center text-sm py-0.5 px-2 rounded ${hiddenIds.has(c.id) ? "opacity-40" : ""}`}
+                  className={`flex items-center text-sm py-0.5 px-2 rounded ${c.isGhost ? "opacity-40" : hiddenIds.has(c.id) ? "opacity-40" : ""}`}
                 >
-                  {onToggleHidden && (
+                  {onToggleHidden && !c.isGhost && (
                     <button
                       onClick={() => toggleHidden(c.id)}
                       className="mr-1"
@@ -152,7 +154,7 @@ export default function RosterPanel({
                   >
                     {shortName(c, allChorists)}
                   </span>
-                  {notesButton(c)}
+                  {!c.isGhost && notesButton(c)}
                 </div>
               </li>
             ))}

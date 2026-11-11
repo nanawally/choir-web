@@ -4,6 +4,7 @@ export type User = {
   id: string;
   username: string;
   choristId: string | null;
+  choristName: string | null;
   role: string;
   email: string | null;
   isArchived: boolean;
@@ -46,7 +47,7 @@ export async function unarchiveUser(id: string): Promise<boolean> {
   return res.ok;
 }
 
-export async function deleteUser(id: string): Promise<boolean> {
-  const res = await apiFetch(`/users/${id}`, { method: "DELETE" });
+export async function deleteUser(id: string, deleteChorist = false): Promise<boolean> {
+  const res = await apiFetch(`/users/${id}?deleteChorist=${deleteChorist}`, { method: "DELETE" });
   return res.ok;
 }
