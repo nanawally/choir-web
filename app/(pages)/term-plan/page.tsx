@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import NavSidebar from "../../components/NavSidebar";
 import { useTranslation } from "../../lib/LanguageContext";
 import { getToken } from "../../lib/api";
+import { usePermissions } from "../../lib/usePermissions";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import AccessDenied from "../../components/AccessDenied";
 
 const SHEET_ID = process.env.NEXT_PUBLIC_TERM_PLAN_SHEET_ID;
 
@@ -12,6 +15,7 @@ export default function TermPlanPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const [hasToken] = useState(() => !!getToken());
+  const { canView, loaded } = usePermissions();
 
   useEffect(() => {
     if (!hasToken) router.push("/login");
@@ -26,7 +30,11 @@ export default function TermPlanPage() {
         <h1 className="text-2xl md:text-4xl font-bold mb-6 text-center">
           {t("termPlan.title")}
         </h1>
-        {SHEET_ID ? (
+        {!loaded ? (
+          <div className="flex-1 flex items-center justify-center"><LoadingSpinner /></div>
+        ) : !canView("term_plan") ? (
+          <AccessDenied />
+        ) : SHEET_ID ? (
           <iframe
             src={`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?embedded=true`}
             className="flex-1 w-full border-0 rounded-lg"

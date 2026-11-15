@@ -17,8 +17,8 @@ const NAV_ITEMS: { href: string; labelKey: TranslationKey; feature?: string }[] 
   { href: "/chorists", labelKey: "nav.chorists", feature: "chorists" },
   { href: "/voice-groups", labelKey: "nav.voiceGroups", feature: "voice_groups" },
   { href: "/base-formations", labelKey: "nav.baseFormations", feature: "base_formations" },
-  { href: "/krysslistan", labelKey: "nav.krysslistan" },
-  { href: "/term-plan", labelKey: "nav.termPlan" },
+  { href: "/krysslistan", labelKey: "nav.krysslistan", feature: "krysslistan" },
+  { href: "/term-plan", labelKey: "nav.termPlan", feature: "term_plan" },
   { href: "/settings", labelKey: "nav.settings" },
 ];
 

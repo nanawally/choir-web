@@ -162,6 +162,8 @@ export default function PermissionsPage() {
       base_formations: t("permissions.feature.baseFormations"),
       permissions: t("permissions.feature.permissions"),
       users: t("permissions.feature.users"),
+      krysslistan: t("permissions.feature.krysslistan"),
+      term_plan: t("permissions.feature.termPlan"),
     };
     return map[feature] ?? feature;
   }
