@@ -29,10 +29,10 @@ const ALL_FEATURES = [
   "songbooks_hidden",
   "concerts",
   "base_formations",
-  "permissions",
-  "users",
   "krysslistan",
   "term_plan",
+  "permissions",
+  "users",
 ] as const;
 
 const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[] = [
@@ -44,10 +44,10 @@ const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[
   { feature: "songbooks_hidden", isChild: true },
   { feature: "concerts", isChild: false },
   { feature: "base_formations", isChild: false },
-  { feature: "permissions", isChild: false },
-  { feature: "users", isChild: false },
   { feature: "krysslistan", isChild: false },
   { feature: "term_plan", isChild: false },
+  { feature: "permissions", isChild: false },
+  { feature: "users", isChild: false },
 ];
 
 function getPerm(group: PermissionGroup, feature: string): PermissionEntry {
