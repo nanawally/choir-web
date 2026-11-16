@@ -31,6 +31,8 @@ const ALL_FEATURES = [
   "base_formations",
   "permissions",
   "users",
+  "krysslistan",
+  "term_plan",
 ] as const;
 
 const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[] = [
@@ -44,6 +46,8 @@ const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[
   { feature: "base_formations", isChild: false },
   { feature: "permissions", isChild: false },
   { feature: "users", isChild: false },
+  { feature: "krysslistan", isChild: false },
+  { feature: "term_plan", isChild: false },
 ];
 
 function getPerm(group: PermissionGroup, feature: string): PermissionEntry {
