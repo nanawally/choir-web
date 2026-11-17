@@ -6,7 +6,7 @@ export function shortName(chorist: Chorist, allChorists: Chorist[]): string {
   );
   if (sameFirst.length === 0) return chorist.firstName;
 
-  const lastInitial = chorist.lastName[0];
+  const lastInitial = chorist.lastName?.[0];
   if (!lastInitial) return chorist.firstName;
 
   const sameFirstAndInitial = sameFirst.filter(

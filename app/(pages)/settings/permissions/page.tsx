@@ -20,22 +20,7 @@ import {
 } from "../../../lib/api";
 import { listUsers, type User } from "../../../lib/api";
 
-const ALL_FEATURES = [
-  "chorists",
-  "chorists_notes",
-  "voice_groups",
-  "songs",
-  "songbooks",
-  "songbooks_hidden",
-  "concerts",
-  "base_formations",
-  "krysslistan",
-  "term_plan",
-  "permissions",
-  "users",
-] as const;
-
-const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[] = [
+const FEATURE_ITEMS = [
   { feature: "chorists", isChild: false },
   { feature: "chorists_notes", isChild: true },
   { feature: "voice_groups", isChild: false },
@@ -48,7 +33,7 @@ const FEATURE_ITEMS: { feature: typeof ALL_FEATURES[number]; isChild: boolean }[
   { feature: "term_plan", isChild: false },
   { feature: "permissions", isChild: false },
   { feature: "users", isChild: false },
-];
+] as const;
 
 function getPerm(group: PermissionGroup, feature: string): PermissionEntry {
   return (

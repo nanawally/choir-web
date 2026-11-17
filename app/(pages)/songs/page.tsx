@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback } from "react";
 import { type Song } from "../../lib/api";
 import SongModal from "../../components/songs/SongModal";
 import NavSidebar from "../../components/NavSidebar";
@@ -28,7 +27,7 @@ export default function SongsPage() {
   const { t } = useTranslation();
   const { canView, canEdit, canDelete, loaded } = usePermissions();
   const suggestions = extractSuggestions(songs);
-  const defaultSort = useCallback((a: Song, b: Song) => a.name.localeCompare(b.name), []);
+  const defaultSort = (a: Song, b: Song) => a.name.localeCompare(b.name);
 
   return (
     <div className="flex h-dvh">

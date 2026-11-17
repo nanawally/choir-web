@@ -11,6 +11,7 @@ import {
   reorderVoiceParts,
 } from "../lib/api";
 import { sortVoiceGroups } from "../lib/voiceGroupSort";
+import { useTranslation } from "../lib/LanguageContext";
 import type { DragEndEvent } from "@dnd-kit/core";
 
 export type VoicePart = { id: string; name: string; color: string; shape: string };
@@ -35,6 +36,7 @@ const DEFAULT_COLORS = [
 export const SHAPES = ["circle", "square", "triangle", "diamond", "cross", "star"];
 
 export function useVoiceGroups() {
+  const { t } = useTranslation();
   const [groups, setGroups] = useState<VoiceGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddGroup, setShowAddGroup] = useState(false);
@@ -85,7 +87,7 @@ export function useVoiceGroups() {
   }
 
   async function handleDeleteGroup(id: string) {
-    if (!window.confirm("Delete this voice group and all its parts?")) return;
+    if (!window.confirm(t("voiceGroups.confirmDeleteGroup"))) return;
     if (await deleteVoiceGroup(id)) {
       setGroups(groups.filter((g) => g.id !== id));
     }

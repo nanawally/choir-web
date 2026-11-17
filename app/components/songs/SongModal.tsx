@@ -32,16 +32,17 @@ export default function SongModal({
 
   useEffect(() => {
     if (!current.hasSheetMusicFile) return;
-    let revoked = false;
+    const controller = new AbortController();
     const url = getSheetMusicUrl(current.id);
     const token = getToken();
-    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {}, signal: controller.signal })
       .then((res) => (res.ok ? res.blob() : null))
       .then((blob) => {
-        if (blob && !revoked) setPdfUrl(URL.createObjectURL(blob));
-      });
+        if (blob) setPdfUrl(URL.createObjectURL(blob));
+      })
+      .catch(() => {});
     return () => {
-      revoked = true;
+      controller.abort();
       setPdfUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
         return null;
