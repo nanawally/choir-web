@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,16 +11,12 @@ import { useTranslation } from "./lib/LanguageContext";
 export default function Home() {
   const router = useRouter();
   const { t } = useTranslation();
-  const hasToken = useSyncExternalStore(
-    () => () => {},
-    () => !!getToken(),
-    () => false,
-  );
+  const [hasToken] = useState(() => !!getToken());
 
   useEffect(() => {
     if (!hasToken) router.push("/login");
   }, [hasToken, router]);
-  
+
   if (!hasToken) return null;
 
   return (
