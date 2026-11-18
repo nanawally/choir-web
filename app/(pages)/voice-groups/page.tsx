@@ -92,43 +92,47 @@ function SortablePartRow({
         <span className="w-6 shrink-0" />
       )}
       {editing ? (
-        <div className="flex items-center gap-2 flex-1">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") save();
-              if (e.key === "Escape") setEditing(false);
-            }}
-            className="border border-border rounded px-2 py-0.5 text-sm w-20"
-            autoFocus
-          />
-          <input
-            type="color"
-            value={color}
-            onChange={(e) => setColor(e.target.value)}
-            className="w-6 h-6 border border-border rounded cursor-pointer p-0"
-          />
-          <select
-            value={shape}
-            onChange={(e) => setShape(e.target.value)}
-            className="border border-border rounded px-1 py-0.5 text-xs"
-          >
-            {SHAPES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-          <button onClick={save} className="px-2 py-0.5 btn-primary text-xs">
-            {t("common.save")}
-          </button>
-          <button
-            onClick={() => setEditing(false)}
-            className="px-2 py-0.5 border border-border rounded text-xs"
-          >
-            {t("common.cancel")}
-          </button>
+        <div className="flex flex-col gap-1 flex-1">
+          <div className="flex items-center gap-2">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") save();
+                if (e.key === "Escape") setEditing(false);
+              }}
+              className="border border-border rounded px-2 py-0.5 text-sm w-20"
+              autoFocus
+            />
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="w-6 h-6 border border-border rounded cursor-pointer p-0"
+            />
+            <select
+              value={shape}
+              onChange={(e) => setShape(e.target.value)}
+              className="border border-border rounded px-1 py-0.5 text-xs"
+            >
+              {SHAPES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={save} className="px-2 py-0.5 btn-primary text-xs">
+              {t("common.save")}
+            </button>
+            <button
+              onClick={() => setEditing(false)}
+              className="px-2 py-0.5 border border-border rounded text-xs"
+            >
+              {t("common.cancel")}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex items-center gap-2 flex-1">
