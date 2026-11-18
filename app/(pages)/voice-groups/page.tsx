@@ -77,7 +77,7 @@ function SortablePartRow({
     <li
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 h-8 px-2 border-b border-border"
+      className="flex items-center gap-2 min-h-8 px-2 py-1 border-b border-border"
     >
       {canEdit ? (
         <span
