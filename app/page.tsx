@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen">
       <NavSidebar />
-      <main className="flex-1 flex flex-col items-center justify-start pt-16 pb-6 px-6 md:justify-center md:p-24">
+      <main className="flex-1 flex flex-col items-center justify-start pt-16 pb-6 px-4 md:justify-center md:px-[5.56vw] md:py-24">
         <Image
           src="/melisma-logo.png"
           alt="melisma"
@@ -31,7 +31,7 @@ export default function Home() {
           className="h-16 w-auto mb-2"
           priority
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 w-full max-w-4xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 w-full">
           <Link
             href="/concerts"
             className="border border-border rounded-lg p-6 hover:bg-hover-bg text-center"
