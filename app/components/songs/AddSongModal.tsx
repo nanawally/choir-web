@@ -5,6 +5,7 @@ import type { Song } from "../../lib/api";
 import { SongFormFields, type Suggestions } from "./SongFormFields";
 import { Upload, X } from "lucide-react";
 import { useTranslation } from "../../lib/LanguageContext";
+import Modal from "../Modal";
 
 const EMPTY_SONG: Song = {
   id: "",
@@ -61,14 +62,7 @@ export default function AddSongModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-overlay flex items-center justify-center z-50 overflow-y-auto p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] md:w-[50vw] max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} scrollable className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] md:w-[50vw] max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto">
         <h2 className="text-lg font-bold mb-4">{t("songs.addSongTitle")}</h2>
         <SongFormFields form={form} set={set} suggestions={suggestions} />
 
@@ -125,7 +119,6 @@ export default function AddSongModal({
             {saving ? t("common.creating") : t("common.create")}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

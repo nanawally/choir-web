@@ -23,6 +23,8 @@ import AccessDenied from "../../components/AccessDenied";
 import { useTranslation } from "../../lib/LanguageContext";
 import { ClefTreble, Upload, Trash, BookPlus } from "lucide-react";
 import { usePermissions } from "../../lib/usePermissions";
+import Modal from "../../components/Modal";
+import { fetchAuthImages } from "../../lib/fetchAuthImages";
 
 type Concert = {
   id: string;
@@ -56,23 +58,8 @@ export default function ConcertsPage() {
 
   useEffect(() => {
     listConcerts()
-      .then(async (data: Concert[]) => {
-        // Fetch images with auth and convert to blob URLs
-        const token = getToken();
-        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-        const withImages = await Promise.all(
-          data.map(async (c) => {
-            if (!c.imageUrl) return c;
-            try {
-              const res = await fetch(getConcertImageUrl(c.id), { headers });
-              if (!res.ok) return { ...c, imageUrl: null };
-              const blob = await res.blob();
-              return { ...c, imageUrl: URL.createObjectURL(blob) };
-            } catch {
-              return { ...c, imageUrl: null };
-            }
-          }),
-        );
+      .then((data: Concert[]) => fetchAuthImages(data, getConcertImageUrl))
+      .then((withImages) => {
         setConcerts(withImages);
         setLoading(false);
       })
@@ -424,8 +411,7 @@ export default function ConcertsPage() {
     </div>
 
     {songbookModal && (
-      <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={() => setSongbookModal(null)}>
-        <div className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] max-w-sm flex flex-col gap-3" onClick={(e) => e.stopPropagation()}>
+      <Modal onClose={() => setSongbookModal(null)} className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] max-w-sm flex flex-col gap-3">
           <h2 className="text-base font-semibold">{t("concerts.createSongbookTitle")}</h2>
           <input
             value={songbookModal.name}
@@ -459,8 +445,7 @@ export default function ConcertsPage() {
               {t("common.create")}
             </button>
           </div>
-        </div>
-      </div>
+      </Modal>
     )}
     </>
   );

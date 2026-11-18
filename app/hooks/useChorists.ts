@@ -6,6 +6,7 @@ import {
   unarchiveChorist,
 } from "../lib/api";
 import { sortVoiceGroups } from "../lib/voiceGroupSort";
+import { useOutsideClick } from "./useOutsideClick";
 
 export type Chorist = {
   id: string;
@@ -47,16 +48,10 @@ export function useChorists() {
     loadData();
   }, []);
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-        setFilterMenuOpen(false);
-        setFilterExpandedGroup(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+  useOutsideClick(filterRef, () => {
+    setFilterMenuOpen(false);
+    setFilterExpandedGroup(null);
+  });
 
   async function loadData() {
     const [choristData, groupData] = await Promise.all([

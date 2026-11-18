@@ -572,6 +572,12 @@ const translations = {
     sv: "Sidan du letar efter finns inte.",
   },
   "error.goHome": { en: "Go to home", sv: "Gå till startsidan" },
+  "error.somethingWentWrong": { en: "Something went wrong", sv: "Något gick fel" },
+  "error.somethingWentWrongDetail": {
+    en: "An unexpected error occurred. Please try again.",
+    sv: "Ett oväntat fel inträffade. Försök igen.",
+  },
+  "error.tryAgain": { en: "Try again", sv: "Försök igen" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

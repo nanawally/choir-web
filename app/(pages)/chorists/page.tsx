@@ -23,6 +23,7 @@ import {
   X,
   Star,
 } from "lucide-react";
+import Modal from "../../components/Modal";
 
 export default function RosterPage() {
   const { t } = useTranslation();
@@ -281,8 +282,7 @@ export default function RosterPage() {
         )}
 
         {archivedOpen && (
-          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50">
-            <div className="bg-surface rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+          <Modal className="bg-surface rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">
                   {t("chorists.archived")}
@@ -359,8 +359,7 @@ export default function RosterPage() {
                 </Table>
               </div>
               )}
-            </div>
-          </div>
+          </Modal>
         )}
       </div>
     </div>

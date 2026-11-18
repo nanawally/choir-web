@@ -20,6 +20,7 @@ import LoadingSpinner from "../../../components/LoadingSpinner";
 import { usePermissions } from "../../../lib/usePermissions";
 import AccessDenied from "../../../components/AccessDenied";
 import DeleteLinkedModal from "../../../components/DeleteLinkedModal";
+import Modal from "../../../components/Modal";
 
 export default function UsersPage() {
   const { t } = useTranslation();
@@ -76,14 +77,7 @@ export default function UsersPage() {
         </Link>
 
         {qrUrl && (
-          <div
-            className="fixed inset-0 bg-overlay flex items-center justify-center z-50"
-            onClick={() => setQrUrl(null)}
-          >
-            <div
-              className="bg-surface rounded-lg shadow-lg p-6 max-w-sm w-[calc(100%-2rem)] flex flex-col items-center gap-4"
-              onClick={(e) => e.stopPropagation()}
-            >
+          <Modal onClose={() => setQrUrl(null)} className="bg-surface rounded-lg shadow-lg p-6 max-w-sm w-[calc(100%-2rem)] flex flex-col items-center gap-4">
               <h2 className="text-lg font-semibold">{t("qrModal.title")}</h2>
               <p className="text-sm text-muted text-center">{t("qrModal.instruction")}</p>
               <QRCodeSVG value={qrUrl} size={200} />
@@ -102,8 +96,7 @@ export default function UsersPage() {
                   {t("common.close")}
                 </button>
               </div>
-            </div>
-          </div>
+          </Modal>
         )}
 
         {(loading || !loaded) ? (

@@ -9,6 +9,7 @@ import SongLyricsTab from "./SongLyricsTab";
 import SongListeningTab from "./SongListeningTab";
 import { SongFormFields, type Suggestions } from "./SongFormFields";
 import { useTranslation } from "../../lib/LanguageContext";
+import Modal from "../Modal";
 
 export default function SongModal({
   song,
@@ -84,14 +85,7 @@ export default function SongModal({
 
   if (editing) {
     return (
-      <div
-        className="fixed inset-0 bg-overlay flex items-center justify-center z-50 overflow-y-auto p-4"
-        onClick={onClose}
-      >
-        <div
-          className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] md:w-[50vw] max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
+      <Modal onClose={onClose} scrollable className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] md:w-[50vw] max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto">
           <h2 className="text-lg font-bold mb-4">{t("songs.editSong")}</h2>
           <SongFormFields form={form} set={set} suggestions={suggestions} />
 
@@ -109,20 +103,12 @@ export default function SongModal({
               {t("common.save")}
             </button>
           </div>
-        </div>
-      </div>
+      </Modal>
     );
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-overlay flex items-center justify-center z-50 overflow-y-auto p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] md:w-[50vw] max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} scrollable className="bg-surface rounded-xl shadow-xl w-[calc(100vw-2rem)] md:w-[50vw] max-h-[calc(100vh-2rem)] overflow-y-auto p-6 my-auto">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-lg font-bold">{current.name}</h2>
@@ -183,7 +169,6 @@ export default function SongModal({
         )}
         {tab === "lyrics" && <SongLyricsTab lyrics={current.lyrics} />}
         {tab === "listening" && <SongListeningTab songId={current.id} canEdit={canEdit} />}
-      </div>
-    </div>
+    </Modal>
   );
 }

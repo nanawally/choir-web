@@ -23,6 +23,7 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import AccessDenied from "../../components/AccessDenied";
 import { usePermissions } from "../../lib/usePermissions";
 import { ClefTreble, Pin, Upload, Trash, Eye, EyeOff } from "lucide-react";
+import { fetchAuthImages } from "../../lib/fetchAuthImages";
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-");
@@ -46,22 +47,8 @@ export default function SongbooksPage() {
 
   useEffect(() => {
     listSongbooks()
-      .then(async (data) => {
-        const token = getToken();
-        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
-        const withImages = await Promise.all(
-          data.map(async (sb) => {
-            if (!sb.imageUrl) return sb;
-            try {
-              const res = await fetch(getSongbookImageUrl(sb.id), { headers });
-              if (!res.ok) return { ...sb, imageUrl: null };
-              const blob = await res.blob();
-              return { ...sb, imageUrl: URL.createObjectURL(blob) };
-            } catch {
-              return { ...sb, imageUrl: null };
-            }
-          }),
-        );
+      .then((data) => fetchAuthImages(data, getSongbookImageUrl))
+      .then((withImages) => {
         setSongbooks(withImages);
         setLoading(false);
       })

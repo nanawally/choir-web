@@ -24,6 +24,7 @@ import { usePermissions } from "../../../lib/usePermissions";
 import AccessDenied from "../../../components/AccessDenied";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { ArrowLeft } from "lucide-react";
+import Modal from "../../../components/Modal";
 
 function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-");
@@ -40,14 +41,7 @@ type DeleteDialogProps = {
 function DeleteSongDialog({ songName, onRemove, onDelete, onCancel }: DeleteDialogProps) {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed inset-0 bg-overlay z-50 flex items-center justify-center p-4"
-      onClick={onCancel}
-    >
-      <div
-        className="bg-surface rounded-xl shadow-xl p-6 w-full max-w-sm"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onCancel} scrollable className="bg-surface rounded-xl shadow-xl p-6 w-full max-w-sm">
         <h2 className="text-base font-semibold mb-4">{songName}</h2>
         <div className="flex flex-col gap-2">
           <button
@@ -66,8 +60,7 @@ function DeleteSongDialog({ songName, onRemove, onDelete, onCancel }: DeleteDial
             {t("common.cancel")}
           </button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

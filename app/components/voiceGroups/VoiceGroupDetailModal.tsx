@@ -10,6 +10,7 @@ import {
   listChorists,
 } from "../../lib/api";
 import type { VoiceGroup } from "../../hooks/useVoiceGroups";
+import Modal from "../Modal";
 
 type Chorist = {
   id: string;
@@ -100,14 +101,7 @@ export default function VoiceGroupDetailModal({
   const unassignedChorists = getUnassignedChorists();
 
   return (
-    <div
-      className="fixed inset-0 bg-overlay flex items-center justify-center z-50"
-      onClick={onClose}
-    >
-      <div
-        className="bg-surface rounded-lg shadow-lg w-full max-w-lg max-h-[90vh] flex flex-col mx-4"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Modal onClose={onClose} className="bg-surface rounded-lg shadow-lg w-full max-w-lg max-h-[90vh] flex flex-col mx-4">
         {/* Header */}
         <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border">
           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -265,7 +259,6 @@ export default function VoiceGroupDetailModal({
             })
           )}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -7,6 +7,7 @@ import { useTranslation } from "../../lib/LanguageContext";
 import { getTokenRole, clearToken } from "../../lib/apiClient";
 import { getMe, changePassword, deleteMyAccount } from "../../lib/api/me";
 import { useRouter } from "next/navigation";
+import Modal from "../../components/Modal";
 
 type Theme = "system" | "light" | "dark";
 
@@ -125,8 +126,7 @@ export default function SettingsPage() {
 
         {/* Change password modal */}
         {showChangePw && (
-          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={closePwModal}>
-            <div className="bg-surface rounded-lg shadow-lg p-6 max-w-sm w-[calc(100%-2rem)] flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+          <Modal onClose={closePwModal} className="bg-surface rounded-lg shadow-lg p-6 max-w-sm w-[calc(100%-2rem)] flex flex-col gap-4">
               <h2 className="text-lg font-semibold">{t("settings.changePassword")}</h2>
               {pwSuccess ? (
                 <>
@@ -145,14 +145,12 @@ export default function SettingsPage() {
                   </div>
                 </form>
               )}
-            </div>
-          </div>
+          </Modal>
         )}
 
         {/* Delete account modal */}
         {showDelete && (
-          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={() => setShowDelete(false)}>
-            <div className="bg-surface rounded-lg shadow-lg p-6 max-w-sm w-[calc(100%-2rem)] flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+          <Modal onClose={() => setShowDelete(false)} className="bg-surface rounded-lg shadow-lg p-6 max-w-sm w-[calc(100%-2rem)] flex flex-col gap-4">
               <h2 className="text-lg font-semibold text-danger">{t("settings.deleteAccount")}</h2>
               <p className="text-sm text-text-muted">{t("settings.deleteAccountConfirm")}</p>
               <form onSubmit={handleDeleteAccount} className="flex flex-col gap-3">
@@ -163,8 +161,7 @@ export default function SettingsPage() {
                   <button type="button" onClick={() => { setShowDelete(false); setDeletePw(""); setDeleteError(null); }} className="flex-1 px-4 py-2 border border-border rounded text-sm hover:bg-hover-bg">{t("common.cancel")}</button>
                 </div>
               </form>
-            </div>
-          </div>
+          </Modal>
         )}
 
         <div className="mx-auto w-full max-w-md space-y-4">

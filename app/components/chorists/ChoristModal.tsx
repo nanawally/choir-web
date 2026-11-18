@@ -17,6 +17,7 @@ import { useTranslation } from "../../lib/LanguageContext";
 import { usePermissions } from "../../lib/usePermissions";
 import AccountQrModal from "./AccountQrModal";
 import DeleteLinkedModal from "../DeleteLinkedModal";
+import Modal from "../Modal";
 
 type Chorist = {
   id: string;
@@ -168,11 +169,7 @@ export default function ChoristModal({
   // Read-only view
   if (!editing && chorist) {
     return (
-      <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50" onClick={onClose}>
-        <div
-          className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] md:w-[50vw] max-h-[80vh] overflow-y-auto"
-          onClick={(e) => e.stopPropagation()}
-        >
+      <Modal onClose={onClose} className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] md:w-[50vw] max-h-[80vh] overflow-y-auto">
           <div className="flex items-start justify-between mb-4">
             <div>
               <h2 className="text-lg font-semibold">
@@ -308,15 +305,14 @@ export default function ChoristModal({
               </>
             )}
           </div>
-        </div>
-      </div>
+      </Modal>
     );
   }
 
   // Edit / Add form
   return (
-    <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50">
-      <div className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] md:w-[50vw] max-h-[80vh] overflow-y-auto">
+    <>
+    <Modal className="bg-surface rounded-lg shadow-lg p-6 w-[calc(100%-2rem)] md:w-[50vw] max-h-[80vh] overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4">
           {mode === "add" ? t("chorists.addTitle") : t("chorists.editTitle")}
         </h2>
@@ -422,7 +418,7 @@ export default function ChoristModal({
             </button>
           </div>
         </div>
-      </div>
+      </Modal>
       {showDelete && chorist && (() => {
         const choristName = `${chorist.firstName} ${chorist.lastName}`;
         return (
@@ -437,6 +433,6 @@ export default function ChoristModal({
           />
         );
       })()}
-    </div>
+    </>
   );
 }

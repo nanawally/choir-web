@@ -17,6 +17,7 @@ import {
   Trash,
   X,
 } from "lucide-react";
+import { useOutsideClick } from "../../hooks/useOutsideClick";
 
 function sortKeyOrLastWord(sortKey: string | null | undefined, value: string | null | undefined): string {
   if (sortKey?.trim()) return sortKey.trim();
@@ -81,16 +82,10 @@ export function SongsTableView<T extends Song>({
   const filterRef = useRef<HTMLDivElement>(null);
   const [expandedSongId, setExpandedSongId] = useState<string | null>(null);
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-        setFilterMenuOpen(false);
-        setFilterExpandedCol(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
+  useOutsideClick(filterRef, () => {
+    setFilterMenuOpen(false);
+    setFilterExpandedCol(null);
+  });
 
   const filterOptions = useMemo(() => {
     const opts: Record<string, string[]> = {};
